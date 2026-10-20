@@ -42,6 +42,7 @@ describe('NewsService', function() {
             slug: slug,
             date: date ?? '09/30/2026',
             author: 'Daniel Bingham',
+            summary: `Summary of ${slug}.`,
             content: `Content of **${slug}**.`,
             ...overrides
         }
@@ -74,9 +75,9 @@ describe('NewsService', function() {
 
         it('Should only keep the properties of a post, in a consistent order', async function() {
             const news = makeNews('a-post')
-            await service.createNews({ content: news.content, id: 7, author: news.author, date: news.date, slug: news.slug, title: news.title, extra: true })
+            await service.createNews({ content: news.content, id: 7, summary: news.summary, author: news.author, date: news.date, slug: news.slug, title: news.title, extra: true })
 
-            expect(Object.keys(readIndex()['a-post'])).toEqual([ 'title', 'slug', 'date', 'author', 'content' ])
+            expect(Object.keys(readIndex()['a-post'])).toEqual([ 'title', 'slug', 'date', 'author', 'summary', 'content' ])
         })
 
         it('Should refuse a slug that\'s already taken, leaving the existing post alone', async function() {
@@ -115,6 +116,13 @@ describe('NewsService', function() {
             writeIndex({ 'the-key': makeNews('a-different-slug') })
 
             expect((await service.getNews('the-key')).slug).toBe('the-key')
+        })
+
+        it('Should give a post written before posts had summaries a null summary', async function() {
+            const { summary, ...withoutSummary } = makeNews('an-old-post')
+            writeIndex({ 'an-old-post': withoutSummary })
+
+            expect(await service.getNews('an-old-post')).toEqual({ ...withoutSummary, summary: null })
         })
     })
 

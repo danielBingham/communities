@@ -86,7 +86,7 @@ const removeDraft = function(slug) {
         return
     }
 
-    for(const field of [ 'title', 'date', 'content' ]) {
+    for(const field of [ 'title', 'date', 'summary', 'content' ]) {
         try {
             localStorage.removeItem(getDraftKey(slug, field))
         } catch (error) {
@@ -123,10 +123,13 @@ const NewsFormFields = function({ news, origin, onDelete }) {
 
     const [ title, setTitle ] = useLocalStorage(getDraftKey(news?.slug, 'title'), isEdit ? news.title : '')
     const [ date, setDate ] = useLocalStorage(getDraftKey(news?.slug, 'date'), isEdit ? news.date : getToday())
+    // Posts written before posts had summaries don't have one.
+    const [ summary, setSummary ] = useLocalStorage(getDraftKey(news?.slug, 'summary'), isEdit ? (news.summary ?? '') : '')
     const [ content, setContent ] = useLocalStorage(getDraftKey(news?.slug, 'content'), isEdit ? news.content : '')
 
     const [ titleErrors, setTitleErrors ] = useState(null)
     const [ dateErrors, setDateErrors ] = useState(null)
+    const [ summaryErrors, setSummaryErrors ] = useState(null)
     const [ contentErrors, setContentErrors ] = useState(null)
     const [ slugErrors, setSlugErrors ] = useState(null)
 
@@ -154,7 +157,7 @@ const NewsFormFields = function({ news, origin, onDelete }) {
      * @return {boolean} Whether the checked fields are valid.
      */
     const validate = function(field, values) {
-        const current = { title: title, date: date, content: content, ...values }
+        const current = { title: title, date: date, summary: summary, content: content, ...values }
 
         let titleValidationErrors = []
         if ( ! field || field === 'title' ) {
@@ -166,6 +169,12 @@ const NewsFormFields = function({ news, origin, onDelete }) {
         if ( ! field || field === 'date' ) {
             dateValidationErrors = schema.properties.date.validate(current.date, undefined, 'create')
             setDateErrors(describeErrors(dateValidationErrors))
+        }
+
+        let summaryValidationErrors = []
+        if ( ! field || field === 'summary' ) {
+            summaryValidationErrors = schema.properties.summary.validate(current.summary, undefined, 'create')
+            setSummaryErrors(describeErrors(summaryValidationErrors))
         }
 
         let contentValidationErrors = []
@@ -189,6 +198,7 @@ const NewsFormFields = function({ news, origin, onDelete }) {
 
         return titleValidationErrors.length === 0
             && dateValidationErrors.length === 0
+            && summaryValidationErrors.length === 0
             && contentValidationErrors.length === 0
             && slugValidationErrors.length === 0
     }
@@ -215,10 +225,11 @@ const NewsFormFields = function({ news, origin, onDelete }) {
      */
     const isDirty = function() {
         if ( isEdit ) {
-            return title !== news.title || date !== news.date || content !== news.content
+            return title !== news.title || date !== news.date
+                || summary !== (news.summary ?? '') || content !== news.content
         }
 
-        return title !== '' || date !== getToday() || content !== ''
+        return title !== '' || date !== getToday() || summary !== '' || content !== ''
     }
 
     /**
@@ -227,10 +238,12 @@ const NewsFormFields = function({ news, origin, onDelete }) {
     const clearDraft = function() {
         setTitle('')
         setDate('')
+        setSummary('')
         setContent('')
 
         setTitleErrors(null)
         setDateErrors(null)
+        setSummaryErrors(null)
         setContentErrors(null)
         setSlugErrors(null)
 
@@ -250,6 +263,7 @@ const NewsFormFields = function({ news, origin, onDelete }) {
                 slug: news.slug,
                 title: title,
                 date: date,
+                summary: summary,
                 content: content
             }))
         } else {
@@ -258,6 +272,7 @@ const NewsFormFields = function({ news, origin, onDelete }) {
                 slug: slug,
                 date: date,
                 author: currentUser.name,
+                summary: summary,
                 content: content
             }))
         }
@@ -284,7 +299,7 @@ const NewsFormFields = function({ news, origin, onDelete }) {
     }, [ request ])
 
     let baseError = null
-    if ( titleErrors !== null || dateErrors !== null || contentErrors !== null || slugErrors !== null ) {
+    if ( titleErrors !== null || dateErrors !== null || summaryErrors !== null || contentErrors !== null || slugErrors !== null ) {
         baseError = (<span>One or more fields has an invalid value.  Please fix the error and try again!</span>)
     }
 
@@ -322,6 +337,17 @@ const NewsFormFields = function({ news, origin, onDelete }) {
                     { isEdit && <div className="news-form__url__explanation">A post's URL doesn't change when its title or date do.</div> }
                     { slugErrors && <div className="news-form__url__error">{ slugErrors }</div> }
                 </div>
+                <TextBox
+                    name="summary"
+                    className="news-form__summary"
+                    label="Summary"
+                    explanation={`A sentence or two about the post, shown in link previews and search results.  ${summary.length} of ${shared.schema.NewsSchema.MAX_SUMMARY_LENGTH} characters.`}
+                    value={summary}
+                    maxLength={shared.schema.NewsSchema.MAX_SUMMARY_LENGTH}
+                    onBlur={(event) => validate('summary')}
+                    onChange={onChange('summary', setSummary, summaryErrors !== null)}
+                    error={summaryErrors}
+                />
                 <TextBox
                     name="content"
                     className="news-form__content"

@@ -16,12 +16,12 @@
 
         The server replaces everything between the page-metadata markers with
         the metadata for the page that was requested, so that link previews
-        show that page, and the API responses the page would request when the
-        server already has them (a script of type application/json, which the
-        client's makeRequest reads).  See
+        show that page, and the entities the server read to build it (a
+        script of type application/json, which the client loads into its
+        store when it starts).  See
         web-application/server/controllers/PageController.js,
         packages/backend/services/PageMetadataService.js and
-        web-application/client/state/lib/preloadedResponses.js.
+        web-application/client/state/lib/preloadedEntities.js.
 
         What's here is only used when this file is served as it is: by the
         mobile apps, which load it from their bundle.  Keep it in step with

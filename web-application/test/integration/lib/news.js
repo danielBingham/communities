@@ -33,6 +33,7 @@ const makeNews = function(overrides = {}) {
         slug: `01-01-2000-integration-test-news-${unique}`,
         date: '01/01/2000',
         author: 'The Integration Test Suite',
+        summary: 'A post created by the integration test suite.',
         content: `# A Test Post\n\nCreated by the integration test suite.  **Markdown** and all.`,
         ...overrides
     }

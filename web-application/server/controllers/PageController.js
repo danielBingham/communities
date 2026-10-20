@@ -24,8 +24,6 @@ const { NewsService, PageMetadataService } = require('@communities/backend')
 const { lib } = require('@communities/shared')
 
 const BaseController = require('./BaseController')
-const NotFoundError = require('../errors/NotFoundError')
-const { getControllerErrorBody } = require('../errors.js')
 
 /**
  * Serves the web application's pages: the index.html webpack builds, with
@@ -35,12 +33,11 @@ const { getControllerErrorBody } = require('../errors.js')
  *    crawlers that build link previews don't run JavaScript, so the metadata
  *    has to be in the HTML we send.
  *
- *  - The API responses for the requests the page makes as it loads, when we
- *    already have what's in them, in a `<script type="application/json">`.
- *    The client's makeRequest() answers those requests from them instead of
- *    the network (see `client/state/lib/preloadedResponses.js`).  We read a
- *    News post to build its metadata anyway, so the client shouldn't have to
- *    ask for it again.
+ *  - The entities we read to build the metadata, in a
+ *    `<script type="application/json">`, shaped like an API response's
+ *    relations.  The client loads them into its store when it starts (see
+ *    `client/state/lib/preloadedEntities.js`), so it doesn't have to request
+ *    them again.  We read a News post to build its metadata anyway.
  *
  * We don't render the React app on the server.  Every page is the same
  * index.html, and the client renders the page once it loads.
@@ -59,7 +56,7 @@ const { getControllerErrorBody } = require('../errors.js')
  *
  * Getting a page's data should never stop the page from loading.  If it fails
  * or takes too long, the page gets the default metadata and no preloaded
- * responses, and the client makes its requests as usual.
+ * entities, and the client requests what it needs as usual.
  */
 module.exports = class PageController extends BaseController {
 
@@ -161,56 +158,37 @@ module.exports = class PageController extends BaseController {
     }
 
     /**
-     * Add a response to a page's preloaded responses.
-     *
-     * The response must be exactly what the API sends for that request, and
-     * should be built the same way the API's controller builds it.
-     *
-     * @param {Object} responses    The page's preloaded responses.
-     * @param {string} method   The request's method.
-     * @param {string} endpoint The request's endpoint, relative to the API's
-     * root, exactly as the client's thunk requests it.
-     * @param {number} status   The response's status.
-     * @param {Object} body     The response's body.
-     */
-    addPreloadedResponse(responses, method, endpoint, status, body) {
-        responses[lib.preloadedResponses.getPreloadedResponseKey(method, endpoint)] = {
-            status: status,
-            body: body
-        }
-    }
-
-    /**
-     * Render a page's preloaded responses as the <script> the client reads
+     * Render a page's preloaded entities as the <script> the client loads
      * them from.
      *
-     * The JSON goes in as it is, so every `<` in it is escaped as `<`.
+     * The JSON goes in as it is, so every `<` in it is escaped as `\u003c`.
      * JSON.parse() turns it back, and nothing in the JSON can end the
      * <script> (`</script>`) or confuse the HTML parser (`<!--`), even when
      * the content is someone's post.
      *
-     * @param {Object} responses    The page's preloaded responses.
+     * @param {Object} entities     The page's preloaded entities, shaped like
+     * an API response's relations: `{ news: { <slug>: <entity> } }`.
      *
-     * @return {string} The <script>, or '' when there aren't any responses.
+     * @return {string} The <script>, or '' when there aren't any entities.
      */
-    renderPreloadedResponses(responses) {
-        if ( Object.keys(responses).length === 0 ) {
+    renderPreloadedEntities(entities) {
+        if ( Object.keys(entities).length === 0 ) {
             return ''
         }
 
-        const json = JSON.stringify(responses).replace(/</g, '\\u003c')
-        return `<script type="application/json" id="${lib.preloadedResponses.ELEMENT_ID}">${json}</script>\n`
+        const json = JSON.stringify(entities).replace(/</g, '\\u003c')
+        return `<script type="application/json" id="${lib.preloadedEntities.ELEMENT_ID}">${json}</script>\n`
     }
 
     /**
-     * Send index.html with a page's metadata and preloaded responses.
+     * Send index.html with a page's metadata and preloaded entities.
      *
      * @param {Object} request  Standard Express request object.
      * @param {Object} response Standard Express response object.
      * @param {function} getPageData    Gets what the page needs.  Returns (or
-     * resolves to) `{ metadata, status, responses }`: the page's metadata,
-     * the status to send it with (default 200) and its preloaded responses
-     * (default none).  See addPreloadedResponse().
+     * resolves to) `{ metadata, status, entities }`: the page's metadata,
+     * the status to send it with (default 200) and its preloaded entities
+     * (default none).  See renderPreloadedEntities().
      *
      * @returns {Promise}   Resolves to void.
      */
@@ -229,13 +207,13 @@ module.exports = class PageController extends BaseController {
 
         const metadata = page?.metadata ?? this.pageMetadataService.getDefaultMetadata()
         const status = page?.status ?? 200
-        const responses = page?.responses ?? {}
+        const entities = page?.entities ?? {}
 
         let html = index.before
         if ( index.after !== null ) {
             html = `${index.before}\n`
                 + this.pageMetadataService.renderTags(metadata)
-                + this.renderPreloadedResponses(responses)
+                + this.renderPreloadedEntities(entities)
                 + index.after
         }
 
@@ -265,48 +243,25 @@ module.exports = class PageController extends BaseController {
     /**
      * GET /about/news
      *
-     * The list of News posts.  Preloads the page of posts the client will
-     * request: GET /news?page=<page>.
+     * The list of News posts.  Its metadata doesn't depend on the posts, so
+     * this doesn't read them.
      *
      * @param {Object} request  Standard Express request object.
-     * @param {string} request.query.page   (Optional) Which page of posts.
      * @param {Object} response Standard Express response object.
      *
      * @returns {Promise}   Resolves to void.
      */
     async getNewsList(request, response) {
-        await this.sendPage(request, response, async () => {
-            // Read the page the way the client's useNewsQuery() does, so we
-            // preload the request it will make.
-            const searchParams = new URL(request.originalUrl, 'https://page.invalid').searchParams
-            let page = parseInt(searchParams.get('page') ?? 1, 10)
-            if ( ! (page > 0) ) {
-                page = 1
-            }
-
-            // As NewsController.getNewsList() sends it.
-            const results = await this.newsService.getNewsPage(page)
-
-            const responses = {}
-            this.addPreloadedResponse(responses, 'GET', `/news?page=${page}`, 200, {
-                dictionary: results.dictionary,
-                list: results.list,
-                meta: results.meta,
-                relations: {}
-            })
-
-            return {
-                metadata: this.pageMetadataService.getNewsListMetadata(),
-                responses: responses
-            }
-        })
+        await this.sendPage(request, response, () => ({
+            metadata: this.pageMetadataService.getNewsListMetadata()
+        }))
     }
 
     /**
      * GET /about/news/:slug
      *
-     * A News post: 404 when there's no such post.  Preloads the request the
-     * client will make for the post: GET /news/:slug.
+     * A News post: 404 when there's no such post.  The post is preloaded, so
+     * the client doesn't request it.
      *
      * @param {Object} request  Standard Express request object.
      * @param {string} request.params.slug  The post's slug.
@@ -316,34 +271,22 @@ module.exports = class PageController extends BaseController {
      */
     async getNews(request, response) {
         await this.sendPage(request, response, async () => {
-            const slug = request.params.slug
-            const endpoint = `/news/${encodeURIComponent(slug)}`
-            const responses = {}
-
-            const news = await this.newsService.getNews(slug)
+            const news = await this.newsService.getNews(request.params.slug)
 
             // The page doesn't exist.  The client will show that, but crawlers
-            // should know it too.  As NewsController.getNews() sends it.
+            // should know it too.
             if ( news === null ) {
-                const error = new NotFoundError(`News(${slug}) not found.`)
-                this.addPreloadedResponse(responses, 'GET', endpoint, error.status, getControllerErrorBody(error))
-
                 return {
                     metadata: this.pageMetadataService.getDefaultMetadata(),
-                    status: 404,
-                    responses: responses
+                    status: 404
                 }
             }
 
-            // As NewsController.getNews() sends it.
-            this.addPreloadedResponse(responses, 'GET', endpoint, 200, {
-                entity: news,
-                relations: {}
-            })
-
             return {
                 metadata: this.pageMetadataService.getNewsMetadata(news),
-                responses: responses
+                entities: {
+                    news: { [news.slug]: news }
+                }
             }
         })
     }

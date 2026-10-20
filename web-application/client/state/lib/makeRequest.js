@@ -22,8 +22,6 @@ import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin'
 
 import logger from '/logger'
 
-import { takePreloadedResponse } from './preloadedResponses'
-
 
 export const makeRequest = function(method, endpoint, body, onSuccess, onFailure, options) {
     return function(dispatch, getState) {
@@ -91,14 +89,8 @@ export const makeRequest = function(method, endpoint, body, onSuccess, onFailure
             // ==================== Make the Request ==========================
             //
 
-            // The page may have come with the response to this request.  If
-            // so, it's handled exactly like one from the network.  See
-            // ./preloadedResponses.js.
-            const preloadedResponse = ( method === 'GET' && options?.isFile !== true )
-                ? takePreloadedResponse(method, endpoint) : null
-
             try {
-                const response = preloadedResponse ?? await fetch(fullEndpoint, fetchOptions)
+                const response = await fetch(fullEndpoint, fetchOptions)
 
                 // If they've been logged out, send them to the home page, which will
                 // let them log back in again.

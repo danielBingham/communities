@@ -55,7 +55,6 @@
  * into the home page's.)
  ******************************************************************************/
 const { parseUSDate } = require('./date')
-const markdown = require('./markdown')
 
 const SITE_NAME = 'Communities'
 
@@ -76,8 +75,10 @@ const DEFAULT_IMAGE = {
 }
 
 /**
- * The longest a description may be, in characters.  Search results show
- * about 160 characters and link previews about 200 before they cut it off.
+ * The longest a description may be, in characters: the most a link preview
+ * shows.  X cuts descriptions off at 200 characters, the only limit any of
+ * the platforms documents, and the others show about as much.  A News post's
+ * summary, which is its description, is limited to this (see NewsSchema).
  */
 const DESCRIPTION_LENGTH = 200
 
@@ -106,46 +107,6 @@ const toAbsoluteURL = function(host, path) {
  */
 const getDocumentTitle = function(title) {
     return `${title} -- ${SITE_NAME}`
-}
-
-/**
- * Shorten text to at most `maxLength` characters, at a word boundary when
- * there's one close enough, ending it with an ellipsis when it was cut.
- *
- * Counts characters rather than UTF-16 code units, so it never cuts an emoji
- * or other astral character in half.
- *
- * @param {string} text         The text.
- * @param {number} maxLength    The most characters to keep, including the
- * ellipsis.
- *
- * @return {string} The text, shortened if it needed to be.
- */
-const truncate = function(text, maxLength) {
-    if ( typeof text !== 'string' ) {
-        return ''
-    }
-
-    const characters = Array.from(text)
-    if ( characters.length <= maxLength ) {
-        return text
-    }
-
-    // Leave room for the ellipsis.
-    let cut = characters.slice(0, maxLength - 1).join('')
-
-    // When the cut splits a word, back up to the end of the last whole word,
-    // unless that throws away too much (one very long word).
-    const splitsWord = /\S/.test(characters[maxLength - 1]) && /\S$/.test(cut)
-    const lastSpace = cut.search(/\s\S*$/)
-    if ( splitsWord && lastSpace > maxLength / 2 ) {
-        cut = cut.slice(0, lastSpace)
-    }
-
-    // Don't leave dangling punctuation before the ellipsis.
-    cut = cut.replace(/[\s,;:.!?\-–—]+$/u, '')
-
-    return `${cut}…`
 }
 
 /**
@@ -219,23 +180,24 @@ const buildNewsListMetadata = function(host) {
 /**
  * The metadata for a News post: '/about/news/:slug'.
  *
- * Posts don't have a summary or an image of their own (yet), so the
- * description is the start of the post's content and the image is the
- * default one.  The posts come from a file that can be edited by hand, so
- * this copes with missing or mistyped properties rather than trusting them.
+ * The description is the post's summary.  Posts written before posts had
+ * summaries get the News page's description until they're given one.  Posts
+ * don't have an image of their own (yet), so the image is the default one.
+ * The posts come from a file that can be edited by hand, so this copes with
+ * missing or mistyped properties rather than trusting them.
  *
  * @param {string} host The site's origin.
- * @param {Object} news The post: { title, slug, date, author, content }.
+ * @param {Object} news The post: { title, slug, date, author, summary, content }.
  *
  * @return {Object} The metadata.
  */
 const buildNewsMetadata = function(host, news) {
     const title = typeof news.title === 'string' && news.title.trim() !== '' ? news.title.trim() : NEWS_TITLE
 
-    let description = truncate(markdown.toPreviewText(news.content), DESCRIPTION_LENGTH)
-    if ( description === '' ) {
-        description = NEWS_DESCRIPTION
-    }
+    // A summary is written in a <textarea>, so it may have line breaks, which
+    // don't belong in a description.
+    const summary = typeof news.summary === 'string' ? news.summary.replace(/\s+/g, ' ').trim() : ''
+    const description = summary !== '' ? summary : NEWS_DESCRIPTION
 
     const date = parseUSDate(news.date)
     const publishedTime = date === null ? null
@@ -265,7 +227,6 @@ module.exports = {
     DESCRIPTION_LENGTH: DESCRIPTION_LENGTH,
     toAbsoluteURL: toAbsoluteURL,
     getDocumentTitle: getDocumentTitle,
-    truncate: truncate,
     buildDefaultMetadata: buildDefaultMetadata,
     buildRootMetadata: buildRootMetadata,
     buildNewsListMetadata: buildNewsListMetadata,

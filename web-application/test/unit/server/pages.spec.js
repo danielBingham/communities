@@ -1,12 +1,12 @@
 /******************************************************************************
- * The page routes: index.html with each page's metadata and preloaded API
- * responses rendered into its <head>, so link previews show the page that was
+ * The page routes: index.html with each page's metadata and preloaded
+ * entities rendered into its <head>, so link previews show the page that was
  * linked and the client doesn't have to ask for what the server already read.
  *
  * Runs the real page router in a real Express app over HTTP, against an
  * index.html shaped like the one the production build makes and News kept by
- * the filesystem storage driver.  The preloaded responses are checked against
- * what the real NewsController sends for the same requests.
+ * the filesystem storage driver.  The preloaded entities are checked against
+ * what the real NewsController sends for the same posts.
  ******************************************************************************/
 
 const fs = require('fs')
@@ -67,6 +67,7 @@ describe('Page routes', function() {
         slug: '09-29-2026-protocols-arent-the-answer',
         date: '09/29/2026',
         author: 'Daniel Bingham',
+        summary: 'Protocols are good tools, but a protocol can\'t decide who a platform answers to.',
         content: '# Protocols\n\nThere\'s been a lot of talk about **protocols** lately.'
     }
 
@@ -118,7 +119,7 @@ describe('Page routes', function() {
         const html = await response.text()
         const { document } = new JSDOM(html).window
         const content = (selector) => document.head.querySelector(selector)?.getAttribute('content') ?? null
-        const preloaded = document.getElementById('communities-preloaded-responses')
+        const preloaded = document.getElementById('communities-preloaded-entities')
 
         return {
             response: response,
@@ -175,7 +176,8 @@ describe('Page routes', function() {
             expect(page.response.status).toBe(200)
             expect(page.title).toBe('Protocols Aren\'t the Answer -- Communities')
             expect(page.titles).toBe(1)
-            expect(page.description).toBe('There\'s been a lot of talk about protocols lately.')
+            expect(page.description).toBe(news.summary)
+            expect(page.og('og:description')).toBe(news.summary)
             expect(page.canonical).toBe(`https://communities.social/about/news/${news.slug}`)
             expect(page.og('og:title')).toBe('Protocols Aren\'t the Answer')
             expect(page.og('og:type')).toBe('article')
@@ -184,16 +186,25 @@ describe('Page routes', function() {
             expect(page.og('article:published_time')).toBe('2026-09-29')
         })
 
-        it('Should preload the response the API sends for the post', async function() {
+        it('Should preload the post as the API sends it, shaped like relations', async function() {
             await start()
             const page = await getPage(`/about/news/${news.slug}`)
 
             expect(page.preloadedElement.getAttribute('type')).toBe('application/json')
-            expect(Object.keys(page.preloaded)).toEqual([ `GET /news/${news.slug}` ])
 
             const api = await callAPI('getNews', { params: { slug: news.slug } })
             expect(api.status).toBe(200)
-            expect(page.preloaded[`GET /news/${news.slug}`]).toEqual({ status: api.status, body: api.body })
+            expect(page.preloaded).toEqual({ news: { [news.slug]: api.body.entity } })
+        })
+
+        it('Should preload a post written before posts had summaries, with the default description', async function() {
+            const { summary, ...withoutSummary } = news
+            writeNews({ [news.slug]: withoutSummary })
+            await start()
+
+            const page = await getPage(`/about/news/${news.slug}`)
+            expect(page.description).toBe('News and updates from the people building Communities.')
+            expect(page.preloaded.news[news.slug].summary).toBeNull()
         })
 
         it('Should keep what people write from breaking out of the <script>', async function() {
@@ -205,10 +216,10 @@ describe('Page routes', function() {
 
             expect(page.html).not.toMatch(/<\/script><script>alert/i)
             expect(page.html).not.toContain('<!-- and a comment')
-            // Only our two: the preloaded responses and the bundle.
+            // Only our two: the preloaded entities and the bundle.
             expect(page.document.querySelectorAll('script').length).toBe(2)
 
-            const entity = page.preloaded[`GET /news/${news.slug}`].body.entity
+            const entity = page.preloaded.news[news.slug]
             expect(entity.content).toBe(content)
             expect(entity.title).toBe('</SCRIPT> in the title')
         })
@@ -242,34 +253,30 @@ describe('Page routes', function() {
             const page = await getPage(`/about/news/${news.slug}`)
 
             expect(page.og('og:title')).toBe('An Edited Title')
-            expect(page.preloaded[`GET /news/${news.slug}`].body.entity.title).toBe('An Edited Title')
+            expect(page.preloaded.news[news.slug].title).toBe('An Edited Title')
         })
 
-        it('Should send 404, the default metadata and the API\'s 404 for a post that doesn\'t exist', async function() {
+        it('Should send 404 and the default metadata, and preload nothing, for a post that doesn\'t exist', async function() {
             await start()
-            const slug = '01-01-2000-no-such-post'
-            const page = await getPage(`/about/news/${slug}`)
+            const page = await getPage('/about/news/01-01-2000-no-such-post')
 
             expect(page.response.status).toBe(404)
             expect(page.title).toBe('Communities -- Cooperative Social Media')
             expect(page.canonical).toBeNull()
             expect(page.og('og:url')).toBeNull()
+            expect(page.preloadedElement).toBeNull()
             // Still the app, so the client can show its 404 page.
             expect(page.html).toContain('<div id="root"></div>')
-
-            const api = await callAPI('getNews', { params: { slug: slug } })
-            expect(api.status).toBe(404)
-            expect(page.preloaded[`GET /news/${slug}`]).toEqual({ status: api.status, body: api.body })
         })
 
-        it('Should preload the request the client makes for a slug that needs encoding', async function() {
+        it('Should key the preloaded post by its slug, as the client\'s store does', async function() {
             const slug = 'a slug with spaces'
             writeNews({ [slug]: { ...news, slug: slug } })
             await start()
 
             const page = await getPage(`/about/news/${encodeURIComponent(slug)}`)
             expect(page.response.status).toBe(200)
-            expect(Object.keys(page.preloaded)).toEqual([ 'GET /news/a%20slug%20with%20spaces' ])
+            expect(Object.keys(page.preloaded.news)).toEqual([ slug ])
         })
 
         it('Should answer HEAD requests', async function() {
@@ -280,7 +287,7 @@ describe('Page routes', function() {
             expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8')
         })
 
-        it('Should send the default metadata and no preloaded responses when getting the post fails', async function() {
+        it('Should send the default metadata and no preloaded entities when getting the post fails', async function() {
             await start()
             jest.spyOn(FilesystemStorage.prototype, 'getFile').mockRejectedValue(new Error('Storage is down.'))
 
@@ -292,7 +299,7 @@ describe('Page routes', function() {
             expect(page.html).toContain('<div id="root"></div>')
         })
 
-        it('Should send the default metadata and no preloaded responses when getting the post takes too long', async function() {
+        it('Should send the default metadata and no preloaded entities when getting the post takes too long', async function() {
             const timeout = PageController.PAGE_DATA_TIMEOUT
             PageController.PAGE_DATA_TIMEOUT = 50
             try {
@@ -337,41 +344,20 @@ describe('Page routes', function() {
             }
         })
 
-        it('Should preload the page of posts the API sends', async function() {
+        it('Should not read the posts, or preload them', async function() {
             await start()
-            const page = await getPage('/about/news')
+            const getFile = jest.spyOn(FilesystemStorage.prototype, 'getFile')
 
-            expect(Object.keys(page.preloaded)).toEqual([ 'GET /news?page=1' ])
+            const page = await getPage('/about/news?page=2')
 
-            const api = await callAPI('getNewsList', { query: { page: '1' } })
-            expect(api.status).toBe(200)
-            expect(page.preloaded['GET /news?page=1']).toEqual({ status: api.status, body: api.body })
-        })
-
-        it('Should preload the page the client will ask for', async function() {
-            const index = {}
-            for(let day = 1; day <= 12; day++) {
-                const slug = `10-${String(day).padStart(2, '0')}-2026-post-${day}`
-                index[slug] = { ...news, slug: slug, date: `10/${String(day).padStart(2, '0')}/2026` }
-            }
-            writeNews(index)
-            await start()
-
-            const second = await getPage('/about/news?page=2')
-            expect(Object.keys(second.preloaded)).toEqual([ 'GET /news?page=2' ])
-            expect(second.preloaded['GET /news?page=2'].body.meta.page).toBe(2)
-            expect(second.preloaded['GET /news?page=2']).toEqual({ status: 200, body: (await callAPI('getNewsList', { query: { page: '2' } })).body })
-
-            // useNewsQuery() asks for the first page when ?page= isn't a page.
-            for(const query of [ '?page=0', '?page=-3', '?page=abc', '' ]) {
-                const page = await getPage(`/about/news${query}`)
-                expect(Object.keys(page.preloaded)).toEqual([ 'GET /news?page=1' ])
-            }
+            expect(page.response.status).toBe(200)
+            expect(page.preloadedElement).toBeNull()
+            expect(getFile).not.toHaveBeenCalled()
         })
     })
 
     describe('GET /', function() {
-        it('Should send the home page\'s metadata and no preloaded responses', async function() {
+        it('Should send the home page\'s metadata and no preloaded entities', async function() {
             await start()
             const page = await getPage('/')
 

@@ -34,6 +34,7 @@ const ServiceError = require('../errors/ServiceError')
  *          "slug": "09-29-2026-protocols-arent-the-answer",
  *          "date": "09/29/2026",
  *          "author": "Daniel Bingham",
+ *          "summary": "A sentence or two, for link previews.",
  *          "content": "<Markdown>"
  *      },
  *      ...
@@ -72,6 +73,9 @@ module.exports = class NewsService {
      * Copy a post with its properties in a consistent order, leaving out
      * anything that isn't part of a post.
      *
+     * Posts written before posts had summaries don't have one, so their
+     * summary is null until they're given one.
+     *
      * @param {Object} news     The post.
      * @param {string} slug     The post's slug.  The index's key is the source
      * of truth for the slug.
@@ -84,6 +88,7 @@ module.exports = class NewsService {
             slug: slug,
             date: news.date,
             author: news.author,
+            summary: news.summary ?? null,
             content: news.content
         }
     }

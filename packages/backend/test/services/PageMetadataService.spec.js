@@ -23,6 +23,7 @@ describe('PageMetadataService', function() {
             slug: slug,
             date: '09/30/2026',
             author: 'Daniel Bingham',
+            summary: `Summary of ${slug}.`,
             content: `Content of **${slug}**.`,
             ...overrides
         }
@@ -68,7 +69,7 @@ describe('PageMetadataService', function() {
         it('Should build the metadata for a post', function() {
             const metadata = service.getNewsMetadata(makeNews('a-post'))
             expect(metadata.title).toBe('Title of a-post')
-            expect(metadata.description).toBe('Content of a-post.')
+            expect(metadata.description).toBe('Summary of a-post.')
             expect(metadata.url).toBe('https://localhost:3000/about/news/a-post')
             expect(metadata.type).toBe('article')
             expect(metadata.article).toEqual({ publishedTime: '2026-09-30', author: 'Daniel Bingham' })
@@ -80,13 +81,13 @@ describe('PageMetadataService', function() {
             const tags = parseTags(service.renderTags(service.getNewsMetadata(makeNews('a-post'))))
 
             expect(tags.title).toBe('Title of a-post -- Communities')
-            expect(tags.description).toBe('Content of a-post.')
+            expect(tags.description).toBe('Summary of a-post.')
             expect(tags.canonical).toBe('https://localhost:3000/about/news/a-post')
             expect(tags.og).toEqual({
                 'og:site_name': 'Communities',
                 'og:type': 'article',
                 'og:title': 'Title of a-post',
-                'og:description': 'Content of a-post.',
+                'og:description': 'Summary of a-post.',
                 'og:url': 'https://localhost:3000/about/news/a-post',
                 'og:image': 'https://localhost:3000/social-sharing-image.jpg',
                 'og:image:width': '1200',
@@ -117,7 +118,7 @@ describe('PageMetadataService', function() {
             const html = service.renderTags(service.getNewsMetadata(makeNews('a-post', {
                 title: title,
                 author: 'Someone" onload="alert(1)',
-                content: 'Text with a <script>alert("content")</script> & an ampersand.'
+                summary: 'A summary with a <script>alert("summary")</script> & an ampersand.'
             })))
             const tags = parseTags(html)
 
@@ -126,7 +127,7 @@ describe('PageMetadataService', function() {
             expect(tags.og['og:title']).toBe(title)
             expect(tags.title).toBe(`${title} -- Communities`)
             expect(tags.author).toBe('Someone" onload="alert(1)')
-            expect(tags.description).toBe('Text with a alert("content") & an ampersand.')
+            expect(tags.description).toBe('A summary with a <script>alert("summary")</script> & an ampersand.')
         })
     })
 })

@@ -33,13 +33,13 @@ const unescapeHTML = function(text) {
 }
 
 // Request a page of the web application, the way a link preview crawler
-// would, and pick out its metadata and preloaded API responses.  Pages are
-// served from the root of the host the API is on.
+// would, and pick out its metadata and preloaded entities.  Pages are served
+// from the root of the host the API is on.
 //
 // Returns { status, html, title, description, canonical, og(property),
 // preloaded }.  Values are null when the page doesn't have that tag.
-// `preloaded` is the API responses the page came with, keyed by request:
-// { 'GET /news/a-post': { status, body } }.
+// `preloaded` is the entities the page came with, shaped like an API
+// response's relations: { news: { 'a-post': { ... } } }.
 const fetchPage = async function(pagePath) {
     if ( API_ROOT.startsWith('https://communities.social') || API_ROOT.startsWith('http://communities.social') ) {
         throw new Error('Integration tests may not be run against production!')
@@ -62,7 +62,7 @@ const fetchPage = async function(pagePath) {
     const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
     // Script content isn't HTML escaped, so it's parsed as it is.
-    const preloaded = html.match(/<script type="application\/json" id="communities-preloaded-responses">([^<]*)<\/script>/)
+    const preloaded = html.match(/<script type="application\/json" id="communities-preloaded-entities">([^<]*)<\/script>/)
 
     return {
         status: response.status,

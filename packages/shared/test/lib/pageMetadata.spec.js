@@ -3,10 +3,8 @@ const { lib } = require('../../')
 const {
     DEFAULT_TITLE,
     DEFAULT_DESCRIPTION,
-    DESCRIPTION_LENGTH,
     toAbsoluteURL,
     getDocumentTitle,
-    truncate,
     buildDefaultMetadata,
     buildRootMetadata,
     buildNewsListMetadata,
@@ -27,37 +25,6 @@ describe('lib.pageMetadata', function() {
     describe('getDocumentTitle()', function() {
         it('Should add the site\'s name', function() {
             expect(getDocumentTitle('News')).toBe('News -- Communities')
-        })
-    })
-
-    describe('truncate()', function() {
-        it('Should leave text that fits alone', function() {
-            expect(truncate('Short enough.', 13)).toBe('Short enough.')
-            expect(truncate('', 10)).toBe('')
-        })
-
-        it('Should return an empty string for anything that isn\'t text', function() {
-            expect(truncate(undefined, 10)).toBe('')
-            expect(truncate(null, 10)).toBe('')
-        })
-
-        it('Should cut at a word boundary and add an ellipsis', function() {
-            const result = truncate('The quick brown fox jumps over the lazy dog.', 20)
-            expect(result).toBe('The quick brown fox…')
-            expect(Array.from(result).length).toBeLessThanOrEqual(20)
-        })
-
-        it('Should not leave punctuation before the ellipsis', function() {
-            expect(truncate('Funded by users, governed by members.', 17)).toBe('Funded by users…')
-        })
-
-        it('Should cut a very long word rather than throw everything away', function() {
-            expect(truncate('Supercalifragilisticexpialidocious', 10)).toBe('Supercali…')
-        })
-
-        it('Should never cut an emoji in half', function() {
-            const result = truncate('🎉'.repeat(20), 10)
-            expect(Array.from(result)).toEqual([ ...Array(9).fill('🎉'), '…' ])
         })
     })
 
@@ -104,7 +71,8 @@ describe('lib.pageMetadata', function() {
             slug: '09-29-2026-protocols-arent-the-answer',
             date: '09/29/2026',
             author: 'Daniel Bingham',
-            content: '# Protocols\n\nThere\'s been a lot of talk about **protocols** lately.  [Bluesky](https://bsky.app) and the fediverse are both built on them.'
+            summary: 'Protocols are good tools, but a protocol can\'t decide who a platform answers to.',
+            content: '# Protocols\n\nThere\'s been a lot of talk about **protocols** lately.'
         }
 
         it('Should describe the post as an article', function() {
@@ -112,7 +80,7 @@ describe('lib.pageMetadata', function() {
                 ...buildDefaultMetadata(host),
                 title: 'Protocols Aren\'t the Answer',
                 documentTitle: 'Protocols Aren\'t the Answer -- Communities',
-                description: 'There\'s been a lot of talk about protocols lately. Bluesky and the fediverse are both built on them.',
+                description: 'Protocols are good tools, but a protocol can\'t decide who a platform answers to.',
                 url: 'https://staging.communities.social/about/news/09-29-2026-protocols-arent-the-answer',
                 type: 'article',
                 article: {
@@ -122,15 +90,21 @@ describe('lib.pageMetadata', function() {
             })
         })
 
-        it('Should shorten a long post\'s description', function() {
-            const metadata = buildNewsMetadata(host, { ...news, content: 'Words and more words. '.repeat(50) })
-            expect(Array.from(metadata.description).length).toBeLessThanOrEqual(DESCRIPTION_LENGTH)
-            expect(metadata.description.endsWith('…')).toBe(true)
+        it('Should use the summary as it is, never the content', function() {
+            const metadata = buildNewsMetadata(host, { ...news, summary: 'Just the summary.', content: 'Not the content.' })
+            expect(metadata.description).toBe('Just the summary.')
         })
 
-        it('Should fall back to the News description when the post has no prose', function() {
-            const metadata = buildNewsMetadata(host, { ...news, content: '# Just a heading\n\n![An image](/a.png)' })
-            expect(metadata.description).toBe(buildNewsListMetadata(host).description)
+        it('Should put a summary written on several lines on one', function() {
+            const metadata = buildNewsMetadata(host, { ...news, summary: '  A summary\nwritten on\r\n\n  several lines.  ' })
+            expect(metadata.description).toBe('A summary written on several lines.')
+        })
+
+        it('Should fall back to the News description for a post without a summary', function() {
+            for(const summary of [ undefined, null, '', '   \n ', 12 ]) {
+                const metadata = buildNewsMetadata(host, { ...news, summary: summary })
+                expect(metadata.description).toBe(buildNewsListMetadata(host).description)
+            }
         })
 
         it('Should encode the slug in the URL', function() {

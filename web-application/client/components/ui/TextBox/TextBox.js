@@ -21,7 +21,7 @@ import { useId } from 'react'
 
 import './TextBox.css'
 
-const TextBox = function({ label, explanation, placeholder, name, className, value, onChange, onBlur, onFocus, error }) {
+const TextBox = function({ label, explanation, placeholder, name, className, value, maxLength, onChange, onBlur, onFocus, error }) {
 
     const id = useId()
     const explanationId = useId()
@@ -58,6 +58,7 @@ const TextBox = function({ label, explanation, placeholder, name, className, val
                 onFocus={onFocusInternal}
                 onBlur={onBlurInternal}
                 placeholder={placeholder}
+                maxLength={maxLength}
             ></textarea>
             { error && <p id={errorId} className="text-box_error">{ error }</p>}
         </div>

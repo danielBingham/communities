@@ -8,6 +8,7 @@ import { setGroupSubscriptionsInDictionary, removeGroupSubscription } from '/sta
 import { setJobsInDictionary, removeJob } from '/state/jobs'
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
 import { setMutualsInDictionary, removeMutuals } from '/state/Mutuals/slice'
+import { setNewsInDictionary, removeNews } from '/state/News/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
 import { setPostReactionsInDictionary, removePostReaction } from '/state/PostReaction/slice'
@@ -25,6 +26,7 @@ const entityMap = {
     jobs: { set: setJobsInDictionary, remove: removeJob },
     linkPreviews: { set: setLinkPreviewsInDictionary, remove: removeLinkPreview },
     mutuals: { set: setMutualsInDictionary, remove: removeMutuals },
+    news: { set: setNewsInDictionary, remove: removeNews },
     posts: { set: setPostsInDictionary, remove: removePost },
     postComments: { set: setPostCommentsInDictionary, remove: removePostComment },
     postReactions: { set: setPostReactionsInDictionary, remove: removePostReaction },

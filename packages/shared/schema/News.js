@@ -19,6 +19,7 @@
  ******************************************************************************/
 const { stringCleaner } = require('../cleaning/types')
 const { StringValidator, DateValidator } = require('../validation/types')
+const { DESCRIPTION_LENGTH } = require('../lib/pageMetadata')
 
 const Schema = require('./Schema')
 
@@ -33,6 +34,7 @@ const Schema = require('./Schema')
  *      slug: '09-29-2026-protocols-arent-the-answer',
  *      date: '09/29/2026',
  *      author: 'Daniel Bingham',
+ *      summary: 'A sentence or two, for link previews and search results.',
  *      content: '<Markdown>'
  *  }
  */
@@ -42,6 +44,12 @@ module.exports = class NewsSchema extends Schema {
      * The longest a post's Markdown content may be, in characters.
      */
     static MAX_CONTENT_LENGTH = 100000
+
+    /**
+     * The longest a post's summary may be, in characters: the most a link
+     * preview shows of a description.  See `lib.pageMetadata`.
+     */
+    static MAX_SUMMARY_LENGTH = DESCRIPTION_LENGTH
 
     constructor() {
         super()
@@ -104,6 +112,32 @@ module.exports = class NewsSchema extends Schema {
                         .mustNotBeEmpty()
                         .mustBeShorterThan(256)
                         .getErrors()
+                    return errors
+                }
+            },
+            summary: {
+                // What link previews and search results show of the post: its
+                // og:description and description.
+                clean: (value) => { return stringCleaner(value) },
+                validate: (value, existing, action) => {
+                    const validator = new StringValidator('summary', value, existing, action)
+                    const errors = validator
+                        .isRequiredToCreate()
+                        .mustNotBeNull()
+                        .mustBeString()
+                        .mustNotBeEmpty()
+                        .mustBeShorterThan(NewsSchema.MAX_SUMMARY_LENGTH + 1)
+                        .getErrors()
+
+                    // mustNotBeEmpty() lets whitespace through, and the form
+                    // checks what's typed before it's cleaned.
+                    if ( errors.length === 0 && typeof value === 'string' && value.trim() === '' ) {
+                        errors.push({
+                            type: `summary:required`,
+                            log: `summary is required.`,
+                            message: `summary is required.`
+                        })
+                    }
                     return errors
                 }
             },
