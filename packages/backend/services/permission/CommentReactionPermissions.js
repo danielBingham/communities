@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 const CommentReactionDAO = require('../../daos/CommentReactionDAO')
+const PostCommentDAO = require('../../daos/PostCommentDAO')
 
 const { util } = require('@communities/shared')
 
@@ -32,6 +33,7 @@ module.exports = class CommentReactionPermissions {
         this.permissionService = permissionService
 
         this.commentReactionDAO = new CommentReactionDAO(core)
+        this.postCommentDAO = new PostCommentDAO(core)
     }
 
     async ensureContext(user, context, required, optional) {
@@ -53,6 +55,24 @@ module.exports = class CommentReactionPermissions {
 
             if ( required?.includes('commentReaction') && context.commentReaction === null ) {
                 throw new ServiceError('missing-context', `'commentReaction' missing from context.`)
+            }
+        }
+
+        if ( (required?.includes('postComment') || optional?.includes('postComment'))
+            && ( ! util.objectHas(context, 'postComment') || context.postComment === null))
+        {
+            if ( context.postComment !== null ) {
+                if ( util.objectHas(context, 'commentId') && context.commentId !== null ) {
+                    context.postComment = await this.postCommentDAO.getPostCommentById(context.commentId)
+                } else if ( util.objectHas(context, 'commentReaction') && context.commentReaction !== null ) {
+                    context.postComment = await this.postCommentDAO.getPostCommentById(context.commentReaction.commentId)
+                } else {
+                    context.postComment = null
+                }
+            }
+
+            if ( required?.includes('postComment') && context.postComment === null ) {
+                throw new ServiceError('missing-context', `'postComment' missing from context.`)
             }
         }
 
@@ -87,8 +107,15 @@ module.exports = class CommentReactionPermissions {
     }
 
     async canCreateCommentReaction(user, context) {
+        await this.ensureContext(user, context, [ 'postComment' ])
+
+        // Users may not react to their own comments.
+        if ( context.postComment.userId === user.id ) {
+            return false
+        }
+
         // We're not going to test comment visibility here, but if you can see
-        // the comment, you can react to it (for now).
+        // someone else's comment, you can react to it (for now).
         return true
     }
 

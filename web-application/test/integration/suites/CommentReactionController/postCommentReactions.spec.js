@@ -22,7 +22,7 @@ const assert = require('node:assert/strict')
 
 const { initialize, logout, loginAs } = require('../../lib/authentication')
 const { createPost, deleteAllPostsForUser } = require('../../lib/posts')
-const { addComment } = require('../../lib/postComments')
+const { addComment, getPostComments } = require('../../lib/postComments')
 const { blockUser, clearRelationship } = require('../../lib/relationships')
 const { isFeatureEnabled } = require('../../lib/system')
 const {
@@ -102,15 +102,31 @@ describe('POST /post/:postId/comment/:commentId/reactions', function() {
         assert.deepEqual(updatedComment.reactions, [ entity.id ])
     })
 
-    it(`Should let a user like their own comment`, async function(t) {
+    it(`Should not let a user like their own comment`, async function(t) {
         if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
 
         const { post, comment } = await createCommentedPost()
 
         const response = await postCommentReaction(commenter.session, post.id, comment.id, { reaction: 'like' })
 
+        assert.equal(response.status, 403)
+        assert.equal(response.content?.error?.type, 'not-authorized')
+
+        // And no reaction was created.
+        const commentsResponse = await getPostComments(commenter.session, post.id)
+        assert.equal(commentsResponse.status, 200)
+        assert.deepEqual(commentsResponse.content.dictionary?.[comment.id]?.reactions, [])
+    })
+
+    it(`Should let the post's author like other users' comments on their post`, async function(t) {
+        if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
+
+        const { post, comment } = await createCommentedPost()
+
+        const response = await postCommentReaction(author.session, post.id, comment.id, { reaction: 'like' })
+
         assert.equal(response.status, 201)
-        assert.equal(response.content.entity.userId, commenter.user.id)
+        assert.equal(response.content.entity.userId, author.user.id)
     })
 
     it(`Should not let a user like the same comment twice`, async function(t) {

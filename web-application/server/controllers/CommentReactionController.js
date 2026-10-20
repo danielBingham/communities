@@ -124,10 +124,11 @@ module.exports = class CommentReactionController {
     async postCommentReactions(request, response) {
         const { currentUser, post, postComment } = await this.ensureCanViewComment(request)
 
+        // Users may not react to their own comments.
         const canCreateCommentReaction = await this.permissionService.can(currentUser, 'create', 'CommentReaction', { post: post, postComment: postComment })
         if ( canCreateCommentReaction !== true ) {
             throw new ControllerError(403, 'not-authorized',
-                `User(${currentUser.id}) attempting to react to Comment(${postComment.id}) without authorization.`,
+                `User(${currentUser.id}) attempting to react to Comment(${postComment.id}) by User(${postComment.userId}) without authorization.`,
                 `You're not authorized to react to that comment.`)
         }
 

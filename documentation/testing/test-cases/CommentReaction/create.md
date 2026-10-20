@@ -66,6 +66,6 @@ None.
 The Integration suite covers who can and cannot like a comment
 (`web-application/test/integration/suites/CommentReactionController/postCommentReactions.spec.js`):
 unauthenticated users, comments that don't exist or aren't on the post,
-comments on posts the user can't see, blocks in either direction, liking twice,
-and reactions other than 'like'.  All of the user interface cases are defined
+comments on posts the user can't see, blocks in either direction, liking your
+own comment, liking twice, and reactions other than 'like'.  All of the user interface cases are defined
 in the Smoke Test and Manual Regression sections above.
