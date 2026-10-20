@@ -74,7 +74,8 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('feat-377-improved-file-pipelines', 'enabled', now(), now()),
         ('feat-61-multifactor-authentication', 'enabled', now(), now()),
         ('fix-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
-        ('video-uploads', 'enabled', now(), now());
+        ('video-uploads', 'enabled', now(), now()),
+        ('feat-585-comment-reactions', 'enabled', now(), now());
 
 
 
@@ -471,6 +472,27 @@ CREATE TABLE post_comment_versions (
     updated_date timestamptz
 );
 CREATE INDEX post_comment_versions__post_comment_id ON post_comment_versions (post_comment_id);
+
+CREATE TYPE comment_reaction_type AS ENUM(
+    /** positive **/
+    'like'
+);
+CREATE TABLE comment_reactions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    post_id uuid REFERENCES posts (id) ON DELETE CASCADE NOT NULL,
+    comment_id uuid REFERENCES post_comments (id) ON DELETE CASCADE NOT NULL,
+    user_id uuid REFERENCES users (id) ON DELETE CASCADE NOT NULL,
+
+    reaction comment_reaction_type NOT NULL,
+
+    created_date timestamptz,
+    updated_date timestamptz,
+
+    /* A user may only react to a comment once.  This also indexes comment_id. */
+    CONSTRAINT comment_reactions__comment_id_user_id_unique UNIQUE (comment_id, user_id)
+);
+CREATE INDEX comment_reactions__post_id ON comment_reactions (post_id);
+CREATE INDEX comment_reactions__user_id ON comment_reactions (user_id);
 
 CREATE TABLE post_subscriptions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

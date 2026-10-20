@@ -1,4 +1,5 @@
 const Blocklist  = require('./entities/Blocklist')
+const CommentReaction = require('./entities/CommentReaction')
 const Group = require('./entities/Group')
 const GroupMember = require('./entities/GroupMember')
 const GroupModeration = require('./entities/GroupModeration')
@@ -14,6 +15,7 @@ const types = require('./types')
 
 module.exports = {
     Blocklist: Blocklist,
+    CommentReaction: CommentReaction,
     Group: Group,
     GroupMember: GroupMember,
     GroupModeration: GroupModeration,

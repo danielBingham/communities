@@ -37,6 +37,9 @@
     max-width: 100%;
 }
 .post-comment .post-comment__footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 0 10px 10px 10px;
     font-size: 14px;
 }

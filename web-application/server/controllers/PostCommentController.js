@@ -23,8 +23,10 @@ const Uuid = require('uuid')
 const {
     NotificationService,
     PermissionService,
+    UserRelationshipService,
     ValidationService,
 
+    CommentReactionDAO,
     GroupSubscriptionDAO,
     PostDAO,
     PostCommentDAO,
@@ -41,6 +43,7 @@ module.exports = class PostCommentController {
     constructor(core) {
         this.core = core
 
+        this.commentReactionDAO = new CommentReactionDAO(core)
         this.groupSubscriptionDAO = new GroupSubscriptionDAO(core)
         this.postDAO = new PostDAO(core)
         this.postCommentDAO = new PostCommentDAO(core)
@@ -50,6 +53,7 @@ module.exports = class PostCommentController {
 
         this.notificationService = new NotificationService(core)
         this.permissionService = new PermissionService(core)
+        this.userRelationshipService = new UserRelationshipService(core)
         this.validationService = new ValidationService(core)
     }
 
@@ -81,6 +85,18 @@ module.exports = class PostCommentController {
             params: [ results.list ]
         })
         relations.siteModerations = siteModerationResults.dictionary
+
+        // -------- CommentReaction -------------------------------------------
+        if ( this.core.features.has('feat-585-comment-reactions') ) {
+            // Leave out reactions from users who are blocked by, or have
+            // blocked, the current user.
+            const blockIds = await this.userRelationshipService.getBlockIdsForUser(currentUser.id)
+            const commentReactionResults = await this.commentReactionDAO.selectCommentReactions({
+                where: `comment_reactions.comment_id = ANY($1::uuid[]) AND comment_reactions.user_id != ALL($2::uuid[])`,
+                params: [ results.list, blockIds ]
+            })
+            relations.commentReactions = commentReactionResults.dictionary
+        }
 
         return relations
     }

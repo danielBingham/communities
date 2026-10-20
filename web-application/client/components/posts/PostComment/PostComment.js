@@ -13,6 +13,7 @@ import { usePostLink } from '/lib/hooks/Post'
 import DateTag from '/components/DateTag'
 import UserTag from '/components/users/UserTag'
 
+import CommentReactions from './CommentReactions'
 import PostCommentDotsMenu from './PostCommentDotsMenu'
 import PostCommentModeration from './PostCommentModeration'
 
@@ -32,6 +33,8 @@ const PostComment = function({ postId, id, onReply }) {
     const [highlight, setHighlight] = useState(false)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
+
+    const hasCommentReactions = useFeature('feat-585-comment-reactions')
 
     const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)
@@ -126,13 +129,14 @@ const PostComment = function({ postId, id, onReply }) {
             <div className="post-comment__content">
                 <TextWithMentions text={ comment.content } />
             </div>
-            { canReply && <div className="post-comment__footer">
-                <a
+            { ( hasCommentReactions || canReply ) && <div className="post-comment__footer">
+                { hasCommentReactions && <CommentReactions postId={postId} commentId={id} /> }
+                { canReply && <a
                     href=""
                     className="post-comment__reply"
                     aria-label={`Reply to ${author.name}`}
                     onClick={(e) => { e.preventDefault(); onReply(author.username) }}
-                >Reply</a>
+                >Reply</a> }
             </div> }
         </div>
     )

@@ -562,6 +562,24 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * CommentReaction REST Routes
+     **************************************************************************/
+    const CommentReactionController = require('./controllers/CommentReactionController')
+    const commentReactionController = new CommentReactionController(core)
+
+    router.post('/post/:postId/comment/:commentId/reactions', rateLimit(core, 120), function(request, response, next) {
+        commentReactionController.postCommentReactions(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:postId/comment/:commentId/reaction', rateLimit(core, 120), function(request, response, next) {
+        commentReactionController.deleteCommentReaction(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * PostSubscription REST Routes
      **************************************************************************/
     const PostSubscriptionController = require('./controllers/PostSubscriptionController')
