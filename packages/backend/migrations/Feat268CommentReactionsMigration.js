@@ -25,7 +25,7 @@ const BaseMigration = require('./BaseMigration')
  * This only adds a new enum, a new table, and its indexes, so it is entirely
  * in the initialization phase.  There is no data to migrate.
  */
-module.exports = class Feat585CommentReactionsMigration extends BaseMigration {
+module.exports = class Feat268CommentReactionsMigration extends BaseMigration {
 
     constructor(core) {
         super(core)

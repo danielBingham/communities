@@ -221,7 +221,7 @@ module.exports = class PostController {
         // ==== CommentReactions ====
         // Only for the comments we're sending, and leaving out reactions from
         // users who are blocked by, or have blocked, the current user.
-        if ( this.core.features.has('feat-585-comment-reactions') ) {
+        if ( this.core.features.has('feat-268-comment-reactions') ) {
             const commentReactionResults = await this.commentReactionDAO.selectCommentReactions({
                 where: `comment_reactions.comment_id = ANY($1::uuid[]) AND comment_reactions.user_id != ALL($2::uuid[])`,
                 params: [ postCommentResults.list, blockIds ]

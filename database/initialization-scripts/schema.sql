@@ -75,7 +75,7 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('feat-61-multifactor-authentication', 'enabled', now(), now()),
         ('fix-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
         ('video-uploads', 'enabled', now(), now()),
-        ('feat-585-comment-reactions', 'enabled', now(), now());
+        ('feat-268-comment-reactions', 'enabled', now(), now());
 
 
 

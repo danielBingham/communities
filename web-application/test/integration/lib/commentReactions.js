@@ -22,7 +22,7 @@ const { fetchEndpoint } = require('./fetchEndpoint')
 
 // CommentReactions are gated behind this server feature flag.  The suites
 // that use these helpers skip themselves when it isn't enabled.
-const COMMENT_REACTIONS_FEATURE = 'feat-585-comment-reactions'
+const COMMENT_REACTIONS_FEATURE = 'feat-268-comment-reactions'
 
 // POST a reaction to a comment and return the raw response (without throwing
 // on non-2xx) so callers can assert on the status.

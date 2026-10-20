@@ -141,12 +141,12 @@ module.exports = class PostCommentDAO extends DAO {
 
     /**
      * The `comment_reactions` table doesn't exist until the
-     * 'feat-585-comment-reactions' migration has run, so we only join it once
+     * 'feat-268-comment-reactions' migration has run, so we only join it once
      * the feature is enabled.  Until then, `PostComment.reactions` is always
      * empty.
      */
     hasCommentReactions() {
-        return this.core.features?.has('feat-585-comment-reactions') === true
+        return this.core.features?.has('feat-268-comment-reactions') === true
     }
 
     hydratePostComment(row) {

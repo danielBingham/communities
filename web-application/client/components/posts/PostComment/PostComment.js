@@ -34,7 +34,7 @@ const PostComment = function({ postId, id, onReply }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
-    const hasCommentReactions = useFeature('feat-585-comment-reactions')
+    const hasCommentReactions = useFeature('feat-268-comment-reactions')
 
     const [post, postRequest] = usePost(postId)
     const [comment, request] = usePostComment(postId, id)

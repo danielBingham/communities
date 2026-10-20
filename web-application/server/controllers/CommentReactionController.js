@@ -71,7 +71,7 @@ module.exports = class CommentReactionController {
      * @return {Promise<Object>} The `currentUser`, `post` and `postComment`.
      */
     async ensureCanViewComment(request) {
-        if ( ! this.core.features.has('feat-585-comment-reactions') ) {
+        if ( ! this.core.features.has('feat-268-comment-reactions') ) {
             throw new ControllerError(503, 'unsupported',
                 `Comment reactions are not currently supported.`,
                 `Comment reactions are not currently supported.`)

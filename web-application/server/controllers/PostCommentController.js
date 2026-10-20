@@ -87,7 +87,7 @@ module.exports = class PostCommentController {
         relations.siteModerations = siteModerationResults.dictionary
 
         // -------- CommentReaction -------------------------------------------
-        if ( this.core.features.has('feat-585-comment-reactions') ) {
+        if ( this.core.features.has('feat-268-comment-reactions') ) {
             // Leave out reactions from users who are blocked by, or have
             // blocked, the current user.
             const blockIds = await this.userRelationshipService.getBlockIdsForUser(currentUser.id)
