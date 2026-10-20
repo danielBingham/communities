@@ -110,7 +110,7 @@ describe('POST /news', function() {
 
             const response = await postNewsRequest(admin.session, { ...news, id: 5, userId: admin.user.id })
             assert.equal(response.status, 201, JSON.stringify(response.content))
-            assert.deepEqual(Object.keys(response.content.entity).sort(), [ 'author', 'content', 'date', 'slug', 'title' ])
+            assert.deepEqual(Object.keys(response.content.entity).sort(), [ 'author', 'content', 'date', 'slug', 'summary', 'title' ])
         })
 
         it('Should refuse a slug that\'s already taken with 409, leaving the original', async function() {
@@ -140,7 +140,7 @@ describe('POST /news', function() {
             assert.ok(types.includes(expectedType), `Expected '${expectedType}' in ${JSON.stringify(types)}`)
         }
 
-        for(const property of [ 'title', 'slug', 'date', 'author', 'content' ]) {
+        for(const property of [ 'title', 'slug', 'date', 'author', 'summary', 'content' ]) {
             it(`Should require ${property}`, async function() {
                 const news = makeNews()
                 delete news[property]
@@ -172,6 +172,14 @@ describe('POST /news', function() {
 
         it('Should refuse content that is only whitespace', async function() {
             await assertInvalid(makeNews({ content: '   \n\n  ' }), 'content:required')
+        })
+
+        it('Should refuse a summary that is only whitespace', async function() {
+            await assertInvalid(makeNews({ summary: '   \n\n  ' }), 'summary:required')
+        })
+
+        it('Should refuse a summary longer than a link preview shows', async function() {
+            await assertInvalid(makeNews({ summary: 'a'.repeat(201) }), 'summary:too-long')
         })
 
         it('Should refuse an empty body', async function() {

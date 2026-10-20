@@ -41,6 +41,7 @@ const { createCSRFMiddleware } = require('./csrf')
 const { createSecurityHeadersMiddleware } = require('./middleware/security-headers')
 const { createErrorsMiddleware } = require('./errors')
 const { mountStorageRoute } = require('./storage')
+const { createPageRouter } = require('./pages')
 
 const createRouter = require('./router')
 
@@ -212,6 +213,14 @@ const createExpressApp = function(core, sessionParser) {
         response.sendFile(filepath)
     })
 
+    // The image link previews show for pages that don't have one of their
+    // own.  It needs a URL that doesn't change from build to build, so it
+    // isn't bundled.  See `lib.pageMetadata` in @communities/shared.
+    app.get('/social-sharing-image.jpg', function(request, response) {
+        const filepath = path.join(process.cwd(), 'public/social-sharing-image.jpg')
+        response.sendFile(filepath)
+    })
+
     /**
      * Any other static images are going to be bundled into the dist.
      */
@@ -226,12 +235,11 @@ const createExpressApp = function(core, sessionParser) {
         response.sendFile(filepath)
     })
 
-    // Everything else goes to the index file.
-    app.all('{*any}', function(request,response) {
-        request.logger.verbose(`Loading index file.`)
-        const filepath = path.join(process.cwd(), 'public/dist/index.html')
-        response.sendFile(filepath)
-    })
+    // ==================== Page Requests ===================================
+    // Everything else is a page: the index file, with the page's metadata
+    // rendered into its <head>.  See `./pages.js`.
+    // ========================================================================
+    app.use(createPageRouter(core))
 
     // Register the error handler.
     app.use(createErrorsMiddleware(core))

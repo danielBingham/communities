@@ -15,6 +15,10 @@
     font-size: 14px;
     line-height: 1.5em;
 }
+.news-form .news-form__summary textarea {
+    height: 6em;
+    resize: vertical;
+}
 .news-form .news-form__url {
     padding: 0 0 10px 0;
     font-size: 14px;

@@ -61,6 +61,14 @@ module.exports = {
         port: 3000,
         open: true,
         historyApiFallback: true,
+        devMiddleware: {
+            // The Express server renders the pages from the index.html we
+            // build (see the page proxy below), so it has to be on disk.
+            writeToDisk: true,
+            // Let requests for '/' through to the page proxy, rather than
+            // answering them with index.html from memory.
+            index: false
+        },
         allowedHosts: [ host ],
         server: {
             type: 'https',
@@ -82,6 +90,27 @@ module.exports = {
                 secure: false,
                 changeOrigin: true,
                 ws: true
+            },
+            {
+                // Pages.  The Express server sends index.html with the page's
+                // metadata rendered into it (see server/pages.js), so send
+                // page requests there, as they are in staging and production,
+                // rather than answering them with the bare index.html.
+                //
+                // A page request is one historyApiFallback would answer: a
+                // GET or HEAD that accepts HTML, for a path without a file
+                // extension.  Bundles and other files webpack built never
+                // get here: the dev middleware answers them first.
+                context: function(pathname, request) {
+                    const accept = request.headers.accept ?? ''
+                    return ( request.method === 'GET' || request.method === 'HEAD' )
+                        && ( accept.includes('text/html') || accept.includes('*/*') )
+                        && ! pathname.startsWith(api) && ! pathname.startsWith('/socket') && pathname !== '/health'
+                        && ! /\.[^/]*$/.test(pathname)
+                },
+                target: "https://localhost:8080",
+                changeOrigin: true,
+                secure: false
             }
         ]
     },

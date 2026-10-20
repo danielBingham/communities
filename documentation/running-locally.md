@@ -425,6 +425,13 @@ Then, from the repository root:
 
    and open `https://localhost:3000`.
 
+   That's webpack's dev server, which serves the client's bundles and passes
+   API and page requests on to the web application's Express server on
+   `https://localhost:8080`. Express sends every page as the `index.html`
+   webpack builds, with the page's title and link preview tags rendered into
+   it (view the source of a News post to see them), so the dev server writes
+   its builds to `web-application/public/dist`.
+
 ## Running the Integration Tests
 
 With the environment running, create the test users in your database, then

@@ -1,4 +1,4 @@
-const { schema } = require('../../')
+const { schema, lib } = require('../../')
 
 const NewsSchema = schema.NewsSchema
 
@@ -10,6 +10,7 @@ describe('NewsSchema', function() {
             slug: '09-29-2026-protocols-arent-the-answer',
             date: '09/29/2026',
             author: 'Daniel Bingham',
+            summary: 'Protocols are good tools, but they are not the answer.',
             content: '# Protocols\n\nThey are not the answer.',
             ...overrides
         }
@@ -20,15 +21,16 @@ describe('NewsSchema', function() {
     describe('clean()', function() {
         it('Should keep only News properties', function() {
             const cleaned = new NewsSchema().clean(valid({ id: 5, extra: 'nope', __proto__pollution: true }))
-            expect(Object.keys(cleaned).sort()).toEqual([ 'author', 'content', 'date', 'slug', 'title' ])
+            expect(Object.keys(cleaned).sort()).toEqual([ 'author', 'content', 'date', 'slug', 'summary', 'title' ])
         })
 
         it('Should trim the short fields but leave the Markdown content alone', function() {
-            const cleaned = new NewsSchema().clean(valid({ title: '  A Title  ', slug: ' a-slug ', date: ' 09/29/2026 ', author: ' Someone ', content: '    indented code\n\n' }))
+            const cleaned = new NewsSchema().clean(valid({ title: '  A Title  ', slug: ' a-slug ', date: ' 09/29/2026 ', author: ' Someone ', summary: ' A summary. \n', content: '    indented code\n\n' }))
             expect(cleaned.title).toBe('A Title')
             expect(cleaned.slug).toBe('a-slug')
             expect(cleaned.date).toBe('09/29/2026')
             expect(cleaned.author).toBe('Someone')
+            expect(cleaned.summary).toBe('A summary.')
             expect(cleaned.content).toBe('    indented code\n\n')
         })
     })
@@ -39,7 +41,7 @@ describe('NewsSchema', function() {
         })
 
         it('Should require every property', function() {
-            for(const property of [ 'title', 'slug', 'date', 'author', 'content' ]) {
+            for(const property of [ 'title', 'slug', 'date', 'author', 'summary', 'content' ]) {
                 const news = valid()
                 delete news[property]
                 expect(types(new NewsSchema().validate(news))).toEqual([ `${property}:required` ])
@@ -47,14 +49,15 @@ describe('NewsSchema', function() {
         })
 
         it('Should reject empty and blank values', function() {
-            for(const property of [ 'title', 'slug', 'date', 'author', 'content' ]) {
+            for(const property of [ 'title', 'slug', 'date', 'author', 'summary', 'content' ]) {
                 expect(types(new NewsSchema().validate(valid({ [property]: '' })))).toContain(`${property}:required`)
             }
             expect(types(new NewsSchema().validate(valid({ content: ' \n\t ' })))).toEqual([ 'content:required' ])
+            expect(types(new NewsSchema().validate(valid({ summary: ' \n\t ' })))).toEqual([ 'summary:required' ])
         })
 
         it('Should reject null and non-string values', function() {
-            for(const property of [ 'title', 'slug', 'date', 'author', 'content' ]) {
+            for(const property of [ 'title', 'slug', 'date', 'author', 'summary', 'content' ]) {
                 expect(types(new NewsSchema().validate(valid({ [property]: null })))).toEqual([ `${property}:null` ])
                 expect(types(new NewsSchema().validate(valid({ [property]: 5 })))).toEqual([ `${property}:invalid-type` ])
             }
@@ -76,9 +79,15 @@ describe('NewsSchema', function() {
         })
 
         it('Should limit the length of each property', function() {
+            // The summary is a link preview's description.
+            expect(NewsSchema.MAX_SUMMARY_LENGTH).toBe(lib.pageMetadata.DESCRIPTION_LENGTH)
+
             expect(types(new NewsSchema().validate(valid({ title: 'a'.repeat(512) })))).toEqual([ 'title:too-long' ])
             expect(types(new NewsSchema().validate(valid({ slug: 'a'.repeat(512) })))).toEqual([ 'slug:too-long' ])
             expect(types(new NewsSchema().validate(valid({ author: 'a'.repeat(256) })))).toEqual([ 'author:too-long' ])
+
+            expect(new NewsSchema().validate(valid({ summary: 'a'.repeat(NewsSchema.MAX_SUMMARY_LENGTH) })).all).toEqual([])
+            expect(types(new NewsSchema().validate(valid({ summary: 'a'.repeat(NewsSchema.MAX_SUMMARY_LENGTH + 1) })))).toEqual([ 'summary:too-long' ])
 
             expect(new NewsSchema().validate(valid({ content: 'a'.repeat(NewsSchema.MAX_CONTENT_LENGTH) })).all).toEqual([])
             expect(types(new NewsSchema().validate(valid({ content: 'a'.repeat(NewsSchema.MAX_CONTENT_LENGTH + 1) })))).toEqual([ 'content:too-long' ])
@@ -98,6 +107,8 @@ describe('NewsSchema', function() {
             expect(types(new NewsSchema().validate({ date: '13/01/2026' }, existing))).toEqual([ 'date:invalid' ])
             expect(types(new NewsSchema().validate({ title: '' }, existing))).toEqual([ 'title:required' ])
             expect(types(new NewsSchema().validate({ author: null }, existing))).toEqual([ 'author:null' ])
+            expect(types(new NewsSchema().validate({ summary: '' }, existing))).toEqual([ 'summary:required' ])
+            expect(types(new NewsSchema().validate({ summary: null }, existing))).toEqual([ 'summary:null' ])
         })
 
         it('Should not allow the slug to change', function() {

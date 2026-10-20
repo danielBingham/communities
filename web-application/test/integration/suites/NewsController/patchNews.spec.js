@@ -89,7 +89,7 @@ describe('PATCH /news/:slug', function() {
 
     describe('editing a post', function() {
         it('Should change only the properties in the patch', async function() {
-            const patch = { title: `Edited ${news.title}`, content: 'Edited **content**.' }
+            const patch = { title: `Edited ${news.title}`, summary: 'An edited summary.', content: 'Edited **content**.' }
 
             const response = await patchNews(admin.session, news.slug, patch)
             assert.equal(response.status, 201, JSON.stringify(response.content))
@@ -140,14 +140,18 @@ describe('PATCH /news/:slug', function() {
             await assertInvalid({ date: '13/01/2000' }, 'date:invalid')
         })
 
+        it('Should refuse a summary longer than a link preview shows', async function() {
+            await assertInvalid({ summary: 'a'.repeat(201) }, 'summary:too-long')
+        })
+
         it('Should refuse to empty a property', async function() {
-            for(const property of [ 'title', 'date', 'author', 'content' ]) {
+            for(const property of [ 'title', 'date', 'author', 'summary', 'content' ]) {
                 await assertInvalid({ [property]: '' }, `${property}:required`)
             }
         })
 
         it('Should refuse null properties', async function() {
-            for(const property of [ 'title', 'date', 'author', 'content' ]) {
+            for(const property of [ 'title', 'date', 'author', 'summary', 'content' ]) {
                 await assertInvalid({ [property]: null }, `${property}:null`)
             }
         })
