@@ -1,5 +1,6 @@
 import logger from '/logger'
 
+import { setCommentReactionsInDictionary, removeCommentReaction } from '/state/CommentReaction/slice'
 import { setFilesInDictionary, removeFile } from '/state/File/slice'
 import { setGroupsInDictionary, removeGroup } from '/state/Group/slice'
 import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMember/slice'
@@ -18,6 +19,7 @@ import { setUsersInDictionary, removeUser } from '/state/User/slice'
 import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/UserRelationship/slice'
 
 const entityMap = {
+    commentReactions: { set: setCommentReactionsInDictionary, remove: removeCommentReaction },
     files: { set: setFilesInDictionary, remove: removeFile },
     groups: { set: setGroupsInDictionary, remove: removeGroup },
     groupMembers: { set: setGroupMembersInDictionary, remove: removeGroupMember },

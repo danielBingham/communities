@@ -82,6 +82,15 @@ module.exports = class PostCommentDAO extends DAO {
                         updateOverride: 'now()',
                         select: 'always',
                         key: 'updatedDate'
+                    },
+                    'comment_reactions': {
+                        insert: 'denied',
+                        update: 'denied',
+                        select: 'override',
+                        selectOverride: function(row) {
+                            return []
+                        },
+                        key: 'reactions'
                     }
                 }
             },
@@ -130,6 +139,16 @@ module.exports = class PostCommentDAO extends DAO {
         return this.getSelectionString('PostComment')
     }
 
+    /**
+     * The `comment_reactions` table doesn't exist until the
+     * 'feat-268-comment-reactions' migration has run, so we only join it once
+     * the feature is enabled.  Until then, `PostComment.reactions` is always
+     * empty.
+     */
+    hasCommentReactions() {
+        return this.core.features?.has('feat-268-comment-reactions') === true
+    }
+
     hydratePostComment(row) {
         return this.hydrate('PostComment', row)
     }
@@ -138,10 +157,20 @@ module.exports = class PostCommentDAO extends DAO {
         const dictionary = {}
         const list = []
 
+        const commentReactionDictionary = {}
+
         for(const row of rows) {
             if ( ! ( row.PostComment_id in dictionary) ) {
                 dictionary[row.PostComment_id] = this.hydratePostComment(row)
                 list.push(row.PostComment_id)
+            }
+
+            // Hydrate CommentReactions.
+            if ( row.CommentReaction_id !== undefined && row.CommentReaction_id !== null
+                && ! ( row.CommentReaction_id in commentReactionDictionary) )
+            {
+                commentReactionDictionary[row.CommentReaction_id] = true
+                dictionary[row.PostComment_id].reactions.push(row.CommentReaction_id)
             }
         }
 
@@ -177,12 +206,16 @@ module.exports = class PostCommentDAO extends DAO {
             }
         }
 
+        const hasCommentReactions = this.hasCommentReactions()
+
         const sql = `
         SELECT
             ${this.getPostCommentSelectionString()}
+            ${ hasCommentReactions ? `, comment_reactions.id as "CommentReaction_id"` : '' }
         FROM post_comments
+            ${ hasCommentReactions ? `LEFT OUTER JOIN comment_reactions ON post_comments.id = comment_reactions.comment_id` : '' }
         ${where}
-        ${order}
+        ${order}${ hasCommentReactions ? `, comment_reactions.created_date ASC` : '' }
         `
         const results = await this.core.database.query(sql, params)
 

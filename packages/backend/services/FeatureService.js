@@ -33,6 +33,7 @@ const Fix495SlowFriendsListMigration = require('../migrations/Fix495SlowFriendsL
 const Feat377ImprovedFilePipelinesMigration = require('../migrations/Feat377ImprovedFilePipelinesMigration')
 const Feat61MultifactorAuthenticationMigration = require('../migrations/Feat61MultifactorAuthenticationMigration')
 const Fix563VideoPosterFailsOnMobileMigration = require('../migrations/Fix563VideoPosterFailsOnMobileMigration')
+const Feat268CommentReactionsMigration = require('../migrations/Feat268CommentReactionsMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -104,7 +105,10 @@ module.exports = class FeatureService {
             'fix-563-video-poster-fails-on-mobile': {
                 migration: new Fix563VideoPosterFailsOnMobileMigration(core)
             },
-            'video-uploads': {}
+            'video-uploads': {},
+            'feat-268-comment-reactions': {
+                migration: new Feat268CommentReactionsMigration(core)
+            }
 
         }
     }

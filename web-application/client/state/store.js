@@ -6,6 +6,7 @@ import logger from '/logger'
 import adminReducer from './admin'
 import authenticationReducer from './authentication'
 import BlocklistReducer from './Blocklist'
+import CommentReactionReducer from './CommentReaction'
 import eventsSliceReducer, { subscribe, unsubscribe, confirmSubscription, confirmUnsubscription, clearSubscriptions } from './events'
 import featuresReducer from './features'
 import FileReducer from './File'
@@ -37,6 +38,7 @@ const reducers = combineReducers({
     admin: adminReducer,
     authentication: authenticationReducer,
     Blocklist: BlocklistReducer,
+    CommentReaction: CommentReactionReducer,
     events: eventsSliceReducer,
     features: featuresReducer,
     File: FileReducer,

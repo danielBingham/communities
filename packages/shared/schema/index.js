@@ -18,6 +18,7 @@
  *
  ******************************************************************************/
 
+const CommentReactionSchema = require('./CommentReaction')
 const DeviceSchema = require('./Device')
 const FileSchema = require('./File')
 const GroupSchema = require('./Group')
@@ -28,6 +29,7 @@ const NotificationSchema = require('./Notification')
 const SiteModerationSchema = require('./SiteModeration')
 
 module.exports = {
+    CommentReactionSchema: CommentReactionSchema,
     DeviceSchema: DeviceSchema,
     FileSchema: FileSchema,
     GroupSchema: GroupSchema,

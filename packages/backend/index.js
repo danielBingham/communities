@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 exports.BlocklistDAO = require('./daos/BlocklistDAO')
+exports.CommentReactionDAO = require('./daos/CommentReactionDAO')
 exports.FeatureDAO = require('./daos/FeatureDAO') 
 exports.FileDAO = require('./daos/FileDAO')
 exports.GroupDAO = require('./daos/GroupDAO')

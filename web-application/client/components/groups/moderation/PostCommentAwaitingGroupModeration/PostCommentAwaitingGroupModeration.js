@@ -28,7 +28,8 @@ const PostCommentAwaitingGroupModeration = function({ groupId, id }) {
             <div className="post-comment-awaiting-group-moderation__context">
                 <a href={`${link}#comment-${moderation.postCommentId}`}>View Context</a>
             </div>
-            <PostComment postId={moderation.postId} id={moderation.postCommentId} />
+            { /* Reactions aren't relevant to moderation.  They can be seen through "View Context". */ }
+            <PostComment postId={moderation.postId} id={moderation.postCommentId} hideReactions />
         </Card>
     )
 }

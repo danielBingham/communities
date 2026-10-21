@@ -31,7 +31,13 @@ import Spinner from '/components/Spinner'
 
 import './PostCommentWithContext.css'
 
-const PostCommentWithContext = function({ postCommentId }) {
+/**
+ * @param {object} props
+ * @param {string} props.postCommentId The id of the comment.
+ * @param {boolean} [props.hideReactions] Hide the comment's like count and
+ * like button.  See PostComment.
+ */
+const PostCommentWithContext = function({ postCommentId, hideReactions }) {
     const comment = useSelector((state) => postCommentId in state.PostComment.dictionary ? state.PostComment.dictionary[postCommentId] : null)
 
     const [post, postRequest, reloadPost] = usePost(comment?.postId)
@@ -66,7 +72,7 @@ const PostCommentWithContext = function({ postCommentId }) {
             <div className="post-comment-with-context__context">
                 <a href={`${link}#comment-${postCommentId}`}>View Context</a>
             </div>
-            <PostComment postId={comment.postId} id={postCommentId} />
+            <PostComment postId={comment.postId} id={postCommentId} hideReactions={hideReactions} />
         </Card>
     )
 }

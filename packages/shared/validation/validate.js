@@ -1,5 +1,9 @@
 const BaseValidator = require('./types/BaseValidator')
 
+/**
+ * @deprecated Use `Schema.validate()` from `packages/shared/schema` instead.
+ * See packages/shared/validation/README.md.
+ */
 const validateEntity = function(entity, validators, existing) {
     const errors = {
         all: []
