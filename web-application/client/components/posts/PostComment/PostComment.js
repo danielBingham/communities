@@ -29,8 +29,11 @@ import './PostComment.css'
  * @param {function} [props.onReply] Called with the comment author's username
  * when the user clicks "Reply".  The "Reply" link is only shown when this is
  * provided, since there needs to be a comment form to reply in.
+ * @param {boolean} [props.hideReactions] Hide the comment's like count and
+ * like button.  For views where reactions aren't relevant, like moderation
+ * queues, which link to the comment in context instead.
  */
-const PostComment = function({ postId, id, onReply }) {
+const PostComment = function({ postId, id, onReply, hideReactions }) {
     const [highlight, setHighlight] = useState(false)
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
@@ -115,9 +118,11 @@ const PostComment = function({ postId, id, onReply }) {
     const canReply = typeof onReply === 'function'
         && currentUser && author && author.id !== currentUser.id
 
+    const showReactions = hasCommentReactions && hideReactions !== true
+
     // As with replies, we don't offer likes on your own comments.
-    const canReact = hasCommentReactions && currentUser && comment.userId !== currentUser.id
-    const showLikes = hasCommentReactions && likes.length > 0
+    const canReact = showReactions && currentUser && comment.userId !== currentUser.id
+    const showLikes = showReactions && likes.length > 0
 
     return (
         <div id={`comment-${comment.id}`} key={comment.id} role="article" className={`post-comment ${ highlight ? 'highlight' : ''}`}>
