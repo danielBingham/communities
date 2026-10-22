@@ -37,10 +37,52 @@ isn't needed here. It's used two ways:
 Either way it stops without changing anything if `communities` already
 exists. To start over: `dropdb communities && dropuser app`.
 
-## Staging and production
+## Staging and production: the database helper image
 
-The infrastructure repository documents initializing them ("Initializing the
-Database"). They create the `app` role, with their own password, and the
-`communities` database by hand instead of running `local-database.sql`, then
-run the other three files from this folder: `permissions.sql` and
-`extensions.sql` as the master user, and `schema.sql` as `app`.
+`Dockerfile` here builds `communities-database-helper`, which runs database
+tasks from inside the cluster, where the private database is reachable. It's
+based on the `postgres` image (for `psql`) and adds the AWS CLI, the three
+shared SQL files and the scripts in `helper/`:
+
+| Command                       | What it does |
+| ----------------------------- | ------------ |
+| `initialize-database`         | Creates the `app` role and the `communities` database, then runs `permissions.sql` and `extensions.sql` as the master user and `schema.sql` as `app`, in one transaction. Safe to run again: it checks each step, and only sets the `app` password on a database that's already initialized. |
+| `promote-superadmin USERNAME` | Gives a registered account the superadmin site role. Fails if no account has that username. |
+
+The infrastructure runs the image as a Kubernetes Job and picks the task with
+the container's command. It never touches `local-database.sql` or
+`initialize.sh`, which stay local-only.
+
+Both commands read their settings from Parameter Store under
+`/$COMMUNITIES_ENVIRONMENT_NAME`, the same parameters the web application
+reads: `database/host`, `database/port`, `database/root-user`,
+`database/root-password` and `database/password`. The Job passes the same
+AWS keys and environment name the web application uses, so whatever reads
+the app's configuration has to be able to read the root credentials too.
+
+The Release workflow builds and pushes the image to ECR as
+`communities/database-helper`, tagged with the release version alongside
+`communities/web-application` and `communities/worker`. A release's schema
+therefore always matches its code.
+
+### Trying it locally
+
+Build it from the repository root:
+
+```
+docker build -t communities-database-helper database
+```
+
+Point it at a database directly by setting `PGHOST`, `PGPORT`, `PGUSER`,
+`PGPASSWORD` and `APP_PASSWORD`; Parameter Store isn't read when `PGHOST` is
+set. For example, against the local database from `compose.yaml`:
+
+```
+docker run --rm --add-host=host.docker.internal:host-gateway \
+  -e PGHOST=host.docker.internal -e PGPORT=5432 \
+  -e PGUSER=postgres -e PGPASSWORD=password -e APP_PASSWORD=local-development \
+  communities-database-helper initialize-database
+```
+
+The scripts also run straight from `helper/` with `psql` and the AWS CLI
+installed: `database/helper/initialize-database`.
