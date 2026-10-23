@@ -420,6 +420,45 @@ module.exports = function(core) {
     })
 
     /**************************************************************************
+     * News REST Routes
+     *
+     * The posts on the News page.  Anyone may read them, including people
+     * without an account.  Only site admins may change them.
+     **************************************************************************/
+    const NewsController = require('./controllers/NewsController')
+    const newsController = new NewsController(core)
+
+    router.get('/news', rateLimit(core, 2400), function(request, response, next) {
+        newsController.getNewsList(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.post('/news', rateLimit(core, 30), function(request, response, next) {
+        newsController.postNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.get('/news/:slug', rateLimit(core, 2400), function(request, response, next) {
+        newsController.getNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.patch('/news/:slug', rateLimit(core, 30), function(request, response, next) {
+        newsController.patchNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/news/:slug', rateLimit(core, 30), function(request, response, next) {
+        newsController.deleteNews(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
      * Post REST Routes
      **************************************************************************/
     const PostController = require('./controllers/PostController')
@@ -518,6 +557,24 @@ module.exports = function(core) {
 
     router.delete('/post/:postId/comment/:id', rateLimit(core, 30), function(request, response, next) {
         postCommentController.deletePostComment(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    /**************************************************************************
+     * CommentReaction REST Routes
+     **************************************************************************/
+    const CommentReactionController = require('./controllers/CommentReactionController')
+    const commentReactionController = new CommentReactionController(core)
+
+    router.post('/post/:postId/comment/:commentId/reactions', rateLimit(core, 120), function(request, response, next) {
+        commentReactionController.postCommentReactions(request, response).catch(function(error) {
+            next(error)
+        })
+    })
+
+    router.delete('/post/:postId/comment/:commentId/reaction', rateLimit(core, 120), function(request, response, next) {
+        commentReactionController.deleteCommentReaction(request, response).catch(function(error) {
             next(error)
         })
     })

@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useRef, useEffect, useLayoutEffect, useId } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useId, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import * as shared from '@communities/shared'
@@ -30,7 +30,7 @@ import { getUsers, clearUserQuery } from '/state/User'
 
 import './TextAreaWithMentions.css'
 
-const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeholder, className }) {
+const TextAreaWithMentions = function({ ref, value, setValue, postId, groupId, placeholder, className }) {
     const textZoom = useSelector((state) => state.system.textZoom)
 
     const [ menuTop, setMenuTop ] = useState(0)
@@ -236,6 +236,22 @@ const TextAreaWithMentions = function({ value, setValue, postId, groupId, placeh
     useEffect(function() {
         if ( textareaRef.current !== null ) {
             textareaRef.current.focus()
+        }
+    }, [])
+
+    useImperativeHandle(ref, () => {
+        return {
+            /**
+             * Focus the textarea and put the cursor at the end of its content,
+             * so the user can continue typing after whatever is already there.
+             */
+            focusAtEnd: function() {
+                if ( textareaRef.current !== null ) {
+                    const end = textareaRef.current.value.length
+                    textareaRef.current.focus()
+                    textareaRef.current.setSelectionRange(end, end)
+                }
+            }
         }
     }, [])
 

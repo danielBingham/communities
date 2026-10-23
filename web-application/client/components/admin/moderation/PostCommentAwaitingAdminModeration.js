@@ -85,7 +85,8 @@ const PostCommentAwaitingAdminModeration = function({ siteModerationId }) {
             <div className="post-comment-awaiting-admin-moderation__context">
                 <a href={`${link}#comment-${moderation.postCommentId}`}>View Context</a>
             </div>
-            <PostComment postId={moderation.postId} id={moderation.postCommentId} />
+            { /* Reactions aren't relevant to moderation.  They can be seen through "View Context". */ }
+            <PostComment postId={moderation.postId} id={moderation.postCommentId} hideReactions />
             <div className="post-comment-awaiting-admin-moderation__form">
                 <SiteModerationForm siteModerationId={siteModerationId} />
             </div>

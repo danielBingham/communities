@@ -1,5 +1,6 @@
 import logger from '/logger'
 
+import { setCommentReactionsInDictionary, removeCommentReaction } from '/state/CommentReaction/slice'
 import { setFilesInDictionary, removeFile } from '/state/File/slice'
 import { setGroupsInDictionary, removeGroup } from '/state/Group/slice'
 import { setGroupMembersInDictionary, removeGroupMember } from '/state/GroupMember/slice'
@@ -8,6 +9,7 @@ import { setGroupSubscriptionsInDictionary, removeGroupSubscription } from '/sta
 import { setJobsInDictionary, removeJob } from '/state/jobs'
 import { setLinkPreviewsInDictionary, removeLinkPreview } from '/state/LinkPreview/slice'
 import { setMutualsInDictionary, removeMutuals } from '/state/Mutuals/slice'
+import { setNewsInDictionary, removeNews } from '/state/News/slice'
 import { setPostsInDictionary, removePost } from '/state/Post/slice'
 import { setPostCommentsInDictionary, removePostComment } from '/state/PostComment/slice'
 import { setPostReactionsInDictionary, removePostReaction } from '/state/PostReaction/slice'
@@ -17,6 +19,7 @@ import { setUsersInDictionary, removeUser } from '/state/User/slice'
 import { setUserRelationshipsInDictionary, removeUserRelationship } from '/state/UserRelationship/slice'
 
 const entityMap = {
+    commentReactions: { set: setCommentReactionsInDictionary, remove: removeCommentReaction },
     files: { set: setFilesInDictionary, remove: removeFile },
     groups: { set: setGroupsInDictionary, remove: removeGroup },
     groupMembers: { set: setGroupMembersInDictionary, remove: removeGroupMember },
@@ -25,6 +28,7 @@ const entityMap = {
     jobs: { set: setJobsInDictionary, remove: removeJob },
     linkPreviews: { set: setLinkPreviewsInDictionary, remove: removeLinkPreview },
     mutuals: { set: setMutualsInDictionary, remove: removeMutuals },
+    news: { set: setNewsInDictionary, remove: removeNews },
     posts: { set: setPostsInDictionary, remove: removePost },
     postComments: { set: setPostCommentsInDictionary, remove: removePostComment },
     postReactions: { set: setPostReactionsInDictionary, remove: removePostReaction },

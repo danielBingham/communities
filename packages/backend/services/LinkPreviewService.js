@@ -25,7 +25,6 @@ const { preview, presets} = require('linkpeek')
 const FileDAO = require('../daos/FileDAO')
 
 const LocalFileService = require('./files/LocalFileService')
-const S3FileService = require('./files/S3FileService')
 
 const { ssrfSafeFetch } = require('../lib/ssrf-safe-fetch')
 
@@ -35,7 +34,6 @@ module.exports = class LinkPreviewService {
 
         this.fileDAO = new FileDAO(core)
 
-        this.s3 = new S3FileService(core)
         this.local = new LocalFileService(core)
     }
 

@@ -19,10 +19,14 @@
  ******************************************************************************/
 /******************************************************************************
  * Extensions needed by the Communities Platform.
+ *
+ * Run in the `communities` database as a superuser (the master user, with
+ * rds_superuser, on Aurora), before schema.sql: the schema uses both. Safe to
+ * run again.
  ******************************************************************************/
 
 /* Allows fuzzy finding using SIMILARITY() searches. */
-CREATE EXTENSION pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 /* Allows location and geographic types. */
-CREATE EXTENSION postgis;
+CREATE EXTENSION IF NOT EXISTS postgis;

@@ -25,7 +25,6 @@ const FileDAO = require('../../daos/FileDAO')
 
 const FileService = require('../FileService')
 const LocalFileService = require('./LocalFileService')
-const S3FileService = require('./S3FileService')
 const ServiceError = require('../../errors/ServiceError')
 
 module.exports = class ImageService {
@@ -45,7 +44,7 @@ module.exports = class ImageService {
         this.fileService = new FileService(core)
 
         this.local = new LocalFileService(core)
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
 
         this.imageSizes = [ 30, 200, 325, 450, 650 ]
     }
@@ -61,8 +60,8 @@ module.exports = class ImageService {
         const targetPath = this.fileService.getPath(file, size)
 
         try {
-            const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
-                this.core.logger.error(`Failed to download image from S3: `, error)
+            const fileContents = await this.storage.getFile(file.filepath).catch((error) => {
+                this.core.logger.error(`Failed to download image from storage: `, error)
                 throw new ServiceError('failed-download', 'Failed to download image file for processing.')
             })
 
@@ -71,14 +70,14 @@ module.exports = class ImageService {
                 .resize({ width: size })
                 .toFile(tmpPath)
 
-            await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
-                this.core.logger.error('Failed to upload processed image to S3: ', error)
+            await this.storage.uploadFile(tmpPath, targetPath).catch((error) => {
+                this.core.logger.error('Failed to upload processed image to storage: ', error)
                 throw new ServiceError('failed-upload', 'Failed to upload image file after processing.')
             })
             this.local.removeFile(tmpPath)
 
-            const hasFile = await this.s3.hasFile(targetPath).catch((error) => {
-                this.core.logger.error(`Failed to read file variant, '${size}', on S3: `, error)
+            const hasFile = await this.storage.hasFile(targetPath).catch((error) => {
+                this.core.logger.error(`Failed to read file variant, '${size}', in storage: `, error)
                 throw new ServiceError('failed-read', 'Failed to read image after processing.')
             })
             if ( hasFile === true ) {
@@ -106,7 +105,7 @@ module.exports = class ImageService {
 
     async crop(file, crop, renderedDimensions) {
         // Load the original file into memory.
-        const fileContents = await this.s3.getFile(file.filepath).catch((error) => {
+        const fileContents = await this.storage.getFile(file.filepath).catch((error) => {
             this.core.logger.error(`Failed to download file: `, error)
             throw new ServiceError('network-error', `Failed to download file.`)
         })
@@ -174,10 +173,10 @@ module.exports = class ImageService {
 
         // Keep the uncropped file by moving it to `files/id.orig.ext`
         const originalPath = this.fileService.getPath(file, 'orig')
-        await this.s3.moveFile(file.filepath, originalPath).catch((error) => {
-            this.core.logger.error(`Failed to move file on S3: `, error)
+        await this.storage.moveFile(file.filepath, originalPath).catch((error) => {
+            this.core.logger.error(`Failed to move file in storage: `, error)
             throw new ServiceError('network-error',
-                `Failed to move file on S3.`)
+                `Failed to move file in storage.`)
         })
         await this.fileService.deleteVariants(file)
 
@@ -203,7 +202,7 @@ module.exports = class ImageService {
                 `Failed to crop file.`)
         }
 
-        await this.s3.uploadFile(tmpPath, targetPath).catch((error) => {
+        await this.storage.uploadFile(tmpPath, targetPath).catch((error) => {
             this.core.logger.error(`Failed to upload cropped file: `, error)
             throw new ServiceError(`network-error`,
                 `Failed to upload cropped file.`)

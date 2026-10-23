@@ -20,8 +20,6 @@
 
 const path = require('node:path')
 
-const {  S3FileService } = require('@communities/backend')
-
 const ControllerError = require('../errors/ControllerError')
 const NotFoundError = require('../errors/NotFoundError')
 
@@ -34,7 +32,7 @@ module.exports = class AssetController {
         this.logger = core.logger
         this.config = core.config
 
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
     }
 
     /**
@@ -63,12 +61,12 @@ module.exports = class AssetController {
 
         const assetPath = path.join('assets/', name)
 
-        const hasFile = await this.s3.hasFile(assetPath)
+        const hasFile = await this.storage.hasFile(assetPath)
         if ( ! hasFile ) {
-            throw new NotFoundError(`Requested asset not found on S3: ${name}.`)
+            throw new NotFoundError(`Requested asset not found in storage: ${name}.`)
         }
 
-        const url = await this.s3.getSignedUrl(assetPath)
+        const url = await this.storage.getSignedUrl(assetPath)
         if ( url === null ) {
             throw new NotFoundError(`Failed to retrieve requested asset: ${name}.`)
         }

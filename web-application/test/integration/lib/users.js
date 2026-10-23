@@ -52,7 +52,7 @@ const findUserIdByUsernameAsAdmin = async function(adminSession, username) {
     }
 
     if ( response.content.list.length !== 1 ) {
-        throw new Error(`Expected exactly one user for username '${username}', got ${response.content.list.length}.  Check the fixture's manual setup in fixtures/users.js.`)
+        throw new Error(`Expected exactly one user for username '${username}', got ${response.content.list.length}.  Seed the fixtures with 'npm run test:integration:seed' (see fixtures/users.js).`)
     }
 
     return response.content.list[0]

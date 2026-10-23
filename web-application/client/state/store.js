@@ -6,6 +6,7 @@ import logger from '/logger'
 import adminReducer from './admin'
 import authenticationReducer from './authentication'
 import BlocklistReducer from './Blocklist'
+import CommentReactionReducer from './CommentReaction'
 import eventsSliceReducer, { subscribe, unsubscribe, confirmSubscription, confirmUnsubscription, clearSubscriptions } from './events'
 import featuresReducer from './features'
 import FileReducer from './File'
@@ -18,6 +19,7 @@ import jobsReducer, { handleJobEvent } from './jobs'
 import notificationsReducer, { handleNotificationEvent } from './notifications'
 import LinkPreviewReducer from './LinkPreview'
 import MutualsReducer from './Mutuals'
+import NewsReducer from './News'
 import PostReducer from './Post'
 import PostCommentReducer from './PostComment'
 import PostReactionReducer from './PostReaction'
@@ -36,6 +38,7 @@ const reducers = combineReducers({
     admin: adminReducer,
     authentication: authenticationReducer,
     Blocklist: BlocklistReducer,
+    CommentReaction: CommentReactionReducer,
     events: eventsSliceReducer,
     features: featuresReducer,
     File: FileReducer,
@@ -48,6 +51,7 @@ const reducers = combineReducers({
     notifications: notificationsReducer,
     LinkPreview: LinkPreviewReducer,
     Mutuals: MutualsReducer,
+    News: NewsReducer,
     Post: PostReducer,
     PostComment: PostCommentReducer,
     PostReaction: PostReactionReducer,

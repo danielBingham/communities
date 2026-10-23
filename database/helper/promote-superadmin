@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# promote-superadmin: gives a registered account the superadmin site role.
+# The first account on a fresh database needs it. Replaces running this by
+# hand over psql:
+#
+#   UPDATE users SET site_role='superadmin' WHERE users.username='<username>';
+#
+# Fails when no account has that username, so a typo doesn't pass silently.
+# Connects as `app`, which owns the tables. The settings come from Parameter
+# Store, or from the environment; see database-settings.sh.
+#
+# Like initialize-database, it never runs against production: before
+# changing anything it checks the environment and host, and that the
+# `communities` database carries the marker initialize-database wrote.
+#
+# Usage: promote-superadmin USERNAME
+
+set -euo pipefail
+
+HELPER_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ $# -ne 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    sed -n '3,/^$/s/^# \{0,1\}//p' "${BASH_SOURCE[0]}"
+    [ $# -eq 1 ] && exit 0
+    exit 64
+fi
+username="$1"
+
+# shellcheck source=database-settings.sh
+source "$HELPER_DIRECTORY/database-settings.sh"
+load_database_settings
+
+# Before anything changes: refuses unless the communities database carries
+# this environment's marker.
+database_state="$(check_database_environment)"
+if [ "$database_state" != "marked" ]; then
+    echo "There's no communities database on $PGHOST yet; run initialize-database first." >&2
+    exit 1
+fi
+
+export PGUSER=app
+export PGPASSWORD="$APP_PASSWORD"
+export PGDATABASE=communities
+
+promoted=$(psql --no-psqlrc --quiet -v ON_ERROR_STOP=1 --tuples-only --no-align \
+    -v username="$username" <<'SQL'
+WITH promoted AS (
+    UPDATE users SET site_role = 'superadmin'
+    WHERE username = :'username'
+    RETURNING id
+)
+SELECT count(*) FROM promoted;
+SQL
+)
+
+if [ "$promoted" != "1" ]; then
+    echo "No account has the username '$username'. Register it first, then promote it." >&2
+    exit 1
+fi
+
+echo "'$username' is now a superadmin. They may need to log out and back in to see it."

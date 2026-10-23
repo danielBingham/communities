@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -17,13 +17,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+const fs = require('fs')
+
 const { Client, Pool } = require('pg')
 const BullQueue = require('bull')
-const Postmark = require('postmark')
 const { createClient } = require('redis')
 
 const Events = require('./events')
 const Logger = require('./logger')
+const { createEmailDriver } = require('./services/email')
+const { createStorage } = require('./services/storage')
 
 /***
  * A wrapper around our core dependencies that will be used by most of our
@@ -59,21 +62,31 @@ module.exports = class Core {
          * An instance of of a bull queue that we'll use to queue up long
          * running jobs for pickup by the workers.
          */
-        this.queues = {} 
+        this.queues = {}
 
         /**
-         * Our Postmark server client for sending emails to using the Postmark
-         * API.
+         * The email driver selected by `email.driver` in the configuration,
+         * which EmailService sends through.
+         *
+         * @see services/email/index.js
          */
-        this.postmarkClient = null
+        this.emailDriver = null
 
         /**
-         * Our configuration values.  
+         * The storage driver selected by `storage.driver` in the
+         * configuration, where uploaded files are kept.
+         *
+         * @see services/storage/index.js
+         */
+        this.storage = null
+
+        /**
+         * Our configuration values.
          *
          * @see web-application/server/config/index.js
          * @see worker/config/index.js
          */
-        this.config = config 
+        this.config = config
 
         /**
          * An instance of FeatureFlags, initialized with information on what
@@ -85,6 +98,35 @@ module.exports = class Core {
 
         this.shutdownInProgress = false
 
+    }
+
+    /**
+     * Create a connection pool for the database the configuration names.
+     * Also used by the integration test fixture seed, so it connects exactly
+     * the way the apps do.
+     *
+     * @param {Object} database The configuration's `database` block: host,
+     * port, user, password, name and, optionally, certificate.
+     *
+     * @return {Pool}
+     */
+    static createDatabasePool(database) {
+        const databaseConfig = {
+            host: database.host,
+            user: database.user,
+            password: database.password,
+            database: database.name,
+            port: database.port
+        }
+
+        if ( database.certificate ) {
+            databaseConfig.ssl = {
+                rejectUnauthorized: false,
+                cert: fs.readFileSync(database.certificate).toString()
+            }
+        }
+
+        return new Pool(databaseConfig)
     }
 
     /**
@@ -101,23 +143,8 @@ module.exports = class Core {
         /**********************************************************************
          * Database Connection Initialization
          **********************************************************************/
-        const databaseConfig = {
-            host: this.config.database.host,
-            user: this.config.database.user,
-            password: this.config.database.password,
-            database: this.config.database.name,
-            port: this.config.database.port 
-        }
-
-        if ( this.config.database.certificate ) {
-            databaseConfig.ssl = {
-                rejectUnauthorized: false,
-                cert: fs.readFileSync(this.config.database.certificate).toString()
-            }
-        }
-
-        this.logger.info(`Connecting to postgres database at ${databaseConfig.host}:${databaseConfig.port} with ${databaseConfig.user}.`)
-        this.database = new Pool(databaseConfig)
+        this.logger.info(`Connecting to postgres database at ${this.config.database.host}:${this.config.database.port} with ${this.config.database.user}.`)
+        this.database = Core.createDatabasePool(this.config.database)
 
         /**********************************************************************
          * Bull Queue Initialization
@@ -137,7 +164,28 @@ module.exports = class Core {
         this.queues['add-mutuals-for-relationship'] = new BullQueue('add-mutuals-for-relationship', { redis: this.config.redis })
         this.queues['remove-mutuals-for-relationship'] = new BullQueue('remove-mutuals-for-relationship', { redis: this.config.redis })
 
-        this.postmarkClient = new Postmark.ServerClient(this.config.postmark.api_token)
+        /**********************************************************************
+         * Email Driver Initialization
+         **********************************************************************/
+        this.logger.info(`Using the '${this.config.email?.driver}' email driver.`)
+        this.emailDriver = createEmailDriver(this)
+
+        /**********************************************************************
+         * Storage Driver Initialization
+         **********************************************************************/
+        this.logger.info(`Using the '${this.config.storage?.driver}' storage driver.`)
+        this.storage = createStorage(this)
+
+        /**********************************************************************
+         * Push Notifications
+         **********************************************************************/
+        // Each NotificationWorker creates its own push drivers (the iOS driver
+        // holds a connection), so there's nothing to create here.
+        // Config.validateConfig() has already checked their settings.
+        const pushDriverNames = Object.keys(this.config.notifications ?? {})
+        this.logger.info(pushDriverNames.length > 0
+            ? `Sending push notifications with: ${pushDriverNames.join(', ')}.`
+            : `Push notifications are off.`)
     }
 
     async shutdown() {

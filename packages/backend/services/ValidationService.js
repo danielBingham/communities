@@ -32,6 +32,7 @@ const FileService = require('./FileService')
 const PermissionService = require('./PermissionService')
 
 const BlocklistValidation = require('./validation/BlocklistValidation')
+const CommentReactionValidation = require('./validation/CommentReactionValidation')
 const FileValidation = require('./validation/FileValidation')
 const GroupValidation = require('./validation/GroupValidation')
 const GroupMemberValidation = require('./validation/GroupMemberValidation')
@@ -57,6 +58,7 @@ module.exports = class ValidationService {
         this.permissionService = new PermissionService(core)
 
         this.blocklist = new BlocklistValidation(core, this)
+        this.commentReaction = new CommentReactionValidation(core, this)
         this.file = new FileValidation(core, this)
         this.group = new GroupValidation(core, this)
         this.groupMember = new GroupMemberValidation(core, this)
@@ -77,6 +79,10 @@ module.exports = class ValidationService {
 
     async validateBlocklist(currentUser, blocklist, existing) {
         return await this.blocklist.validateBlocklist(currentUser, blocklist, existing)
+    }
+
+    async validateCommentReaction(currentUser, commentReaction, existing) {
+        return await this.commentReaction.validateCommentReaction(currentUser, commentReaction, existing)
     }
 
     async validateFile(currentUser, file, existing) {
@@ -617,6 +623,7 @@ module.exports = class ValidationService {
                                     || usage.postId !== null
                                     || usage.groupId !== null
                                     || usage.linkPreviewId !== null
+                                    || usage.parentId !== null
                                 ) {
                                     errors.push({
                                         type: 'files:conflict',

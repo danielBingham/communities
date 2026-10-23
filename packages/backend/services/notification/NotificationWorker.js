@@ -38,8 +38,7 @@ const PostCommentNotifications = require('./entities/PostCommentNotifications')
 const SiteModerationNotifications = require('./entities/SiteModerationNotifications')
 const UserRelationshipNotifications = require('./entities/UserRelationshipNotifications')
 
-const IOSNotifications = require('./IOSNotifications')
-const AndroidNotifications = require('./AndroidNotifications')
+const { createPushDrivers } = require('../push')
 
 // ================== Load Notification Definitions =================================
 
@@ -60,6 +59,13 @@ for(const notification of notifications) {
 }
 
 module.exports = class NotificationWorker {
+
+    /**
+     * Every notification type, e.g. 'Post:create:mention'. Users' notification
+     * settings are keyed by these.
+     */
+    static notifications = notifications
+
     constructor(core, logger) {
         this.core = core
 
@@ -76,8 +82,9 @@ module.exports = class NotificationWorker {
         this.siteModerationNotifications = new SiteModerationNotifications(core, this)
         this.userRelationshipNotifications = new UserRelationshipNotifications(core, this)
 
-        this.iosNotifications = new IOSNotifications(core, logger)
-        this.androidNotifications = new AndroidNotifications(core)
+        // The drivers the `notifications` configuration turns on. Created
+        // for each worker, since the iOS driver holds its own connection.
+        this.pushDrivers = createPushDrivers(core, logger)
 
         const layoutTemplate = fs.readFileSync(path.resolve(__dirname, './definitions/layout.hbs'), 'utf8')
         Handlebars.registerPartial('layout', layoutTemplate)
@@ -241,15 +248,12 @@ module.exports = class NotificationWorker {
         }
 
         if ( notificationSetting.mobile && options?.noMobile !== true && results.rows[0].status !== 'invited' ) {
-            try {
-                await this.iosNotifications.notify(userId, notification)
-            } catch (error) {
-                this.core.logger.error(error)
-            }
-            try {
-                await this.androidNotifications.sendAndroidNotification(userId, notification)
-            } catch (error) {
-                this.core.logger.error(error)
+            for (const pushDriver of this.pushDrivers) {
+                try {
+                    await pushDriver.send(userId, notification)
+                } catch (error) {
+                    this.core.logger.error(error)
+                }
             }
         }
     }

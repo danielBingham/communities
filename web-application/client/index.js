@@ -31,6 +31,13 @@ import logger from '/logger'
 
 import App from './App'
 import store from './state/store'
+import { setRelationsInState } from './state/lib/relations'
+import { getPreloadedEntities } from './state/lib/preloadedEntities'
+
+// Load the entities the server sent with the page, if it sent any, before the
+// app renders, so it finds them in the store rather than requesting them.
+// See ./state/lib/preloadedEntities.js.
+store.dispatch(setRelationsInState(getPreloadedEntities()))
 
 // We're on mobile.  Capacitor is handling updates.
 if ( Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android' ) {

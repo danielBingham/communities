@@ -28,7 +28,13 @@ async function addComment(session, postId, content) {
     return response.content.entity
 }
 
+// GET a post's comments and return the raw response (without throwing on
+// non-2xx) so callers can assert on the status.
+async function getPostComments(session, postId) {
+    return await fetchEndpoint('GET', `/post/${encodeURIComponent(postId)}/comments`, { session: session })
+}
 
 module.exports = {
-    addComment: addComment
+    addComment: addComment,
+    getPostComments: getPostComments
 }

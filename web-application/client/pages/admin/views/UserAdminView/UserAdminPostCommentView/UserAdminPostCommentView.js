@@ -33,7 +33,9 @@ const UserAdminPostCommentView = function({ userId }) {
     if ( query !== null ) {
         content = []
         for(const id of query.list) {
-            content.push(<PostCommentWithContext key={id} postCommentId={id} />)
+            // Reactions aren't relevant here.  They can be seen through "View
+            // Context".
+            content.push(<PostCommentWithContext key={id} postCommentId={id} hideReactions />)
         }
     }
 

@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 exports.BlocklistDAO = require('./daos/BlocklistDAO')
+exports.CommentReactionDAO = require('./daos/CommentReactionDAO')
 exports.FeatureDAO = require('./daos/FeatureDAO') 
 exports.FileDAO = require('./daos/FileDAO')
 exports.GroupDAO = require('./daos/GroupDAO')
@@ -60,10 +61,9 @@ exports.LocalFileService = require('./services/files/LocalFileService')
 exports.NotificationService = require('./services/NotificationService')
 exports.MultifactorAuthenticationService = require('./services/MultifactorAuthenticationService')
 exports.MutualsService = require('./services/MutualsService')
+exports.NewsService = require('./services/NewsService')
 exports.PageMetadataService = require('./services/PageMetadataService')
 exports.PermissionService = require('./services/PermissionService')
-exports.S3FileService = require('./services/files/S3FileService')
-exports.ServerSideRenderingService = require('./services/ServerSideRenderingService')
 exports.SessionService = require('./services/SessionService')
 exports.TokenService = require('./services/TokenService')
 exports.UserService = require('./services/UserService')
@@ -72,12 +72,17 @@ exports.UserRelationshipService = require('./services/UserRelationshipService')
 exports.WebSocketService = require('./services/WebSocketService')
 exports.VideoService = require('./services/files/VideoService')
 
+exports.FilesystemStorage = require('./services/storage/FilesystemStorage')
+exports.S3Storage = require('./services/storage/S3Storage')
+exports.createStorage = require('./services/storage').createStorage
+
 exports.NotificationWorker = require('./services/notification/NotificationWorker')
 
 exports.Logger = require('./logger')
 exports.FeatureFlags = require('./features')
 exports.Core = require('./core')
 exports.Config = require('./config')
+exports.ConfigError = require('./config').ConfigError
 
 exports.DatabaseFixtures = require('./test/fixtures/database')
 exports.EntityFixtures = require('./test/fixtures/entities')

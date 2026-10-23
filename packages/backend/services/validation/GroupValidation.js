@@ -137,6 +137,7 @@ module.exports = class GroupValidation {
                                 || usage.postId !== null
                                 || usage.userId !== null
                                 || usage.linkPreviewId !== null
+                                || usage.parentId !== null
                             ) {
                                 errors.push({
                                     type: 'files:conflict',

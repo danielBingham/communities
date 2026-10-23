@@ -18,20 +18,24 @@
  *
  ******************************************************************************/
 
+const CommentReactionSchema = require('./CommentReaction')
 const DeviceSchema = require('./Device')
 const FileSchema = require('./File')
 const GroupSchema = require('./Group')
 const GroupSubscriptionSchema = require('./GroupSubscription')
 const LogSchema = require('./Log')
+const NewsSchema = require('./News')
 const NotificationSchema = require('./Notification')
 const SiteModerationSchema = require('./SiteModeration')
 
 module.exports = {
+    CommentReactionSchema: CommentReactionSchema,
     DeviceSchema: DeviceSchema,
     FileSchema: FileSchema,
     GroupSchema: GroupSchema,
     GroupSubscriptionSchema: GroupSubscriptionSchema,
     LogSchema: LogSchema,
+    NewsSchema: NewsSchema,
     NotificationSchema: NotificationSchema,
     SiteModerationSchema: SiteModerationSchema
 }
