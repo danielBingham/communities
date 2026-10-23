@@ -87,6 +87,19 @@ jobs:
         run: |
           docker push 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/web-application:${{ github.event.inputs.version }}
 
+      # Build the database helper image and push it to ECR. It carries the
+      # schema and the scripts that initialize the database, so it's
+      # versioned with the web application and worker images. It builds from
+      # database/, not the repository root (see database/Dockerfile), and is
+      # the same for every environment.
+      - name: Build the Database Helper Docker Container
+        run: |
+          docker build -f database/Dockerfile -t 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/database-helper:${{ github.event.inputs.version }} database
+
+      - name: Push the database helper container to the Repository under the ${{ github.event.inputs.version }} tag
+        run: |
+          docker push 843012963492.dkr.ecr.us-east-1.amazonaws.com/communities/database-helper:${{ github.event.inputs.version }}
+
       # Commit the changes to the package.json package-lock.json files that
       # were made during versioning.
       - name: Commit the version changes

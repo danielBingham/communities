@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# initialize-database: sets up the Communities database on a staging server
+# (Aurora PostgreSQL), or a scratch one locally. Never production: its
+# database was initialized long ago and is only restored from its own
+# snapshots and backups. Safe to run again: each step checks whether it's
+# already done.
+#
+#   0. Before changing anything, check this is the right environment, host
+#      and database (see database-settings.sh). An existing `communities`
+#      database has to carry this environment's marker, which only this
+#      script writes.
+#   1. The `app` role, with the password from database/password. If the role
+#      exists, its password is set to that value.
+#   2. Membership of `app` for the master user, with SET, which Aurora needs
+#      before its master user can create a database owned by `app`.
+#   3. The `communities` database, owned by `app` and marked with the
+#      environment ("communities-environment=staging" as its comment).
+#   4. permissions.sql and extensions.sql as the master user, then
+#      schema.sql as `app` in a single transaction, so `app` owns the tables.
+#      Skipped when the schema is already loaded.
+#
+# This is what the infrastructure's database initialization Job runs, from
+# the database-helper image built from database/Dockerfile. The settings
+# come from Parameter Store, or from the environment; see
+# database-settings.sh. Local development uses
+# initialization-scripts/initialize.sh instead.
+#
+# Usage: initialize-database
+
+set -euo pipefail
+
+HELPER_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SQL_DIRECTORY="${SQL_DIRECTORY:-$HELPER_DIRECTORY/../initialization-scripts}"
+
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    sed -n '3,/^$/s/^# \{0,1\}//p' "${BASH_SOURCE[0]}"
+    exit 0
+fi
+
+# shellcheck source=database-settings.sh
+source "$HELPER_DIRECTORY/database-settings.sh"
+load_database_settings
+
+# Before anything changes: refuses unless the communities database is absent
+# or carries this environment's marker.
+database_state="$(check_database_environment)"
+
+PSQL=( psql --no-psqlrc --quiet -v ON_ERROR_STOP=1 )
+
+# Runs a command as `app` instead of the master user.
+as_app() {
+    PGUSER=app PGPASSWORD="$APP_PASSWORD" "$@"
+}
+
+echo "Making sure the app role exists, with the current password..."
+"${PSQL[@]}" --dbname postgres \
+    -v app_password="$APP_PASSWORD" \
+    -v master_user="$PGUSER" <<'SQL'
+SELECT NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app') AS create_app_role \gset
+\if :create_app_role
+CREATE ROLE app WITH LOGIN;
+\endif
+ALTER ROLE app WITH LOGIN PASSWORD :'app_password';
+GRANT app TO :"master_user" WITH SET TRUE;
+SQL
+
+if [ "$database_state" = "absent" ]; then
+    echo "Creating the communities database, marked as $COMMUNITIES_ENVIRONMENT_NAME..."
+    "${PSQL[@]}" --dbname postgres --command "CREATE DATABASE communities OWNER app"
+    as_app "${PSQL[@]}" --dbname postgres \
+        --command "COMMENT ON DATABASE communities IS '$(database_marker)'"
+fi
+
+schema_loaded=$(as_app "${PSQL[@]}" --dbname communities --tuples-only --no-align \
+    --command "SELECT to_regclass('public.users') IS NOT NULL")
+if [ "$schema_loaded" = "t" ]; then
+    echo "The schema is already loaded; nothing else to do."
+    exit 0
+fi
+
+echo "Setting permissions and creating extensions..."
+"${PSQL[@]}" --dbname communities \
+    --file "$SQL_DIRECTORY/permissions.sql" \
+    --file "$SQL_DIRECTORY/extensions.sql"
+
+echo "Loading the schema as app..."
+as_app "${PSQL[@]}" --dbname communities --single-transaction \
+    --file "$SQL_DIRECTORY/schema.sql"
+
+echo "The communities database is ready."
