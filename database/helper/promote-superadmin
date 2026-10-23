@@ -10,6 +10,10 @@
 # Connects as `app`, which owns the tables. The settings come from Parameter
 # Store, or from the environment; see database-settings.sh.
 #
+# Like initialize-database, it never runs against production: before
+# changing anything it checks the environment and host, and that the
+# `communities` database carries the marker initialize-database wrote.
+#
 # Usage: promote-superadmin USERNAME
 
 set -euo pipefail
@@ -26,6 +30,14 @@ username="$1"
 # shellcheck source=database-settings.sh
 source "$HELPER_DIRECTORY/database-settings.sh"
 load_database_settings
+
+# Before anything changes: refuses unless the communities database carries
+# this environment's marker.
+database_state="$(check_database_environment)"
+if [ "$database_state" != "marked" ]; then
+    echo "There's no communities database on $PGHOST yet; run initialize-database first." >&2
+    exit 1
+fi
 
 export PGUSER=app
 export PGPASSWORD="$APP_PASSWORD"

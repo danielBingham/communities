@@ -37,16 +37,16 @@ isn't needed here. It's used two ways:
 Either way it stops without changing anything if `communities` already
 exists. To start over: `dropdb communities && dropuser app`.
 
-## Staging and production: the database helper image
+## Staging: the database helper image
 
 `Dockerfile` here builds `communities-database-helper`, which runs database
-tasks from inside the cluster, where the private database is reachable. It's
-based on the `postgres` image (for `psql`) and adds the AWS CLI, the three
-shared SQL files and the scripts in `helper/`:
+tasks for staging from inside the cluster, where the private database is
+reachable. It's based on the `postgres` image (for `psql`) and adds the AWS
+CLI, the three shared SQL files and the scripts in `helper/`:
 
 | Command                       | What it does |
 | ----------------------------- | ------------ |
-| `initialize-database`         | Creates the `app` role and the `communities` database, then runs `permissions.sql` and `extensions.sql` as the master user and `schema.sql` as `app`, in one transaction. Safe to run again: it checks each step, and only sets the `app` password on a database that's already initialized. |
+| `initialize-database`         | Creates the `app` role and the `communities` database (marked as belonging to the environment), then runs `permissions.sql` and `extensions.sql` as the master user and `schema.sql` as `app`, in one transaction. Safe to run again: it checks each step, and only sets the `app` password on a database that's already initialized. |
 | `promote-superadmin USERNAME` | Gives a registered account the superadmin site role. Fails if no account has that username. |
 
 The infrastructure runs the image as a Kubernetes Job and picks the task with
@@ -65,6 +65,34 @@ The Release workflow builds and pushes the image to ECR as
 `communities/web-application` and `communities/worker`. A release's schema
 therefore always matches its code.
 
+### Never production
+
+Production's database was initialized long ago. If it ever has to be
+recovered, it's restored from its own snapshots and backups, not rebuilt from
+`schema.sql`. So the helper refuses to run against it, with three checks
+before it changes anything, each enough on its own (see
+`helper/database-settings.sh`):
+
+1. `COMMUNITIES_ENVIRONMENT_NAME` is required and must be `staging` or
+   `local`.
+2. The database host has to belong to that environment: a `staging` host
+   name must contain `staging`, a `local` one must be a local address
+   (`localhost`, `127.0.0.1`, `::1`, `host.docker.internal`, `postgres`). A
+   host name containing `production` is always refused.
+3. An existing `communities` database is only touched if its comment is the
+   environment's marker, `communities-environment=staging` (or `=local`).
+   `initialize-database` writes it when it creates the database, and nothing
+   else does, so production's database never has it. Even with every other
+   setting pointing at production, the helper stops there, before it so much
+   as sets a password.
+
+A staging database set up some other way (by hand, before this image
+existed) is refused too. If it really is staging's, mark it once, as `app`:
+
+```
+COMMENT ON DATABASE communities IS 'communities-environment=staging';
+```
+
 ### Trying it locally
 
 Build it from the repository root:
@@ -74,14 +102,22 @@ docker build -t communities-database-helper database
 ```
 
 Point it at a database directly by setting `PGHOST`, `PGPORT`, `PGUSER`,
-`PGPASSWORD` and `APP_PASSWORD`; Parameter Store isn't read when `PGHOST` is
-set. For example, against the local database from `compose.yaml`:
+`PGPASSWORD` and `APP_PASSWORD`, with `COMMUNITIES_ENVIRONMENT_NAME=local`;
+Parameter Store isn't read when `PGHOST` is set. Use a scratch server: the
+database from `compose.yaml` was set up by `initialize.sh` and has no marker,
+so the helper leaves it alone. For example:
 
 ```
+docker run --rm -d --name communities-scratch-database \
+  -e POSTGRES_PASSWORD=password -p 5433:5432 postgis/postgis:16-3.5
+
 docker run --rm --add-host=host.docker.internal:host-gateway \
-  -e PGHOST=host.docker.internal -e PGPORT=5432 \
-  -e PGUSER=postgres -e PGPASSWORD=password -e APP_PASSWORD=local-development \
+  -e COMMUNITIES_ENVIRONMENT_NAME=local \
+  -e PGHOST=host.docker.internal -e PGPORT=5433 \
+  -e PGUSER=postgres -e PGPASSWORD=password -e APP_PASSWORD=scratch \
   communities-database-helper initialize-database
+
+docker stop communities-scratch-database
 ```
 
 The scripts also run straight from `helper/` with `psql` and the AWS CLI

@@ -14,6 +14,10 @@
 # /$COMMUNITIES_ENVIRONMENT_NAME, using the AWS credentials in the
 # environment (see helper/database-settings.sh).
 #
+# Staging only, never production: before changing anything, the scripts
+# check the environment name, the database host and a marker that only
+# initialize-database puts on the databases it creates (see README.md).
+#
 # Built and pushed by the Release workflow, tagged with the release version
 # like the web-application and worker images, so a release's schema always
 # travels with its code. Build it from this directory:

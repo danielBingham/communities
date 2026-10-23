@@ -1,15 +1,21 @@
 #!/bin/bash
 #
-# initialize-database: sets up the Communities database on a staging or
-# production server (Aurora PostgreSQL), or brings an existing one up to
-# date with the parts that can be checked. Safe to run again: each step
-# checks whether it's already done.
+# initialize-database: sets up the Communities database on a staging server
+# (Aurora PostgreSQL), or a scratch one locally. Never production: its
+# database was initialized long ago and is only restored from its own
+# snapshots and backups. Safe to run again: each step checks whether it's
+# already done.
 #
+#   0. Before changing anything, check this is the right environment, host
+#      and database (see database-settings.sh). An existing `communities`
+#      database has to carry this environment's marker, which only this
+#      script writes.
 #   1. The `app` role, with the password from database/password. If the role
 #      exists, its password is set to that value.
 #   2. Membership of `app` for the master user, with SET, which Aurora needs
 #      before its master user can create a database owned by `app`.
-#   3. The `communities` database, owned by `app`.
+#   3. The `communities` database, owned by `app` and marked with the
+#      environment ("communities-environment=staging" as its comment).
 #   4. permissions.sql and extensions.sql as the master user, then
 #      schema.sql as `app` in a single transaction, so `app` owns the tables.
 #      Skipped when the schema is already loaded.
@@ -36,6 +42,10 @@ fi
 source "$HELPER_DIRECTORY/database-settings.sh"
 load_database_settings
 
+# Before anything changes: refuses unless the communities database is absent
+# or carries this environment's marker.
+database_state="$(check_database_environment)"
+
 PSQL=( psql --no-psqlrc --quiet -v ON_ERROR_STOP=1 )
 
 # Runs a command as `app` instead of the master user.
@@ -55,11 +65,11 @@ ALTER ROLE app WITH LOGIN PASSWORD :'app_password';
 GRANT app TO :"master_user" WITH SET TRUE;
 SQL
 
-database_exists=$("${PSQL[@]}" --dbname postgres --tuples-only --no-align \
-    --command "SELECT count(*) FROM pg_database WHERE datname = 'communities'")
-if [ "$database_exists" = "0" ]; then
-    echo "Creating the communities database..."
+if [ "$database_state" = "absent" ]; then
+    echo "Creating the communities database, marked as $COMMUNITIES_ENVIRONMENT_NAME..."
     "${PSQL[@]}" --dbname postgres --command "CREATE DATABASE communities OWNER app"
+    as_app "${PSQL[@]}" --dbname postgres \
+        --command "COMMENT ON DATABASE communities IS '$(database_marker)'"
 fi
 
 schema_loaded=$(as_app "${PSQL[@]}" --dbname communities --tuples-only --no-align \
