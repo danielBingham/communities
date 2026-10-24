@@ -434,13 +434,13 @@ Then, from the repository root:
 
 ## Running the Integration Tests
 
-With the environment running, create the test users in your database, then
-run the tests from your machine:
+With the environment running, run the tests from your machine:
 
 ```
-COMMUNITIES_DATABASE_HOST=localhost npm run test:integration:seed
 npm run test:integration
 ```
 
-See [the integration test README](../web-application/test/integration/README.md)
-for what the seed does and how to run against staging.
+Each run creates the users it logs in as and deletes them at the end, so
+there's nothing to set up first. See
+[the integration test README](../web-application/test/integration/README.md)
+for how that works and how to run against staging.

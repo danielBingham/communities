@@ -788,6 +788,32 @@ module.exports = function(core) {
 
 
     /**************************************************************************
+     *      Integration Test Fixtures
+     *
+     * Local development and staging only: anywhere else the controller isn't
+     * even loaded, so in production these routes don't exist. The controller
+     * makes the same check itself. See TestController.
+     *************************************************************************/
+    if ( core.config.environment === 'development' || core.config.environment === 'staging' ) {
+        core.logger.info(`Loading the integration test fixture routes (${core.config.environment}).`)
+
+        const TestController = require('./controllers/TestController')
+        const testController = new TestController(core)
+
+        router.post('/test/user', rateLimit(core, 60), function(request, response, next) {
+            testController.postUser(request, response).catch(function(error) {
+                next(error)
+            })
+        })
+
+        router.delete('/test/user/:id', rateLimit(core, 60), function(request, response, next) {
+            testController.deleteUser(request, response).catch(function(error) {
+                next(error)
+            })
+        })
+    }
+
+    /**************************************************************************
      *      API 404
      *************************************************************************/
     router.all('*any', function(request, response) {

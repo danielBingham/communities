@@ -21,26 +21,38 @@
 /******************************************************************************
  * User Fixtures for use in the integration test suite
  *
- * Create these accounts, or put them back the way they're described here, by
- * running the seed before the tests (see ../README.md):
+ * The users the tests log in as. Each test run creates them all when it
+ * starts and deletes them when it ends (setup.js), through the web
+ * application's test-only POST /test/user and DELETE /test/user/:id. Nothing
+ * is seeded ahead of time, and no password is kept here: each run generates
+ * its own.
  *
- *   npm run test:integration:seed
+ * So each entry only describes the account. The run adds the rest, which
+ * tests read with getFixture(key) from lib/fixtures.js (loginAs(key) in
+ * lib/authentication.js returns it too):
  *
- * The seed (../seed.js) writes them straight to the database. Unless a fixture
- * says otherwise, each one is a confirmed account with the site role 'user',
- * the password below, email notifications off, and 'info' and 'announcement'
+ *   id         from POST /test/user
+ *   username   test-<run>-<key>
+ *   email      communities-test-<run>-<n>@mailinator.com, n being the
+ *              entry's position. The keys stay out of the address because
+ *              Mailinator hard-bounced communities-test-user-site-admin@.
+ *   password   random, for this run only (none for an invited user)
+ *
+ * Unless an entry says otherwise, each one is a confirmed account with the
+ * site role 'user', email notifications off, and 'info' and 'announcement'
  * posts hidden from its feed (so we have a blank slate for post testing).
  *
- * A fixture says otherwise with:
+ * An entry says otherwise with:
  *
  *   status          'unconfirmed', 'invited' or 'banned'
  *   siteRole        'moderator' or 'admin'
- *   siteModeration  a moderation of its profile: { status, flaggedBy }
+ *   siteModeration  a moderation of its profile: { status, flaggedBy }, where
+ *                   flaggedBy is an earlier entry's key
  *   multifactor     'enabled'
  *
- * Seeding again also undoes anything a test run left behind on these
- * accounts: failed login attempts, privacy settings, other settings and
- * profile pictures.
+ * Every run starts from fresh accounts, so nothing a previous run did to
+ * them (failed login attempts, privacy settings, profile pictures) carries
+ * over.
  * ****************************************************************************/
 
 const dictionary = {
@@ -49,9 +61,6 @@ const dictionary = {
   // ==========================================================================
   'user1': {
     name: 'Test User1',
-    username: 'test-user1',
-    email: 'communities-test-user1@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -59,9 +68,6 @@ const dictionary = {
   // ==========================================================================
   'user2': {
     name: 'Test User2',
-    username: 'test-user2',
-    email: 'communities-test-user2@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -69,9 +75,6 @@ const dictionary = {
   // ==========================================================================
   'user3': {
     name: 'Test User3',
-    username: 'test-user3',
-    email: 'communities-test-user3@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -79,9 +82,6 @@ const dictionary = {
   // ==========================================================================
   'user4': {
     name: 'Test User4',
-    username: 'test-user4',
-    email: 'communities-test-user4@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -92,9 +92,6 @@ const dictionary = {
   // ==========================================================================
   'user5': {
     name: 'Test User5',
-    username: 'test-user5',
-    email: 'communities-test-user5@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -105,9 +102,6 @@ const dictionary = {
   // ==========================================================================
   'user6': {
     name: 'Test User6',
-    username: 'test-user6',
-    email: 'communities-test-user6@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -119,9 +113,6 @@ const dictionary = {
   // ==========================================================================
   'user7': {
     name: 'Test User7',
-    username: 'test-user7',
-    email: 'communities-test-user7@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -132,9 +123,6 @@ const dictionary = {
   // ==========================================================================
   'user8': {
     name: 'Test User8',
-    username: 'test-user8',
-    email: 'communities-test-user8@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -146,42 +134,26 @@ const dictionary = {
   // ==========================================================================
   'user9': {
     name: 'Test User9',
-    username: 'test-user9',
-    email: 'communities-test-user9@mailinator.com',
-    password: 'PasswordPassword',
   },
-
-  // NOTE: user10 -- communities-test-user10@mailiantor.com is actually
-  // user-site-admin below.  Mailinator would not accept
-  // `communities-test-user-site-admin@mailinator.com` and returned a hard
-  // bounce to any email sent to that address.  So we used this one instead.
 
   // ==========================================================================
   // user-banned -- A dedicated *banned* user.
   // ==========================================================================
   'user-banned': {
     name: 'Test User Banned',
-    username: 'test-user-banned',
-    email: 'communities-test-user-banned@mailinator.com',
-    password: 'PasswordPassword',
     status: 'banned',
   },
 
   // ==========================================================================
   // user-mfa -- A user with multi-factor authentication ENABLED.
   //
-  // The seed turns multi-factor authentication on without giving the account
-  // a secret, so logging in stops at the pending step -- which is all the
-  // tests that use it need.  The skipped TOTP tests in
-  // patchAuthentication.spec.js would need a real secret.  If the account
-  // already has one (from enrolling an authenticator app by hand), the seed
-  // leaves it alone.
+  // POST /test/user turns multi-factor authentication on without giving the
+  // account a secret, so logging in stops at the pending step -- which is all
+  // the tests that use it need.  The skipped TOTP tests in
+  // patchAuthentication.spec.js would need a real secret.
   // ==========================================================================
   'user-mfa': {
     name: 'Test User MFA',
-    username: 'test-user-mfa',
-    email: 'communities-test-user-mfa@mailinator.com',
-    password: 'PasswordPassword',
     multifactor: 'enabled',
   },
 
@@ -194,20 +166,11 @@ const dictionary = {
   // the next 15 minutes -- there is no API to clear it early. Isolating this
   // to its own account keeps other users usable by every other test.
   //
-  // This account will normally be left in a LOCKED state after the suite runs.
-  // That is expected and self-healing:
-  //   - Re-running the suite within 15 minutes still passes (the test tolerates
-  //     an already-locked account).
-  //   - After 15 minutes the counter resets on the next attempt and the test
-  //     locks it again.
-  // Nothing else depends on this account being unlocked. Seeding again unlocks
-  // it.
+  // The account is left LOCKED once the test has run.  Nothing else depends on
+  // it being unlocked, and the run deletes it at the end.
   // ==========================================================================
   'user-lockout': {
     name: 'Test User Lockout',
-    username: 'test-user-lockout',
-    email: 'communities-test-user-lockout@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -227,9 +190,6 @@ const dictionary = {
   // ==========================================================================
   'user-unconfirmed': {
     name: 'Test User Unconfirmed',
-    username: 'test-user-unconfirmed',
-    email: 'communities-test-user-unconfirmed@mailinator.com',
-    password: 'PasswordPassword',
     status: 'unconfirmed',
   },
 
@@ -244,15 +204,11 @@ const dictionary = {
   // the behaviour of every other suite that uses them, so the mutation is
   // isolated to this account instead.
   //
-  // The suite restores the original value after each group, so this account
-  // should normally be found at its defaults.  If a run dies mid-way, seeding
-  // again puts them back.
+  // The suite restores the original value after each group; the next run
+  // starts from a fresh account anyway.
   // ==========================================================================
   'user-privacy': {
     name: 'Test User Privacy',
-    username: 'test-user-privacy',
-    email: 'communities-test-user-privacy@mailinator.com',
-    password: 'PasswordPassword',
   },
 
   // ==========================================================================
@@ -260,9 +216,6 @@ const dictionary = {
   // ==========================================================================
   'user-site-moderator': {
     name: 'Test User Site Moderator',
-    username: 'test-user-site-moderator',
-    email: 'communities-test-user-site-moderator@mailinator.com',
-    password: 'PasswordPassword',
     siteRole: 'moderator',
   },
 
@@ -277,9 +230,6 @@ const dictionary = {
   // ==========================================================================
   'user-site-admin': {
     name: 'Test User Site Admin',
-    username: 'test-user-site-admin',
-    email: 'communities-test-user10@mailinator.com', // Mailinator would not accept `communities-test-user-site-admin`
-    password: 'PasswordPassword',
     siteRole: 'admin',
   },
 
@@ -289,15 +239,13 @@ const dictionary = {
   // `GET /user/:id` filters on `users.status != 'invited'`, so this account
   // must exist in the invited state permanently.  It CANNOT log in (an invited
   // user has no password set), so it is only ever a *target* in tests; its id
-  // is resolved through the 'user-site-admin' fixture.
+  // comes from POST /test/user.
   //
-  // A real invited user hasn't chosen a name or username yet.  The seed gives
-  // this one both, so the suite can find it by username.
+  // A real invited user hasn't chosen a name or username yet.  This one has
+  // both, like every fixture.
   // ==========================================================================
   'user-invited': {
     name: 'Test User Invited',
-    username: 'test-user-invited',
-    email: 'communities-test-user-invited@mailinator.com',
     status: 'invited',
   },
 
@@ -309,16 +257,13 @@ const dictionary = {
   // moderation with status 'rejected' hides a profile, so this account must
   // remain fully visible to everyone.
   //
-  // Set up directly in the database rather than through the API because
-  // SiteModeration has no DELETE endpoint (it returns 501), so an
-  // API-created flag could not be torn down and the suite would not be
-  // re-runnable.
+  // POST /test/user creates the moderation along with the account rather
+  // than the tests going through the API, because SiteModeration has no
+  // DELETE endpoint (it returns 501).  Deleting the account at the end of the
+  // run deletes the moderation with it.
   // ==========================================================================
   'user-flagged': {
     name: 'Test User Flagged',
-    username: 'test-user-flagged',
-    email: 'communities-test-user-flagged@mailinator.com',
-    password: 'PasswordPassword',
     siteModeration: { status: 'flagged', flaggedBy: 'user1' },
   },
 
@@ -332,7 +277,7 @@ const dictionary = {
   // its id (a rejected profile is filtered out of `GET /users` for every
   // caller, admins included, by the feat-408 clause in parseQuery()).
   //
-  // Set up directly in the database for the same reason as 'user-flagged':
+  // Created along with the account for the same reason as 'user-flagged':
   // SiteModeration cannot be deleted through the API.
   //
   // NOTE: these tests only run when the `feat-408-flag-profiles-and-groups`
@@ -340,9 +285,6 @@ const dictionary = {
   // ==========================================================================
   'user-rejected': {
     name: 'Test User Rejected',
-    username: 'test-user-rejected',
-    email: 'communities-test-user-rejected@mailinator.com',
-    password: 'PasswordPassword',
     siteModeration: { status: 'rejected', flaggedBy: 'user1' },
   }
 }

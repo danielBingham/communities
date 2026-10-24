@@ -32,7 +32,7 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
 
 describe('PATCH /authentication', function() {
     it('Should reject a request that has not logged in yet', async function() {
@@ -56,7 +56,7 @@ describe('PATCH /authentication', function() {
     it('Should reject a logged-in user who omits the token', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -81,7 +81,7 @@ describe('PATCH /authentication', function() {
     it('Should reject verification from a user who is not mid-MFA-setup', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,

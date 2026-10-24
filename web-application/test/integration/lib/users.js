@@ -28,36 +28,6 @@ const getUser = async function(session, userId) {
     return await fetchEndpoint('GET', `/user/${encodeURIComponent(userId)}`, { session: session })
 }
 
-// Resolve a fixture user's runtime id from their username.
-//
-// Most fixtures hand back their id from loginAs().  Two cannot: a BANNED user
-// is rejected by AuthenticationService, and an INVITED user has no password
-// set yet.  Neither can they be found through a plain GET /users -- for any
-// caller who does not pass `admin=true`, UserController.parseQuery() appends
-// `users.status != 'banned' AND users.status != 'invited'`.
-//
-// Passing `admin=true` skips that status filter, but the endpoint only honors
-// it for siteRole 'admin' or 'superadmin' (a 'moderator' gets a 403), so
-// `adminSession` MUST belong to the 'user-site-admin' fixture.
-//
-// NOTE: this cannot find a user whose profile has a *rejected* SiteModeration.
-// The `feat-408-flag-profiles-and-groups` clause in parseQuery() filters those
-// out for every caller, admins included.  Those fixtures can authenticate, so
-// use loginAs() for them instead.
-const findUserIdByUsernameAsAdmin = async function(adminSession, username) {
-    const response = await fetchEndpoint('GET', `/users?admin=true&username=${encodeURIComponent(username)}`, { session: adminSession })
-
-    if ( ! response.ok ) {
-        throw new Error(`Failed to look up User(${username}): ${response.status} ${JSON.stringify(response.content)}`)
-    }
-
-    if ( response.content.list.length !== 1 ) {
-        throw new Error(`Expected exactly one user for username '${username}', got ${response.content.list.length}.  Seed the fixtures with 'npm run test:integration:seed' (see fixtures/users.js).`)
-    }
-
-    return response.content.list[0]
-}
-
 // PATCH a user and return the raw fetchEndpoint result.  `body` MUST include an
 // `id` matching `userId` -- the controller rejects a patch whose body id does
 // not match the route.
@@ -105,7 +75,6 @@ const restoreUserSettings = async function(session, userId, originalSettings) {
 
 module.exports = {
     getUser: getUser,
-    findUserIdByUsernameAsAdmin: findUserIdByUsernameAsAdmin,
     patchUser: patchUser,
     setViewFriendsPrivacy: setViewFriendsPrivacy,
     setUserSetting: setUserSetting,
