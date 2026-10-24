@@ -1,4 +1,4 @@
-FROM node:24.5.0
+FROM node:24.22.1
 
 # Build from the repository root so the image can install the npm workspace
 # (one root package-lock.json) and include the internal @communities/*
