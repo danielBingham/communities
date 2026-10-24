@@ -27,18 +27,31 @@
  *
  * It can create the accounts registration can't: confirmed without an email,
  * banned, invited, a site moderator or admin, with multi-factor
- * authentication on, or with a moderation of their profile.
+ * authentication on (with a real secret and recovery codes, which it hands
+ * back), or with a moderation of their profile.
  *
- * LOCAL DEVELOPMENT AND STAGING ONLY. The router only loads it there, and it
- * refuses to be constructed for any other environment. Every request must
- * also carry the platform header set to 'test' (`X-Communities-Platform:
- * test`), as the integration tests' requests do.
+ * LOCAL DEVELOPMENT AND STAGING ONLY. The router only loads it there, and
+ * only when the configuration has a `test.secret`; it refuses to be
+ * constructed for any other environment, or with a short secret. Every
+ * request must also carry:
+ *
+ *   - the platform header set to 'test' (`X-Communities-Platform: test`), as
+ *     the integration tests' requests do;
+ *   - that secret in SECRET_HEADER (`X-Communities-Test-Secret`). The
+ *     platform header is no secret, and on staging these routes are on the
+ *     internet.
  *
  * It only deletes users it could have created: their emails have to match
  * FIXTURE_EMAIL, which POST requires.
  ******************************************************************************/
+const crypto = require('node:crypto')
+
+const { generateSecret } = require('otplib')
+
 const {
     AuthenticationService,
+    EncryptionService,
+    MultifactorAuthenticationService,
     NotificationWorker,
     SessionService,
 
@@ -53,6 +66,11 @@ const ENVIRONMENTS = [ 'development', 'staging' ]
 
 // The value the platform header must have.
 const TEST_PLATFORM = 'test'
+
+// The header that carries the configuration's `test.secret`, and the
+// shortest secret it accepts.
+const SECRET_HEADER = 'X-Communities-Test-Secret'
+const MINIMUM_SECRET_LENGTH = 32
 
 // Every fixture's email, so DELETE can tell a fixture from a real account.
 // Mailinator accepts anything, so whatever email a test run causes goes
@@ -90,38 +108,61 @@ module.exports = class TestController extends BaseController {
                 + `never '${core.config.environment}'.`)
         }
 
+        // The shared secret every request must carry.
+        const secret = core.config.test?.secret
+        if ( typeof secret !== 'string' || secret.length < MINIMUM_SECRET_LENGTH ) {
+            throw new Error(`TestController needs a test.secret of at least ${MINIMUM_SECRET_LENGTH} `
+                + `characters in the configuration.`)
+        }
+
+        // Compared as digests, so the comparison takes the same time
+        // whatever the request sends.
+        this.secretDigest = crypto.createHash('sha256').update(secret).digest()
+
         this.database = core.database
         this.logger = core.logger
         this.config = core.config
 
         this.auth = new AuthenticationService(core)
+        this.encryptionService = new EncryptionService(core)
+        this.multifactorAuthenticationService = new MultifactorAuthenticationService(core)
         this.sessionService = new SessionService(core)
 
         this.userDAO = new UserDAO(core)
     }
 
     /**
-     * Refuse any request that doesn't come from the integration tests.
+     * Refuse any request that doesn't come from the integration tests: it
+     * needs the test platform header and the shared secret.
      */
-    checkPlatform(request) {
+    checkRequest(request) {
         const platform = request.get(this.config.session.platformHeader)
         if ( platform !== TEST_PLATFORM ) {
             throw new ControllerError(403, 'not-authorized',
                 `${request.method} ${request.originalUrl} without the '${TEST_PLATFORM}' platform header.`,
                 `Only the integration tests may manage test fixtures.`)
         }
+
+        const secret = request.get(SECRET_HEADER)
+        const matches = typeof secret === 'string'
+            && crypto.timingSafeEqual(crypto.createHash('sha256').update(secret).digest(), this.secretDigest)
+        if ( ! matches ) {
+            throw new ControllerError(403, 'not-authorized',
+                `${request.method} ${request.originalUrl} with ${secret === undefined ? 'no' : 'the wrong'} test secret.`,
+                `Only the integration tests may manage test fixtures.`)
+        }
     }
 
     /**
-     * The settings every fixture starts with: email off for every
-     * notification, the way the app's email toggle leaves them (web, desktop
-     * and mobile stay on), and no 'info' or 'announcement' posts in the
-     * feed, so the post tests start from a blank slate.
+     * The settings every fixture starts with: only web notifications (email,
+     * desktop and mobile off for every notification), and no 'info' or
+     * 'announcement' posts in the feed, so the post tests start from a blank
+     * slate.
      */
     fixtureSettings() {
         const notifications = {}
         for (const type of NotificationWorker.notifications) {
-            notifications[type] = { web: true, email: false, desktop: true, mobile: true }
+            notifications[type] = { web: true, email: false, desktop: false, mobile: false }
         }
         return { notifications: notifications, showInfo: false, showAnnouncements: false }
     }
@@ -214,16 +255,19 @@ module.exports = class TestController extends BaseController {
      * @param {string} request.body.siteRole    (Optional) 'user' (the
      * default), 'moderator' or 'admin'.
      * @param {string} request.body.multifactor (Optional) 'disabled' (the
-     * default) or 'enabled'. Enabled without a secret, so logging in stops at
-     * the pending step.
+     * default) or 'enabled'. Enabled, the user gets a TOTP secret and ten
+     * recovery codes, as if they'd enrolled an authenticator app.
      * @param {Object} request.body.siteModeration  (Optional) A moderation of
      * the user's profile: `{ status, flaggedBy }`, where `status` is
      * 'flagged', 'approved' or 'rejected' and `flaggedBy` is a user's id.
      *
-     * Responds 201 with `{ entity }`: the user, with every field.
+     * Responds 201 with `{ entity }`: the user, with every field. With
+     * multi-factor authentication enabled, also `multifactorSecret` (the TOTP
+     * secret, base32, for generating tokens) and `recoveryCodes` (ten,
+     * single-use).
      */
     async postUser(request, response) {
-        this.checkPlatform(request)
+        this.checkRequest(request)
 
         const fixture = this.validateFixture(request.body)
 
@@ -247,9 +291,11 @@ module.exports = class TestController extends BaseController {
             }
         }
 
-        // The user and the moderation of their profile, or neither.
+        // The user, their multi-factor secret and the moderation of their
+        // profile, or none of them.
         const client = await this.database.connect()
         let userId = null
+        let multifactorSecret = undefined
         try {
             await client.query('BEGIN')
 
@@ -271,6 +317,17 @@ module.exports = class TestController extends BaseController {
                 fixture.multifactor
             ])
             userId = inserted.rows[0].id
+
+            // As MultifactorAuthenticationService.initialize() does it: the
+            // secret is encrypted for this user, and only the column holds
+            // it (UserDAO never selects it).
+            if ( fixture.multifactor === 'enabled' ) {
+                multifactorSecret = generateSecret()
+                const encryptedSecret = await this.encryptionService.encrypt(multifactorSecret, userId, 'mfa', 'v1')
+                await client.query(`
+                    UPDATE users SET authentication__multifactor_secret = $1 WHERE id = $2
+                `, [ encryptedSecret, userId ])
+            }
 
             if ( fixture.siteModeration !== null ) {
                 const moderation = await client.query(`
@@ -299,6 +356,18 @@ module.exports = class TestController extends BaseController {
             client.release()
         }
 
+        // The recovery codes go in through the service, which needs the user
+        // committed. If it fails, take the user back out.
+        let recoveryCodes = undefined
+        if ( fixture.multifactor === 'enabled' ) {
+            try {
+                recoveryCodes = await this.multifactorAuthenticationService.generateRecoveryCodes(userId)
+            } catch (error) {
+                await this.userDAO.deleteUser({ id: userId })
+                throw error
+            }
+        }
+
         this.logger.info(`Created test fixture User(${userId}) '${fixture.username}': ${fixture.status}, `
             + `site ${fixture.siteRole}, multi-factor ${fixture.multifactor}`
             + `${fixture.siteModeration ? `, profile ${fixture.siteModeration.status}` : ''}.`)
@@ -310,7 +379,9 @@ module.exports = class TestController extends BaseController {
         })
 
         response.status(201).json({
-            entity: results.dictionary[userId]
+            entity: results.dictionary[userId],
+            multifactorSecret: multifactorSecret,
+            recoveryCodes: recoveryCodes
         })
     }
 
@@ -322,7 +393,7 @@ module.exports = class TestController extends BaseController {
      * delete a real account.
      */
     async deleteUser(request, response) {
-        this.checkPlatform(request)
+        this.checkRequest(request)
 
         const userId = request.params.id
         if ( ! UUID.test(userId) ) {

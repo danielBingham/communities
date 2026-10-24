@@ -73,9 +73,9 @@ cp web-application/server/config/index.development.js-env-example web-applicatio
 cp .env.local.example .env
 ```
 
-Then fill in the three secrets `.env` marks, `COMMUNITIES_SESSION_SECRET`,
-`COMMUNITIES_ENCRYPTION_MFA_V1_KEY` and `COMMUNITIES_STORAGE_FILESYSTEM_SECRET`.
-Generate each with:
+Then fill in the four secrets `.env` marks, `COMMUNITIES_SESSION_SECRET`,
+`COMMUNITIES_ENCRYPTION_MFA_V1_KEY`, `COMMUNITIES_STORAGE_FILESYSTEM_SECRET` and
+`COMMUNITIES_TEST_SECRET` (the integration tests' secret). Generate each with:
 
 ```
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -440,7 +440,8 @@ With the environment running, run the tests from your machine:
 npm run test:integration
 ```
 
-Each run creates the users it logs in as and deletes them at the end, so
-there's nothing to set up first. See
+Each run creates the users it logs in as and deletes them at the end, with
+the `COMMUNITIES_TEST_SECRET` from your `.env`, so there's nothing else to set
+up. See
 [the integration test README](../web-application/test/integration/README.md)
 for how that works and how to run against staging.

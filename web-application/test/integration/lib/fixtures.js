@@ -25,9 +25,13 @@
  * test process in the environment variable FIXTURES_VARIABLE, as JSON keyed
  * like fixtures/users.js. Each one carries what the run generated for it:
  *
- *   { key, id, name, username, email, password, status, siteRole, multifactor }
+ *   { key, id, name, username, email, password, status, siteRole, multifactor,
+ *     multifactorSecret, recoveryCodes }
  *
  * `password` is undefined for an invited user, who has none.
+ * `multifactorSecret` (the TOTP secret, for lib/multifactor.js) and
+ * `recoveryCodes` (ten, single-use) are only there for a fixture with
+ * multi-factor authentication enabled.
  ******************************************************************************/
 
 const FIXTURES_VARIABLE = 'COMMUNITIES_INTEGRATION_TEST_FIXTURES'

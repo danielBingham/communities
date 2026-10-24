@@ -26,6 +26,16 @@ jest.mock('@communities/backend', () => ({
             return `hashed:${password}`
         }
     },
+    EncryptionService: class {
+        async encrypt(message, aad, name, version) {
+            return `encrypted(${message}, ${aad}, ${name}, ${version})`
+        }
+    },
+    MultifactorAuthenticationService: class {
+        constructor() {
+            this.generateRecoveryCodes = jest.fn(async () => [ 'code-1', 'code-2' ])
+        }
+    },
     NotificationWorker: {
         notifications: [ 'Post:create:mention', 'UserRelationship:create:relation' ]
     },
@@ -45,6 +55,10 @@ jest.mock('@communities/backend', () => ({
     }
 }))
 
+jest.mock('otplib', () => ({
+    generateSecret: () => 'TOTPSECRETBASE32'
+}))
+
 const Logger = require('@communities/backend/logger')
 
 const TestController = require('../../../server/controllers/TestController')
@@ -52,6 +66,8 @@ const TestController = require('../../../server/controllers/TestController')
 const USER_ID = '6e9a9f2b-8c99-4a98-b50a-00e131ffd2ee'
 const FLAGGER_ID = '0d4f1c62-1e3a-4f39-9a51-2b7e0c9d8a11'
 const MODERATION_ID = '9b2c7e10-5d4a-4c1e-8f3b-6a0d2e9c4b77'
+
+const SECRET = 'a-shared-secret-for-the-integration-tests'
 
 describe('TestController', function() {
 
@@ -78,7 +94,8 @@ describe('TestController', function() {
         core = {
             config: {
                 environment: 'development',
-                session: { platformHeader: 'X-Communities-Platform' }
+                session: { platformHeader: 'X-Communities-Platform' },
+                test: { secret: SECRET }
             },
             logger: logger,
             database: {
@@ -96,7 +113,11 @@ describe('TestController', function() {
     })
 
     const request = function(options) {
-        const headers = { 'x-communities-platform': 'test', ...(options.headers ?? {}) }
+        const headers = {
+            'x-communities-platform': 'test',
+            'x-communities-test-secret': SECRET,
+            ...(options.headers ?? {})
+        }
         return {
             method: options.method ?? 'POST',
             originalUrl: options.url ?? '/api/0.0.0/test/user',
@@ -154,6 +175,39 @@ describe('TestController', function() {
         })
     })
 
+    describe('the configured secret', function() {
+        it('Should refuse to be constructed without one', function() {
+            delete core.config.test
+            expect(() => new TestController(core)).toThrow(/test\.secret/)
+        })
+
+        it('Should refuse to be constructed with a short one', function() {
+            core.config.test.secret = 'too-short'
+            expect(() => new TestController(core)).toThrow(/at least 32/)
+        })
+
+        it.each([
+            [ 'missing', { 'x-communities-test-secret': undefined } ],
+            [ 'wrong', { 'x-communities-test-secret': 'b-shared-secret-for-the-integration-tests' } ],
+            [ 'a prefix of it', { 'x-communities-test-secret': SECRET.substring(0, 10) } ],
+            [ 'empty', { 'x-communities-test-secret': '' } ]
+        ])('Should refuse POST and DELETE when the secret header is %s', async function(label, headers) {
+            const controller = new TestController(core)
+
+            const posted = await rejection(controller.postUser(request({ headers: headers, body: fixture() }), response()))
+            expect(posted.status).toBe(403)
+            expect(posted.type).toBe('not-authorized')
+
+            const deleted = await rejection(controller.deleteUser(request({
+                method: 'DELETE', headers: headers, params: { id: USER_ID }
+            }), response()))
+            expect(deleted.status).toBe(403)
+
+            expect(core.database.query).not.toHaveBeenCalled()
+            expect(core.database.connect).not.toHaveBeenCalled()
+        })
+    })
+
     describe('the platform header', function() {
         it.each([
             [ 'missing', { 'x-communities-platform': undefined } ],
@@ -198,8 +252,8 @@ describe('TestController', function() {
             expect(multifactor).toBe('disabled')
             expect(settings).toEqual({
                 notifications: {
-                    'Post:create:mention': { web: true, email: false, desktop: true, mobile: true },
-                    'UserRelationship:create:relation': { web: true, email: false, desktop: true, mobile: true }
+                    'Post:create:mention': { web: true, email: false, desktop: false, mobile: false },
+                    'UserRelationship:create:relation': { web: true, email: false, desktop: false, mobile: false }
                 },
                 showInfo: false,
                 showAnnouncements: false
@@ -208,19 +262,60 @@ describe('TestController', function() {
             const statements = client.query.mock.calls.map(([ sql ]) => sql.trim().split(/\s+/)[0])
             expect(statements).toEqual([ 'BEGIN', 'INSERT', 'COMMIT' ])
             expect(client.release).toHaveBeenCalled()
+
+            // No multi-factor authentication, so nothing to hand back.
+            expect(res.body.multifactorSecret).toBeUndefined()
+            expect(res.body.recoveryCodes).toBeUndefined()
+            expect(controller.multifactorAuthenticationService.generateRecoveryCodes).not.toHaveBeenCalled()
+        })
+
+        it('Should enroll a multi-factor fixture and hand back its secret and recovery codes', async function() {
+            const controller = new TestController(core)
+            const res = response()
+
+            await controller.postUser(request({ body: fixture({ multifactor: 'enabled' }) }), res)
+
+            expect(res.statusCode).toBe(201)
+            expect(res.body.multifactorSecret).toBe('TOTPSECRETBASE32')
+            expect(res.body.recoveryCodes).toEqual([ 'code-1', 'code-2' ])
+
+            // The secret is encrypted for the user and stored in the same
+            // transaction as the user.
+            const secret = client.query.mock.calls.find(([ sql ]) => sql.includes('authentication__multifactor_secret'))
+            expect(secret[1]).toEqual([ `encrypted(TOTPSECRETBASE32, ${USER_ID}, mfa, v1)`, USER_ID ])
+            const statements = client.query.mock.calls.map(([ sql ]) => sql.trim().split(/\s+/)[0])
+            expect(statements).toEqual([ 'BEGIN', 'INSERT', 'UPDATE', 'COMMIT' ])
+
+            const insert = client.query.mock.calls.find(([ sql ]) => sql.includes('INSERT INTO users'))
+            expect(insert[1][7]).toBe('enabled')
+
+            expect(controller.multifactorAuthenticationService.generateRecoveryCodes).toHaveBeenCalledWith(USER_ID)
+        })
+
+        it('Should delete a multi-factor fixture whose recovery codes fail', async function() {
+            const controller = new TestController(core)
+            controller.multifactorAuthenticationService.generateRecoveryCodes = jest.fn(async () => {
+                throw new Error('recovery codes failed')
+            })
+            const res = response()
+
+            const error = await rejection(controller.postUser(request({ body: fixture({ multifactor: 'enabled' }) }), res))
+
+            expect(error.message).toBe('recovery codes failed')
+            expect(controller.userDAO.deleteUser).toHaveBeenCalledWith({ id: USER_ID })
+            expect(res.status).not.toHaveBeenCalled()
         })
 
         it('Should create the special fixtures', async function() {
             const controller = new TestController(core)
 
             await controller.postUser(request({
-                body: fixture({ status: 'banned', siteRole: 'admin', multifactor: 'enabled' })
+                body: fixture({ status: 'banned', siteRole: 'admin' })
             }), response())
 
             const insert = client.query.mock.calls.find(([ sql ]) => sql.includes('INSERT INTO users'))
             expect(insert[1][4]).toBe('banned')
             expect(insert[1][5]).toBe('admin')
-            expect(insert[1][7]).toBe('enabled')
         })
 
         it('Should create an invited user without a password', async function() {

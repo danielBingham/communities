@@ -5,8 +5,9 @@
  * examples. When a value is added to production, staging and both examples
  * need it too; these tests fail until they have it. The exceptions are the
  * email, storage and notifications blocks, where the environment example uses
- * the log, filesystem and log drivers. Covers the web application and the
- * worker.
+ * the log, filesystem and log drivers, and the web application's `test`
+ * block, which production must never have. Covers the web application and
+ * the worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -34,6 +35,11 @@ const flatten = function(definition, prefix = '') {
     return out
 }
 
+// The integration test fixtures' secret: staging and development only.
+const testBlock = (key) => key.startsWith('test.')
+const withoutTestBlock = (definition) => Object.fromEntries(
+    Object.entries(definition).filter(([key]) => ! testBlock(key)))
+
 const variableFor = (parameter) => 'COMMUNITIES_' + parameter.replace(/^\/+/, '').replace(/[/-]/g, '_').toUpperCase()
 
 describe.each(Object.entries(apps))('Configuration definitions: %s', function(app, directory) {
@@ -60,8 +66,12 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
 
     it('Should define the same values, from the same sources, in staging and the Parameter Store example', function() {
         const withoutEnvironment = ({ environment, ...rest }) => rest
-        expect(withoutEnvironment(staging)).toEqual(withoutEnvironment(production))
-        expect(withoutEnvironment(ssmExample)).toEqual(withoutEnvironment(production))
+        expect(withoutEnvironment(withoutTestBlock(staging))).toEqual(withoutEnvironment(production))
+        expect(withoutEnvironment(withoutTestBlock(ssmExample))).toEqual(withoutEnvironment(production))
+    })
+
+    it('Should never give production a test block', function() {
+        expect(Object.keys(production).filter(testBlock)).toEqual([])
     })
 
     it('Should select a known email driver and configure it in each file', function() {
@@ -115,7 +125,8 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         // The email, storage and notifications blocks legitimately differ:
         // the example uses the log, filesystem and log drivers.
         const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.') || key.startsWith('notifications.')
-        const outsideDriverBlocks = (definition) => Object.keys(definition).filter((key) => ! driverBlock(key)).sort()
+        const outsideDriverBlocks = (definition) => Object.keys(definition)
+            .filter((key) => ! driverBlock(key) && ! testBlock(key)).sort()
         expect(outsideDriverBlocks(envExample)).toEqual(outsideDriverBlocks(production))
 
         for (const [key, value] of Object.entries(production)) {
@@ -127,5 +138,19 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
                 : value
             expect([ key, envExample[key] ]).toEqual([ key, expected ])
         }
+    })
+})
+
+describe('Configuration definitions: the integration test secret', function() {
+    const directory = apps['web-application']
+
+    it('Should come from Parameter Store on staging and in the Parameter Store example', function() {
+        expect(flatten(load(directory, 'index.staging.js'))['test.secret']).toBe('aws-ssm-parameter:/test/secret')
+        expect(flatten(load(directory, 'index.development.js-ssm-example'))['test.secret']).toBe('aws-ssm-parameter:/test/secret')
+    })
+
+    it('Should come from its matching variable in the environment example', function() {
+        expect(flatten(load(directory, 'index.development.js-env-example'))['test.secret'])
+            .toBe(`env:${variableFor('/test/secret')}`)
     })
 })

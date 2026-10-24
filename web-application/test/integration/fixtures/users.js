@@ -39,8 +39,9 @@
  *   password   random, for this run only (none for an invited user)
  *
  * Unless an entry says otherwise, each one is a confirmed account with the
- * site role 'user', email notifications off, and 'info' and 'announcement'
- * posts hidden from its feed (so we have a blank slate for post testing).
+ * site role 'user', only web notifications (no email, desktop or mobile), and
+ * 'info' and 'announcement' posts hidden from its feed (so we have a blank
+ * slate for post testing).
  *
  * An entry says otherwise with:
  *
@@ -48,7 +49,8 @@
  *   siteRole        'moderator' or 'admin'
  *   siteModeration  a moderation of its profile: { status, flaggedBy }, where
  *                   flaggedBy is an earlier entry's key
- *   multifactor     'enabled'
+ *   multifactor     'enabled': with a TOTP secret and ten recovery codes,
+ *                   which the run keeps as multifactorSecret and recoveryCodes
  *
  * Every run starts from fresh accounts, so nothing a previous run did to
  * them (failed login attempts, privacy settings, profile pictures) carries
@@ -147,10 +149,11 @@ const dictionary = {
   // ==========================================================================
   // user-mfa -- A user with multi-factor authentication ENABLED.
   //
-  // POST /test/user turns multi-factor authentication on without giving the
-  // account a secret, so logging in stops at the pending step -- which is all
-  // the tests that use it need.  The skipped TOTP tests in
-  // patchAuthentication.spec.js would need a real secret.
+  // POST /test/user enrolls it as if it had set up an authenticator app: a
+  // TOTP secret and ten recovery codes, which the run keeps with the fixture.
+  // Logging in with the password alone stops at the pending step;
+  // patchAuthentication.spec.js finishes it with a generated token or a
+  // recovery code.
   // ==========================================================================
   'user-mfa': {
     name: 'Test User MFA',
