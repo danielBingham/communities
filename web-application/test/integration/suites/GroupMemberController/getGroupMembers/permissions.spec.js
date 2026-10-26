@@ -20,8 +20,8 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { logout, loginAs } = require('../../../lib/authentication')
-const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { logout, loginAs } = require('../../../../lib/authentication')
+const { fetchEndpoint } = require('../../../../lib/fetchEndpoint')
 const {
     createGroup,
     createSubgroup,
@@ -33,8 +33,8 @@ const {
     setGroupMemberStatus,
     setGroupMemberRole,
     removeGroupMember
-} = require('../../../lib/groups')
-const { isFeatureEnabled } = require('../../../lib/system')
+} = require('../../../../lib/groups')
+const { isFeatureEnabled } = require('../../../../lib/system')
 
 // Subgroups (and their compound types) are gated behind this feature flag; the
 // subgroup blocks skip themselves when it is off, exactly as in getPost.spec.js

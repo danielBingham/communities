@@ -20,9 +20,9 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { patchPost, createPost, createGroupPost, deleteAllPostsForUser } = require('../../lib/posts')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { patchPost, createPost, createGroupPost, deleteAllPostsForUser } = require('../../../lib/posts')
 const {
     createGroup,
     createSubgroup,
@@ -32,9 +32,9 @@ const {
     setGroupMemberStatus,
     setGroupMemberRole,
     removeGroupMember
-} = require('../../lib/groups')
-const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../lib/relationships')
-const { isFeatureEnabled } = require('../../lib/system')
+} = require('../../../lib/groups')
+const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
+const { isFeatureEnabled } = require('../../../lib/system')
 
 const SUBGROUPS_FEATURE = 'issue-165-subgroups'
 let subgroupsEnabled = false

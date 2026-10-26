@@ -19,17 +19,18 @@
  ******************************************************************************/
 
 /******************************************************************************
- * User Fixtures for use in the integration test suite
+ * User Fixtures for use in the integration and end-to-end test suites
  *
  * The users the tests log in as. Each test run creates them all when it
- * starts and deletes them when it ends (setup.js), through the web
+ * starts and deletes them when it ends (../setup.js), through the web
  * application's test-only POST /test/user and DELETE /test/user/:id. Nothing
  * is seeded ahead of time, and no password is kept here: each run generates
  * its own.
  *
  * So each entry only describes the account. The run adds the rest, which
- * tests read with getFixture(key) from lib/fixtures.js (loginAs(key) in
- * lib/authentication.js returns it too):
+ * tests read with getFixture(key) from ./index.js (loginAs(key) in
+ * ../authentication.js, and openAs(key) in test/e2e/lib/browser.js, return it
+ * too):
  *
  *   id         from POST /test/user
  *   username   test-<run>-<key>
@@ -39,9 +40,9 @@
  *   password   random, for this run only (none for an invited user)
  *
  * Unless an entry says otherwise, each one is a confirmed account with the
- * site role 'user', only web notifications (no email, desktop or mobile), and
+ * site role 'user', only web notifications (no email, desktop or mobile),
  * 'info' and 'announcement' posts hidden from its feed (so we have a blank
- * slate for post testing).
+ * slate for post testing), and no notices seen, like a new account.
  *
  * An entry says otherwise with:
  *
@@ -51,11 +52,22 @@
  *                   flaggedBy is an earlier entry's key
  *   multifactor     'enabled': with a TOTP secret and ten recovery codes,
  *                   which the run keeps as multifactorSecret and recoveryCodes
+ *   notices         the notices it has already seen: { termsOfService,
+ *                   welcomeNotice }, each true or false. The API doesn't care,
+ *                   but in a browser a user who hasn't accepted the Terms of
+ *                   Service is sent to do that before anything else, and one
+ *                   who hasn't seen the welcome notice gets it as a modal over
+ *                   whatever page they open. Every account the end-to-end
+ *                   tests log in as needs NOTICES_SEEN.
  *
  * Every run starts from fresh accounts, so nothing a previous run did to
  * them (failed login attempts, privacy settings, profile pictures) carries
  * over.
  * ****************************************************************************/
+
+// An established account's notices: it has accepted the Terms of Service and
+// closed the welcome notice, so a browser goes straight to the page it opens.
+const NOTICES_SEEN = { termsOfService: true, welcomeNotice: true }
 
 const dictionary = {
   // ==========================================================================
@@ -63,6 +75,7 @@ const dictionary = {
   // ==========================================================================
   'user1': {
     name: 'Test User1',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -70,6 +83,7 @@ const dictionary = {
   // ==========================================================================
   'user2': {
     name: 'Test User2',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -77,6 +91,7 @@ const dictionary = {
   // ==========================================================================
   'user3': {
     name: 'Test User3',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -84,6 +99,7 @@ const dictionary = {
   // ==========================================================================
   'user4': {
     name: 'Test User4',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -94,6 +110,7 @@ const dictionary = {
   // ==========================================================================
   'user5': {
     name: 'Test User5',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -104,6 +121,7 @@ const dictionary = {
   // ==========================================================================
   'user6': {
     name: 'Test User6',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -115,6 +133,7 @@ const dictionary = {
   // ==========================================================================
   'user7': {
     name: 'Test User7',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -125,6 +144,7 @@ const dictionary = {
   // ==========================================================================
   'user8': {
     name: 'Test User8',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -136,6 +156,7 @@ const dictionary = {
   // ==========================================================================
   'user9': {
     name: 'Test User9',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -220,6 +241,7 @@ const dictionary = {
   'user-site-moderator': {
     name: 'Test User Site Moderator',
     siteRole: 'moderator',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================
@@ -234,6 +256,7 @@ const dictionary = {
   'user-site-admin': {
     name: 'Test User Site Admin',
     siteRole: 'admin',
+    notices: NOTICES_SEEN,
   },
 
   // ==========================================================================

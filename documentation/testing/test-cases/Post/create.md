@@ -11,7 +11,7 @@ Cases covering making posts in all their forms and with all their attachments.
 
 #### Cases
 
-- [ ] As a user, I should be able to make a post.
+- [ ] As a user, I should be able to make a post. (covered: e2e)
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -63,7 +63,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed and the video renders and plays.**
 
-- [ ] As a user, I should be able to mention my friends in a post.
+- [ ] As a user, I should be able to mention my friends in a post. (covered: e2e)
     - As User1:
         - Go to the Feed page.
         - Click on the "Create post" form at the top of the feed.
@@ -105,14 +105,14 @@ Cases covering making posts in all their forms and with all their attachments.
         - Click "post".
             - **Confirm post shows on feed with a gallery in the correct order.**
 
-- [ ] As a user, I should be able to post long strings without breaking the app.
+- [ ] As a user, I should be able to post long strings without breaking the app. (covered: e2e)
     - As User1:
         - Create a post with a long (500+ characters) unbroken string.
             - **Confirm app layout is not broken.**
 
 #### Post Drafts
 
-- [ ] As a user, I can draft a post and it will be saved across reloads until I post it.
+- [ ] As a user, I can draft a post and it will be saved across reloads until I post it. (partially covered: e2e)
     - As User1:
         - Create a draft post.
             - Write some text.
@@ -124,7 +124,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Post the draft.
             - **Confirm draft posts correctly.**
 
-- [ ] As a user, my drafts are cleared out when I log out.
+- [ ] As a user, my drafts are cleared out when I log out. (partially covered: e2e)
     - As User1:
         - Create a draft post with some text and some media.
         - Log out.
@@ -281,7 +281,7 @@ Cases covering making posts in all their forms and with all their attachments.
         - Make a public post with text and a video.
             - **Confirm the post is created and is public.**
 
-- [ ] As a user, mentioning someone in a post notifies them.
+- [ ] As a user, mentioning someone in a post notifies them. (covered: e2e)
     - As User1:
         - Make a post mentioning User2.
     - As User2:

@@ -30,11 +30,11 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, login, logout } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { currentToken, wrongToken } = require('../../lib/multifactor')
+const { initialize, login, logout } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { currentToken, wrongToken } = require('../../../lib/multifactor')
 
-const { getFixture } = require('../../lib/fixtures')
+const { getFixture } = require('../../../lib/fixtures')
 
 // Which of the fixture's recovery codes each test spends.
 const RECOVERY_CODE_FOR_LOGIN = 0

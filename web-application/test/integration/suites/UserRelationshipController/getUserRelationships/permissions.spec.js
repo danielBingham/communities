@@ -20,15 +20,15 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { initialize, logout, loginAs } = require('../../../../lib/authentication')
 const {
     getUserRelationships,
     sendFriendRequest,
     makeFriends,
     blockUser,
     clearRelationship
-} = require('../../../lib/relationships')
-const { getUser, setViewFriendsPrivacy, setUserSetting, restoreUserSettings } = require('../../../lib/users')
+} = require('../../../../lib/relationships')
+const { getUser, setViewFriendsPrivacy, setUserSetting, restoreUserSettings } = require('../../../../lib/users')
 
 // ============================================================================
 // Approach

@@ -20,13 +20,13 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { getUser } = require('../../lib/users')
-const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../lib/relationships')
-const { isFeatureEnabled } = require('../../lib/system')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { getUser } = require('../../../lib/users')
+const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
+const { isFeatureEnabled } = require('../../../lib/system')
 
-const { getFixture } = require('../../lib/fixtures')
+const { getFixture } = require('../../../lib/fixtures')
 
 // Flagging profiles for site moderation is gated behind this flag.  When it is
 // off, UserDAO does not select `users.site_moderation_id` at all, DAO.hydrate()

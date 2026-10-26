@@ -20,9 +20,9 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { createPost, deleteAllPostsForUser } = require('../../lib/posts')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { createPost, deleteAllPostsForUser } = require('../../../lib/posts')
 const {
     createGroup,
     createSubgroup,
@@ -32,8 +32,8 @@ const {
     setGroupMemberStatus,
     setGroupMemberRole,
     removeGroupMember
-} = require('../../lib/groups')
-const { isFeatureEnabled } = require('../../lib/system')
+} = require('../../../lib/groups')
+const { isFeatureEnabled } = require('../../../lib/system')
 
 // Subgroups are gated behind this feature flag; the subgroup describe below
 // skips itself when it is off.

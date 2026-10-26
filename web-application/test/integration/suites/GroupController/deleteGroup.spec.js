@@ -20,11 +20,11 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { getPost, createPost, createGroupPost, deletePost } = require('../../lib/posts')
-const { addComment } = require('../../lib/postComments')
-const { addReaction } = require('../../lib/postReactions')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
+const { getPost, createPost, createGroupPost, deletePost } = require('../../../lib/posts')
+const { addComment } = require('../../../lib/postComments')
+const { addReaction } = require('../../../lib/postReactions')
 const {
     getGroup,
     createGroup,
@@ -38,8 +38,8 @@ const {
     addConfirmedMember,
     setGroupMemberStatus,
     setGroupMemberRole
-} = require('../../lib/groups')
-const { isFeatureEnabled } = require('../../lib/system')
+} = require('../../../lib/groups')
+const { isFeatureEnabled } = require('../../../lib/system')
 
 const SUBGROUPS_FEATURE = 'issue-165-subgroups'
 let subgroupsEnabled = false

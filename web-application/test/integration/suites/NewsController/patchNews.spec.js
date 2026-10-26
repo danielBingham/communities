@@ -20,8 +20,8 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { patchNews, getNews, createNews, cleanupNews } = require('../../lib/news')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { patchNews, getNews, createNews, cleanupNews } = require('../../../lib/news')
 
 // ============================================================================
 // PATCH /news/:slug drives NewsController.patchNews(), which runs, in order:

@@ -407,9 +407,11 @@ Then, from the repository root:
        -keyout web-application/security/key.pem -out web-application/security/cert.pem
    ```
 
-   Your browser warns about it until you trust it. The integration tests need
-   it trusted too: add it to your system's certificates, or run them with
-   `NODE_EXTRA_CA_CERTS=$PWD/web-application/security/cert.pem npm run test:integration`.
+   Your browser warns about it until you trust it. The integration and
+   end-to-end tests need it trusted too: add it to your system's
+   certificates, or run them with
+   `NODE_EXTRA_CA_CERTS=$PWD/web-application/security/cert.pem npm run test:integration`
+   (or `test:e2e`).
 
 5. Create the folders the apps process uploads in:
 
@@ -444,4 +446,26 @@ Each run creates the users it logs in as and deletes them at the end, with
 the `COMMUNITIES_TEST_SECRET` from your `.env`, so there's nothing else to set
 up. See
 [the integration test README](../web-application/test/integration/README.md)
-for how that works and how to run against staging.
+for how to run against staging, and
+[the shared test library's README](../web-application/test/lib/README.md) for
+how the users are created.
+
+## Running the End-to-End Tests
+
+The end-to-end tests drive the site in a browser with Playwright. Install
+Playwright's Chromium once, from `web-application`:
+
+```
+npx playwright install chromium
+```
+
+Then, with the environment running (the worker too), run them from your
+machine:
+
+```
+npm run test:e2e
+```
+
+They create and delete their users the same way the integration tests do.
+See [the end-to-end test README](../web-application/test/e2e/README.md) for
+watching them run, debugging failures and running against staging.
