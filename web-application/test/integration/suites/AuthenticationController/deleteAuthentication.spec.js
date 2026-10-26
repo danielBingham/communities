@@ -23,13 +23,13 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
 
 describe('DELETE /authentication', function() {
     it('Should log out an authenticated user', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -81,7 +81,7 @@ describe('DELETE /authentication', function() {
     it('Should invalidate the previous session token after logout', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,

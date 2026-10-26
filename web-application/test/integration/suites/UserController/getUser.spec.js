@@ -22,11 +22,11 @@ const assert = require('node:assert/strict')
 
 const { initialize, logout, loginAs } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
-const { getUser, findUserIdByUsernameAsAdmin } = require('../../lib/users')
+const { getUser } = require('../../lib/users')
 const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../lib/relationships')
 const { isFeatureEnabled } = require('../../lib/system')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
 
 // Flagging profiles for site moderation is gated behind this flag.  When it is
 // off, UserDAO does not select `users.site_moderation_id` at all, DAO.hydrate()
@@ -587,25 +587,22 @@ describe('GET /user/:id', function() {
     // ======================================================================
 
     describe('Account status', function() {
-        let viewer, admin
+        let viewer
         let invitedUserId = null
         let bannedUserId = null
 
         before(async function() {
             viewer = await loginAs('user1')
-            admin = await loginAs('user-site-admin')
 
             // Neither of these fixtures can authenticate -- a banned user is
             // rejected by AuthenticationService and an invited user has no
-            // password -- so their ids come from the admin query, which is the
-            // only lookup that skips the banned/invited status filter.
-            invitedUserId = await findUserIdByUsernameAsAdmin(admin.session, userDictionary['user-invited'].username)
-            bannedUserId = await findUserIdByUsernameAsAdmin(admin.session, userDictionary['user-banned'].username)
+            // password -- so their ids come from the run's fixtures.
+            invitedUserId = getFixture('user-invited').id
+            bannedUserId = getFixture('user-banned').id
         })
 
         after(async function() {
             await logout(viewer.session)
-            await logout(admin.session)
         })
 
         it(`Should return 404 for an invited user`, async function() {

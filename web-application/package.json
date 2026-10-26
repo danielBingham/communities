@@ -16,11 +16,9 @@
     "dev": "export NODE_ENV=development && concurrently \"npm run server\" \"npm run client\"",
     "jest": "jest --passWithNoTests",
     "test": "jest --passWithNoTests test/unit",
-    "test:integration": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 \"test/integration/suites/**/*.spec.js\"",
-    "test:integration:single": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1",
-    "test:integration:staging": "API_ROOT=\"https://staging.communities.social/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 \"test/integration/suites/**/*.spec.js\"",
-    "test:integration:seed": "NODE_ENV=development node test/integration/seed.js",
-    "test:integration:seed:staging": "NODE_ENV=staging node test/integration/seed.js",
+    "test:integration": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 --test-global-setup=test/integration/setup.js \"test/integration/suites/**/*.spec.js\"",
+    "test:integration:single": "API_ROOT=\"https://localhost:3000/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 --test-global-setup=test/integration/setup.js",
+    "test:integration:staging": "API_ROOT=\"https://staging.communities.social/api/0.0.0/\" node --use-system-ca --test --test-concurrency 1 --test-global-setup=test/integration/setup.js \"test/integration/suites/**/*.spec.js\"",
     "storage:seed": "NODE_ENV=development node scripts/seed-storage.js"
   },
   "jest": {

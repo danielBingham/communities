@@ -788,6 +788,36 @@ module.exports = function(core) {
 
 
     /**************************************************************************
+     *      Integration Test Fixtures
+     *
+     * Local development and staging only, and only with a `test.secret` in
+     * the configuration: anywhere else the controller isn't even loaded, so
+     * in production these routes don't exist. The controller makes the same
+     * checks itself. See TestController.
+     *************************************************************************/
+    const testEnvironment = core.config.environment === 'development' || core.config.environment === 'staging'
+    if ( testEnvironment && ! core.config.test?.secret ) {
+        core.logger.info(`Not loading the integration test fixture routes: the configuration has no test.secret.`)
+    } else if ( testEnvironment ) {
+        core.logger.info(`Loading the integration test fixture routes (${core.config.environment}).`)
+
+        const TestController = require('./controllers/TestController')
+        const testController = new TestController(core)
+
+        router.post('/test/user', rateLimit(core, 60), function(request, response, next) {
+            testController.postUser(request, response).catch(function(error) {
+                next(error)
+            })
+        })
+
+        router.delete('/test/user/:id', rateLimit(core, 60), function(request, response, next) {
+            testController.deleteUser(request, response).catch(function(error) {
+                next(error)
+            })
+        })
+    }
+
+    /**************************************************************************
      *      API 404
      *************************************************************************/
     router.all('*any', function(request, response) {

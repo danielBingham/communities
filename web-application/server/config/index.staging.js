@@ -48,6 +48,12 @@ module.exports = {
         platformHeader: 'aws-ssm-parameter:/session/platform-header',
         secret: 'aws-ssm-parameter:/session/secret' 
     },
+    // The secret the integration tests send to create and delete their users
+    // (see controllers/TestController.js). Staging and local development
+    // only: production has no `test` block, and never loads those routes.
+    test: {
+        secret: 'aws-ssm-parameter:/test/secret'
+    },
     // Storage: `driver` selects where uploaded files are kept, and the block
     // with the same name configures that driver (see
     // packages/backend/services/storage).
