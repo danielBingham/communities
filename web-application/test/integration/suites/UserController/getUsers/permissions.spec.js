@@ -22,10 +22,10 @@ const assert = require('node:assert/strict')
 
 const { initialize, login, logout, loginAs } = require('../../../lib/authentication')
 const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
-const { getUser, findUserIdByUsernameAsAdmin } = require('../../../lib/users')
+const { getUser } = require('../../../lib/users')
 const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
 
-const userDictionary = require('../../../fixtures/users')
+const { getFixture } = require('../../../lib/fixtures')
 
 // ============================================================================
 // Approach
@@ -125,7 +125,7 @@ describe('GET /users', function() {
     // substance of the suite.
     it(`Should return a self-consistent, de-duplicated paginated list`, async function() {
         const session = await initialize()
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
         await login({ email: user1.email, password: user1.password }, session)
 
         try {
@@ -360,24 +360,22 @@ describe('GET /users', function() {
     // ======================================================================
 
     describe('for users with a non-standard account status', function() {
-        let viewer, admin, siteModerator
+        let viewer, siteModerator
         let invitedUserId = null
         let bannedUserId = null
 
         before(async function() {
             viewer = await loginAs('user1')
-            admin = await loginAs('user-site-admin')
             siteModerator = await loginAs('user-site-moderator')
 
             // Neither fixture can authenticate, and neither is reachable through
-            // a plain GET /users, so their ids come from the admin query.
-            invitedUserId = await findUserIdByUsernameAsAdmin(admin.session, userDictionary['user-invited'].username)
-            bannedUserId = await findUserIdByUsernameAsAdmin(admin.session, userDictionary['user-banned'].username)
+            // a plain GET /users, so their ids come from the run's fixtures.
+            invitedUserId = getFixture('user-invited').id
+            bannedUserId = getFixture('user-banned').id
         })
 
         after(async function() {
             await logout(viewer.session)
-            await logout(admin.session)
             await logout(siteModerator.session)
         })
 

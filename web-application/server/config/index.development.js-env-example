@@ -57,6 +57,12 @@ module.exports = {
         platformHeader: 'env:COMMUNITIES_SESSION_PLATFORM_HEADER',
         secret: 'env:COMMUNITIES_SESSION_SECRET'
     },
+    // The secret the integration tests send to create and delete their users
+    // (see controllers/TestController.js). Without a `test` block, those
+    // routes aren't loaded.
+    test: {
+        secret: 'env:COMMUNITIES_TEST_SECRET'
+    },
     // Storage: `driver` selects where uploaded files are kept, and the block
     // with the same name configures that driver (see
     // packages/backend/services/storage). The filesystem driver keeps files
