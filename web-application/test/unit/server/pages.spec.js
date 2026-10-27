@@ -182,7 +182,7 @@ describe('Page routes', function() {
             expect(page.og('og:title')).toBe('Protocols Aren\'t the Answer')
             expect(page.og('og:type')).toBe('article')
             expect(page.og('og:url')).toBe(`https://communities.social/about/news/${news.slug}`)
-            expect(page.og('og:image')).toBe('https://communities.social/social-sharing-image.jpg')
+            expect(page.og('og:image')).toBe('https://communities.social/social-sharing-image.png')
             expect(page.og('article:published_time')).toBe('2026-09-29')
         })
 
@@ -376,7 +376,7 @@ describe('Page routes', function() {
                 const page = await getPage(pagePath)
                 expect(page.response.status).toBe(200)
                 expect(page.title).toBe('Communities -- Cooperative Social Media')
-                expect(page.og('og:image')).toBe('https://communities.social/social-sharing-image.jpg')
+                expect(page.og('og:image')).toBe('https://communities.social/social-sharing-image.png')
                 expect(page.canonical).toBeNull()
                 expect(page.og('og:url')).toBeNull()
                 expect(page.preloadedElement).toBeNull()

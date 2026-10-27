@@ -38,7 +38,7 @@ describe('lib.pageMetadata', function() {
                 url: null,
                 type: 'website',
                 image: {
-                    url: 'https://staging.communities.social/social-sharing-image.jpg',
+                    url: 'https://staging.communities.social/social-sharing-image.png',
                     width: 1200,
                     height: 630,
                     alt: 'A phone showing a Communities feed.'

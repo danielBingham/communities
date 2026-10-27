@@ -68,7 +68,7 @@ const DEFAULT_DESCRIPTION = 'A social media platform that will be a non-profit, 
  * Facebook, LinkedIn and X's large card recommend.
  */
 const DEFAULT_IMAGE = {
-    path: '/social-sharing-image.jpg',
+    path: '/social-sharing-image.png',
     width: 1200,
     height: 630,
     alt: 'A phone showing a Communities feed.'

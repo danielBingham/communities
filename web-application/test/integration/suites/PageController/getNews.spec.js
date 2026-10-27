@@ -68,7 +68,7 @@ describe('GET /about/news/:slug (page)', function() {
         const url = new URL(`/about/news/${news.slug}`, page.canonical).href
         assert.equal(page.canonical, url)
         assert.equal(page.og('og:url'), url)
-        assert.ok(page.og('og:image')?.endsWith('/social-sharing-image.jpg'), `Unexpected og:image: ${page.og('og:image')}`)
+        assert.ok(page.og('og:image')?.endsWith('/social-sharing-image.png'), `Unexpected og:image: ${page.og('og:image')}`)
 
         // Still the app.
         assert.match(page.html, /<div id="root"><\/div>/)

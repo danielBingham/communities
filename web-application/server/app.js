@@ -30,6 +30,7 @@ const express = require('express')
 const cors = require('cors')
 
 const path = require('path')
+const fs = require('fs')
 
 const {
     FeatureFlags,
@@ -208,31 +209,33 @@ const createExpressApp = function(core, sessionParser) {
         response.json(json)
     })
 
-    app.get('/favicon.svg', function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
-        response.sendFile(filepath)
-    })
-
-    // The image link previews show for pages that don't have one of their
-    // own.  It needs a URL that doesn't change from build to build, so it
-    // isn't bundled.  See `lib.pageMetadata` in @communities/shared.
-    app.get('/social-sharing-image.jpg', function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/social-sharing-image.jpg')
-        response.sendFile(filepath)
-    })
-
     /**
      * Any other static images are going to be bundled into the dist.
      */
     app.get(/.*\.(svg|ico|jpg|png)$/, function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
-        response.sendFile(filepath)
+        // Check in dist first.
+        const distPath = path.join(process.cwd(), 'public/dist', request.originalUrl)
+        if ( fs.existsSync(distPath) ) {
+            response.sendFile(distPath)
+        }
+
+        // If we didn't find it in the dist, then fall back to public.
+        const publicPath = path.join(process.cwd(), 'public', request.originalUrl)
+        if ( fs.existsSync(publicPath) ) {
+            response.sendFile(publicPath)
+        }
+
+        response.status(404).send()
     })
 
     // Javascript files go to dist.
     app.get(/.*\.(css|js|js.map)$/, function(request, response) {
         const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
-        response.sendFile(filepath)
+        if ( fs.existsSync(filepath) ) {
+            response.sendFile(filepath)
+        }
+
+        response.status(404).send()
     })
 
     // ==================== Page Requests ===================================

@@ -48,7 +48,7 @@ describe('PageMetadataService', function() {
 
     describe('getDefaultMetadata()', function() {
         it('Should use the configured host for the image', function() {
-            expect(service.getDefaultMetadata().image.url).toBe('https://localhost:3000/social-sharing-image.jpg')
+            expect(service.getDefaultMetadata().image.url).toBe('https://localhost:3000/social-sharing-image.png')
             expect(service.getDefaultMetadata().url).toBeNull()
         })
     })
@@ -89,7 +89,7 @@ describe('PageMetadataService', function() {
                 'og:title': 'Title of a-post',
                 'og:description': 'Summary of a-post.',
                 'og:url': 'https://localhost:3000/about/news/a-post',
-                'og:image': 'https://localhost:3000/social-sharing-image.jpg',
+                'og:image': 'https://localhost:3000/social-sharing-image.png',
                 'og:image:width': '1200',
                 'og:image:height': '630',
                 'og:image:alt': 'A phone showing a Communities feed.',
