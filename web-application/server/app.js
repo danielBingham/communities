@@ -217,12 +217,14 @@ const createExpressApp = function(core, sessionParser) {
         const distPath = path.join(process.cwd(), 'public/dist', request.originalUrl)
         if ( fs.existsSync(distPath) ) {
             response.sendFile(distPath)
+            return
         }
 
         // If we didn't find it in the dist, then fall back to public.
         const publicPath = path.join(process.cwd(), 'public', request.originalUrl)
         if ( fs.existsSync(publicPath) ) {
             response.sendFile(publicPath)
+            return
         }
 
         response.status(404).send()
@@ -233,6 +235,7 @@ const createExpressApp = function(core, sessionParser) {
         const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
         if ( fs.existsSync(filepath) ) {
             response.sendFile(filepath)
+            return
         }
 
         response.status(404).send()
