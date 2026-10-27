@@ -1,6 +1,6 @@
 {
   "name": "@communities/backend",
-  "version": "0.24.0-rc.7",
+  "version": "0.24.0-rc.8",
   "private": true,
   "description": "The backend of Communities.",
   "author": "Daniel Bingham",
