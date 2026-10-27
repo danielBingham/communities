@@ -104,9 +104,7 @@ const WelcomeNotice = function({}) {
     return (
         <Modal key="video" isVisible={isVisible} setIsVisible={setIsVisible} hideX={true}>
             <div className="welcome-notice">
-                <h1>Welcome to Communities</h1>
-                <p>Let us show you around!</p>
-                <Video className="welcome-notice__intro" src={introVideoUrl} preload="auto" onError={() => setVideoFailed(true)} />
+                <Video className="welcome-notice__intro" src={introVideoUrl} poster="/intro-poster.png" preload="auto" onError={() => setVideoFailed(true)} playOverlay />
                 <div className="welcome-notice__close">
                     <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
                     <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>
