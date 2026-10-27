@@ -5,7 +5,7 @@
      * missing-poster placeholder until the video's metadata loads.  Otherwise
      * Video sets the poster's or the video's own aspect ratio inline. */
     aspect-ratio: 4 / 5;
-    background-color: black;
+    background-color: var(--card-background-color);
 }
 .video--overlay .video__media {
     position: absolute;
@@ -32,7 +32,7 @@
     height: 100%;
     overflow: hidden;
 
-    background-color: black;
+    background-color: var(--card-background-color);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none;
