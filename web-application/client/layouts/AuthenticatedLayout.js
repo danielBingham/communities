@@ -94,10 +94,7 @@ const AuthenticatedLayout = function() {
     } else {
         return (
             <>
-                <Header />
-                <main id="footerless">
-                    <WelcomeSplash />
-                </main>
+                <WelcomeSplash />
             </>
         )
     }
