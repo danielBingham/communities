@@ -26,14 +26,14 @@ main.welcome-splash header {
     text-align: center;
     font-family: Roboto, sans-serif;
     font-weight: 800;
-    font-size: 100px;
+    font-size: min(100px, 25vw);
     color: #0f0f7a;
 }
 .welcome-splash__intro-subheading {
     text-align: center;
     font-family: Georgia, serif;
     font-style: italic;
-    font-size: 75px;
+    font-size: min(75px, 20vw);
     color: #0f0f7a;
 }
 .welcome-splash__intro-bullets {
@@ -68,8 +68,6 @@ main.welcome-splash header {
 .welcome-splash__intro-left img {
     margin-bottom: -3px;
 }
-
-
 
 
 .welcome-splash__login {
@@ -136,7 +134,7 @@ main.welcome-splash header {
         grid-template-columns: 1fr;
     }
     .welcome-splash__phone-app {
-        max-width: 100vw;
+        max-width: 100%;
     }
 }
 
