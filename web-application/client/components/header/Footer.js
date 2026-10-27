@@ -10,12 +10,8 @@ const Footer = function() {
     const clientVersion = useSelector((state) => state.system.clientVersion)
     const serverVersion = useSelector((state) => state.system.serverVersion)
 
-    if ( currentUser === null || currentUser === undefined ) {
-        return null
-    }
-
     // ======= Render ===============================================
-    
+
     return (
      <footer>
          <div className="footer__grid">
@@ -35,11 +31,11 @@ const Footer = function() {
                 <p><a href="/about/operating-agreement">operating agreement</a></p>
                 <p><a href="/about/contact">contact</a></p>
             </div>
-            <div className="content-links footer__block" role="navigation" aria-label="Site content">
+             { currentUser && <div className="content-links footer__block" role="navigation" aria-label="Site content">
                 <p><a href="/">feeds</a></p>
                 <p><a href="/friends">friends</a></p>
                 <p><a href="/groups">groups</a></p>
-            </div>
+            </div> }
          </div>
          <div className="footer__bottom">
              <div className="footer__store-badges">
