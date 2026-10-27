@@ -18,6 +18,12 @@ header {
 
     font-size: 18px;
 }
+header.header__transparent {
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+}
+
 .ios header {
     padding-top: 60px;
 }

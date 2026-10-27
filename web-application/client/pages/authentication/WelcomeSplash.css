@@ -1,25 +1,93 @@
-.welcome-splash__text {
-    font-size: 30px;
-    line-height: 1.7em;
-    text-align: center;
+main.welcome-splash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    min-height: 100vh;
+    width: 100vw;
+    background-color: white;
 }
-.welcome-splash__beta {
-    font-size: 16px;
-    font-style: italic;
-    line-height: 1.4em;
+main.welcome-splash header {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
-.welcome-splash__banner {
-    background-image: url('splash-banner.png');
-    background-size: cover;
-    background-position: center;
-}
-.welcome-splash__text-wrapper {
+
+.welcome-splash__intro {
     box-sizing: border-box;
-    margin: auto;
-    width: 100%;
-    max-width: 600px;
-    padding: 20px;
+    padding: 200px 5px 0px 5px;
+    min-height: 600px;
+
+    background: linear-gradient(315deg, #d2f9fc, #ffffff);
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }
+.welcome-splash__intro-heading {
+    text-align: center;
+    font-family: Roboto, sans-serif;
+    font-weight: 800;
+    font-size: 100px;
+    color: #0f0f7a;
+}
+.welcome-splash__intro-subheading {
+    text-align: center;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 75px;
+    color: #0f0f7a;
+}
+.welcome-splash__intro-bullets {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 70px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 40px;
+    max-width: 500px;
+}
+.welcome-splash__intro-bullet {
+    box-sizing: border-box;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 50px auto;
+    column-gap: 7px;
+
+    font-family: Roboto, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f0f7a;
+}
+
+.welcome-splash__intro-left {
+    margin: 0;
+    padding: 0;
+    align-self: end;
+    justify-self: center;
+}
+.welcome-splash__intro-left img {
+    margin-bottom: -3px;
+}
+
+
+
+
+.welcome-splash__login {
+    padding: 100px 0;
+    width: 100vw;
+}
+.welcome-splash__login-wrapper {
+    margin: 0 auto;
+    max-width: 500px;
+}
+.welcome-splash__beta-note {
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+    padding: 10px 0;
+}
+
 .welcome-splash__store-badges {
     box-sizing: border-box;
     margin: auto;
@@ -48,70 +116,27 @@
     width: 150px;
 }
 
-@media (width >= 1500px) {
-    .welcome-splash {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        width: 100%;
-        height: calc(100vh - 60px);
-    }
-    .welcome-splash__text {
-        align-self: center;
-    }
 
-    .welcome-splash__login {
-        align-self: center;
-        justify-self: center;
-    }
-    .welcome-splash__login-card {
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    .welcome-splash__login-wrapper {
-        padding: 20px;
-    }
+@media (width >= 1500px) {
+
 }
 @media (1000px < width < 1500px) {
-    .welcome-splash {
-        width: 100%;
-    }
-    .welcome-splash .welcome-splash__banner {
-        width: 100%;
-        height: 700px;
-    }
-
-    .welcome-splash__login {
-        width: 100%;
-    }
-    .welcome-splash__login-wrapper {
-        padding: 50px 0;
-    }
-    .welcome-splash__login-card {
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    .welcome-splash__store-badges {
-        padding-bottom: 100px;
+    .welcome-splash__intro {
+        grid-template-columns: 1fr;
     }
 
 }
 @media (width <= 1000px) {
-    .welcome-splash {
-        width: 100%;
+    .welcome-splash__intro {
+        grid-template-columns: 1fr;
     }
-    .welcome-splash .welcome-splash__banner {
-        width: 100%;
-        height: 500px;
+}
+@media (width <= 600px) {
+    .welcome-splash__intro {
+        grid-template-columns: 1fr;
     }
-
-    .welcome-splash__login {
-        width: 100%;
-    }
-    .welcome-splash__login-wrapper {
-        padding: 50px 0;
-    }
-    .welcome-splash__store-badges {
-        padding-bottom: 100px;
+    .welcome-splash__phone-app {
+        max-width: 100vw;
     }
 }
 
