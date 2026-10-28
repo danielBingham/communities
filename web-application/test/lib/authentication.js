@@ -24,7 +24,7 @@ const { getFixture } = require('./fixtures')
 
 // Log in a fixture user by their key in fixtures/users.js and return the
 // session, the authenticated user record and the fixture as this run created
-// it (lib/fixtures.js), password included.
+// it (fixtures/index.js), password included.
 const loginAs = async function(key) {
     const fixture = getFixture(key)
     const session = await initialize()

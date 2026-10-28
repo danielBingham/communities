@@ -23,7 +23,8 @@
  * ends.
  *
  * Every integration test script passes this file to Node's test runner with
- * --test-global-setup (see package.json). globalSetup runs once, in the
+ * --test-global-setup (see package.json); the end-to-end test scripts pass
+ * test/e2e/setup.js, which runs this one. globalSetup runs once, in the
  * runner's own process, before any test file; globalTeardown runs once after
  * the last one, whether the tests passed, failed or were interrupted.
  *
@@ -31,7 +32,7 @@
  * POST /test/user, with a username and email unique to this run and a random
  * password. The MFA fixture also gets a TOTP secret and recovery codes back.
  * The test processes, which the runner starts after globalSetup, get them all
- * in the environment (see lib/fixtures.js), so the passwords are never
+ * in the environment (see fixtures/index.js), so the passwords are never
  * written anywhere.
  *
  * Those endpoints need the server's test secret (its configuration's
@@ -51,9 +52,9 @@ const path = require('node:path')
 
 const dotenv = require('dotenv')
 
-const { API_ROOT, fetchEndpoint } = require('./lib/fetchEndpoint')
-const { initialize } = require('./lib/authentication')
-const { FIXTURES_VARIABLE } = require('./lib/fixtures')
+const { API_ROOT, fetchEndpoint } = require('./fetchEndpoint')
+const { initialize } = require('./authentication')
+const { FIXTURES_VARIABLE } = require('./fixtures')
 
 const definitions = require('./fixtures/users')
 
@@ -100,10 +101,11 @@ const readTestSecret = function() {
         }
     }
 
-    throw new Error(`The integration tests need the server's test secret in ${SECRET_VARIABLE}. `
+    throw new Error(`The tests need the server's test secret in ${SECRET_VARIABLE}. `
         + `Locally, set it in your .env (see .env.local.example). For staging, read it from `
         + `Parameter Store:\n\n  ${SECRET_VARIABLE}="$(aws ssm get-parameter --region us-east-1 --name /staging/test/secret `
-        + `--with-decryption --query Parameter.Value --output text)" npm run test:integration:staging\n`)
+        + `--with-decryption --query Parameter.Value --output text)" npm run test:integration:staging\n\n`
+        + `(or npm run test:e2e:staging)\n`)
 }
 
 /**
@@ -138,7 +140,8 @@ const createFixture = async function(run, number, key, definition, fixtures) {
             status: definition.status,
             siteRole: definition.siteRole,
             multifactor: definition.multifactor,
-            siteModeration: siteModeration
+            siteModeration: siteModeration,
+            notices: definition.notices
         }
     })
 

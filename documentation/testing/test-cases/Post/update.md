@@ -14,7 +14,7 @@ Editing posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can edit the text of my post.
+- [ ] As a user, I can edit the text of my post. (partially covered: e2e)
     - As User1:
         - Create a post with text and an image.
         - Edit the post and change the text.  Save the edit.
@@ -30,7 +30,7 @@ Editing posts made to a group is covered separately in
 
 #### Post Editing
 
-- [ ] As a user, I can edit a post with an image.
+- [ ] As a user, I can edit a post with an image. (partially covered: e2e)
     - As User1:
         - Create a post with text and an image.
         - Edit the post and change the image.  Save the edit.
@@ -40,7 +40,7 @@ Editing posts made to a group is covered separately in
         - Edit the post and change the image.  Cancel the edit.
             - **Confirm the post was not updated.**
 
-- [ ] As a user, I can edit a post with a link.
+- [ ] As a user, I can edit a post with a link. (partially covered: e2e)
     - As User1:
         - Create a post with text and a link.
         - Edit the post and change the text.  Save the edit.
@@ -52,7 +52,7 @@ Editing posts made to a group is covered separately in
         - Edit the post and change the link.  Cancel the edit.
             - **Confirm the post was not updated.**
 
-- [ ] As a user, edits to a post I made propagate to shares of that post.
+- [ ] As a user, edits to a post I made propagate to shares of that post. (partially covered: e2e)
     - As User1:
         - Create a public post with text and a link.
     - As User2:
@@ -65,7 +65,7 @@ Editing posts made to a group is covered separately in
 
 #### Post Edit Drafts
 
-- [ ] As a user, my edit draft of a post with an image is saved across reloads.
+- [ ] As a user, my edit draft of a post with an image is saved across reloads. (partially covered: e2e)
     - As User1:
         - Edit a post with an image - change text and image.
         - Navigate away from the home feed and back to feed.
@@ -75,13 +75,13 @@ Editing posts made to a group is covered separately in
         - Post the draft.
             - **Confirm draft posts correctly.**
 
-- [ ] As a user, my edit draft of a post with an image is cleared when I log out.
+- [ ] As a user, my edit draft of a post with an image is cleared when I log out. (partially covered: e2e)
     - As User1:
         - Edit a post with an image - change text and image.
         - Log out. Log back in.
             - **Confirm draft is gone.**
 
-- [ ] As a user, my edit draft of a post with a link is saved across reloads.
+- [ ] As a user, my edit draft of a post with a link is saved across reloads. (partially covered: e2e)
     - As User1:
         - Edit a post with a link - change text and link.
         - Navigate away from the home feed and back to feed.
@@ -91,7 +91,7 @@ Editing posts made to a group is covered separately in
         - Post the draft.
             - **Confirm draft posts correctly.**
 
-- [ ] As a user, my edit draft of a post with a link is cleared when I log out.
+- [ ] As a user, my edit draft of a post with a link is cleared when I log out. (partially covered: e2e)
     - As User1:
         - Edit a post with a link - change text and link.
         - Log out. Log back in.

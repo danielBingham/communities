@@ -242,7 +242,7 @@ describe('TestController', function() {
             expect(res.body.entity.id).toBe(USER_ID)
 
             const insert = client.query.mock.calls.find(([ sql ]) => sql.includes('INSERT INTO users'))
-            const [ email, name, username, password, status, siteRole, settings, multifactor ] = insert[1]
+            const [ email, name, username, password, status, siteRole, settings, multifactor, notices ] = insert[1]
             expect(email).toBe('communities-test-1a2b3c4d-1@mailinator.com')
             expect(name).toBe('Test User1')
             expect(username).toBe('test-1a2b3c4d-user1')
@@ -258,6 +258,8 @@ describe('TestController', function() {
                 showInfo: false,
                 showAnnouncements: false
             })
+            // No notices seen, like a new account.
+            expect(notices).toEqual({})
 
             const statements = client.query.mock.calls.map(([ sql ]) => sql.trim().split(/\s+/)[0])
             expect(statements).toEqual([ 'BEGIN', 'INSERT', 'COMMIT' ])
@@ -318,6 +320,18 @@ describe('TestController', function() {
             expect(insert[1][5]).toBe('admin')
         })
 
+        it('Should create a user who has already seen the notices it names', async function() {
+            const controller = new TestController(core)
+
+            await controller.postUser(request({
+                body: fixture({ notices: { termsOfService: true, welcomeNotice: false } })
+            }), response())
+
+            const insert = client.query.mock.calls.find(([ sql ]) => sql.includes('INSERT INTO users'))
+            expect(insert[0]).toContain('notices')
+            expect(insert[1][8]).toEqual({ termsOfService: true, welcomeNotice: false })
+        })
+
         it('Should create an invited user without a password', async function() {
             const controller = new TestController(core)
 
@@ -359,7 +373,11 @@ describe('TestController', function() {
             [ 'a missing password', { password: undefined } ],
             [ 'an invited user with a password', { status: 'invited' } ],
             [ 'an unknown moderation status', { siteModeration: { status: 'deleted', flaggedBy: FLAGGER_ID } } ],
-            [ 'a flaggedBy that is not an id', { siteModeration: { status: 'flagged', flaggedBy: 'user1' } } ]
+            [ 'a flaggedBy that is not an id', { siteModeration: { status: 'flagged', flaggedBy: 'user1' } } ],
+            [ 'notices that are not an object', { notices: 'termsOfService' } ],
+            [ 'notices that are a list', { notices: [ 'termsOfService' ] } ],
+            [ 'a notice that does not exist', { notices: { contribution: true } } ],
+            [ 'a notice that is not true or false', { notices: { termsOfService: 'yes' } } ]
         ])('Should refuse %s', async function(label, overrides) {
             const controller = new TestController(core)
 

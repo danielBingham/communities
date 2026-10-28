@@ -20,16 +20,16 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { createPost, deleteAllPostsForUser } = require('../../lib/posts')
-const { addComment, getPostComments } = require('../../lib/postComments')
-const { blockUser, clearRelationship } = require('../../lib/relationships')
-const { isFeatureEnabled } = require('../../lib/system')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { createPost, deleteAllPostsForUser } = require('../../../lib/posts')
+const { addComment, getPostComments } = require('../../../lib/postComments')
+const { blockUser, clearRelationship } = require('../../../lib/relationships')
+const { isFeatureEnabled } = require('../../../lib/system')
 const {
     COMMENT_REACTIONS_FEATURE,
     postCommentReaction,
     addCommentReaction
-} = require('../../lib/commentReactions')
+} = require('../../../lib/commentReactions')
 
 // user1 writes the post, user2 comments on it, and user3 reacts to the
 // comment.  Each test creates its own post and comment, and the `after`

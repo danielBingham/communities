@@ -20,8 +20,8 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
 const {
     getGroup,
     patchGroup,
@@ -34,8 +34,8 @@ const {
     addConfirmedMember,
     setGroupMemberStatus,
     setGroupMemberRole
-} = require('../../lib/groups')
-const { isFeatureEnabled } = require('../../lib/system')
+} = require('../../../lib/groups')
+const { isFeatureEnabled } = require('../../../lib/system')
 
 // Subgroups (`parentId` and the compound group types) are gated behind this
 // feature flag; the subgroup describes below skip themselves when it is off.

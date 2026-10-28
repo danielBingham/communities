@@ -246,6 +246,16 @@ to be defined quickly and succinctly.
 If tests have additional coverage in our automated tests suites, they are
 marked as such parenthetically, eg. `(covered: e2e, integration)`.
 
+If only part of a case is automated, it's marked `(partially covered: e2e)`,
+and the rest still needs running by hand. For example, the end-to-end tests
+run the text steps of some cases that also attach an image or a link, and
+leave the attachment steps for manual testing.
+
+The integration tests live in `web-application/test/integration` and the
+end-to-end tests in `web-application/test/e2e`, organized like these case
+files: `test-cases/Post/update.md` is automated in
+`web-application/test/e2e/suites/Post/update.spec.js`.
+
 #### Example Test Case Definitions
 
 Here is an example (truncated) test file giving an idea of how it is organized.

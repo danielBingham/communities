@@ -15,9 +15,9 @@ Posts made to a group are covered separately in
 
 #### Cases
 
-- [ ] A user **can** see a public post. (covered: integration)
-- [ ] A friend of a user **can** see that user's private post. (covered: integration)
-- [ ] A stranger **cannot** see a user's private post. (covered: integration)
+- [ ] A user **can** see a public post. (covered: e2e, integration)
+- [ ] A friend of a user **can** see that user's private post. (covered: e2e, integration)
+- [ ] A stranger **cannot** see a user's private post. (covered: e2e, integration)
 
 ### Manual Regression
 
@@ -28,7 +28,7 @@ Posts made to a group are covered separately in
 
 #### Cases
 
-- [ ] As a user, a post I cannot see is not reachable by permalink.
+- [ ] As a user, a post I cannot see is not reachable by permalink. (covered: e2e)
     - As User1:
         - Make a private post and copy its permalink.
     - As User3:
