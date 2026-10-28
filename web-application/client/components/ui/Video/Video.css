@@ -1,0 +1,106 @@
+.video--overlay {
+    position: relative;
+    width: 100%;
+    /* A standard vertical video shape for the loading spinner, and for the
+     * missing-poster placeholder until the video's metadata loads.  Otherwise
+     * Video sets the poster's or the video's own aspect ratio inline. */
+    aspect-ratio: 4 / 5;
+    background-color: var(--card-background-color);
+}
+.video--overlay .video__media {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+/* Hidden, but still loading its metadata, behind the overlay. */
+.video--overlay .video__media--hidden {
+    visibility: hidden;
+}
+.video .video__poster {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background-color: var(--card-background-color);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.video .video__poster--loading {
+    cursor: default;
+}
+.video .video__poster:focus-visible {
+    outline: none;
+}
+.video .video__poster__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: contain;
+
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+/* Still loading; the spinner shows over it until it's ready. */
+.video .video__poster__image--loading {
+    visibility: hidden;
+}
+.video .video__poster__play {
+    position: relative;
+
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    height: 64px;
+    width: 64px;
+    border-radius: 64px;
+
+    /* Translucent background rather than `opacity`, so the icon stays solid
+     * white instead of picking up the poster's colors. */
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    transition: background-color 150ms ease-in-out;
+}
+.video .video__poster__play svg {
+    width: 32px;
+    height: 32px;
+    /* The triangle is visually heavy on the left; nudge it to look centered. */
+    margin-left: 4px;
+    color: white;
+}
+.video .video__poster:focus-visible .video__poster__play {
+    background-color: rgba(0, 0, 0, 0.85);
+    outline: 3px solid white;
+    outline-offset: 2px;
+}
+@media (hover: hover) {
+    .video .video__poster:hover .video__poster__play {
+        background-color: rgba(0, 0, 0, 0.85);
+    }
+}
+.video .video__loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* The post's background: white, or dark in dark mode. */
+    background-color: var(--card-background-color);
+}

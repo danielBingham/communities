@@ -23,13 +23,13 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
 
 describe('GET /authentication', function() {
     it('Should return the current session', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -50,7 +50,7 @@ describe('GET /authentication', function() {
     it('Should return the full user record (minus password) for the current session', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -95,7 +95,7 @@ describe('GET /authentication', function() {
     it('Should return a null session after the user logs out', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -120,7 +120,7 @@ describe('GET /authentication', function() {
     it('Should return the pending session for a user mid-MFA-login', async function() {
         const session = await initialize()
 
-        const userMfa = userDictionary['user-mfa']
+        const userMfa = getFixture('user-mfa')
 
         const credentials = {
             email: userMfa.email,

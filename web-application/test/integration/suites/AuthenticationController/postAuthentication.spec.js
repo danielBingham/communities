@@ -23,13 +23,13 @@ const assert = require('node:assert/strict')
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
 
 describe(`POST /authentication`, function() {
     it('Should allow a user to log in', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -54,7 +54,7 @@ describe(`POST /authentication`, function() {
     it('Should reject a user with invalid credentials', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -88,7 +88,7 @@ describe(`POST /authentication`, function() {
     it(`Should give the same error for a wrong password and a non-existent user`, async function() {
         // Login should not reveal whether an account with a given email exists.
         // A wrong password and an unknown email must both fail identically.
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const wrongPasswordSession = await initialize()
         const wrongPassword = await fetchEndpoint('POST', '/authentication', {
@@ -114,7 +114,7 @@ describe(`POST /authentication`, function() {
         // surrounding whitespace and mixed case should still authenticate.
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: `  ${user1.email.toUpperCase()}  `,
@@ -137,7 +137,7 @@ describe(`POST /authentication`, function() {
         // Email present, but no password key at all.
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email
@@ -154,7 +154,7 @@ describe(`POST /authentication`, function() {
     it(`Should reject an empty password`, async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -172,7 +172,7 @@ describe(`POST /authentication`, function() {
     it(`Should reject a whitespace-only password`, async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -199,10 +199,10 @@ describe(`POST /authentication`, function() {
     })
 
     it(`Should reject a banned user`, async function() {
-        // See fixtures/users.js -> 'user-banned' for the required manual setup.
+        // See fixtures/users.js -> 'user-banned'.
         const session = await initialize()
 
-        const userBanned = userDictionary['user-banned']
+        const userBanned = getFixture('user-banned')
 
         const credentials = {
             email: userBanned.email,
@@ -224,12 +224,12 @@ describe(`POST /authentication`, function() {
         // stops even checking the password and returns a 429 for ~15 minutes.
         //
         // This test is intentionally destructive, so it runs against its own
-        // dedicated fixture (userLockout) -- see fixtures/users.js.  It is written to
-        // be tolerant of an already-locked account so that re-running the suite
-        // inside the 15 minute window still passes.
+        // dedicated fixture (userLockout) -- see fixtures/users.js.  Each run
+        // creates that account afresh, but the test still tolerates one that's
+        // already locked.
         const session = await initialize()
 
-        const userLockout = userDictionary['user-lockout']
+        const userLockout = getFixture('user-lockout')
 
         const wrongCredentials = {
             email: userLockout.email,
@@ -275,7 +275,7 @@ describe(`POST /authentication`, function() {
     it(`Should return a pending session for an MFA-enabled user`, async function() {
         const session = await initialize()
 
-        const userMfa = userDictionary['user-mfa']
+        const userMfa = getFixture('user-mfa')
 
         const credentials = {
             email: userMfa.email,

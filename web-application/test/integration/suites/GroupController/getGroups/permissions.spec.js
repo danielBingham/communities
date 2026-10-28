@@ -36,7 +36,7 @@ const {
 } = require('../../../lib/groups')
 const { isFeatureEnabled } = require('../../../lib/system')
 
-const userDictionary = require('../../../fixtures/users')
+const { getFixture } = require('../../../lib/fixtures')
 
 // Subgroups (and their compound types) are gated behind this feature flag; the
 // subgroup blocks skip themselves when it is off, exactly as in getGroup.spec.js.
@@ -129,7 +129,7 @@ describe('GET /groups', function() {
     // substance of the suite.
     it(`Should return a self-consistent, de-duplicated paginated list`, async function() {
         const session = await initialize()
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
         await login({ email: user1.email, password: user1.password }, session)
 
         try {

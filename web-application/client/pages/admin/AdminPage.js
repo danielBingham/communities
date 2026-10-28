@@ -19,7 +19,7 @@
  ******************************************************************************/
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, NavLink, Routes, Route } from 'react-router-dom'
+import { useNavigate, Routes, Route } from 'react-router-dom'
 
 import can, { Entities, Actions } from '/lib/permission'
 
@@ -28,11 +28,13 @@ import { resetEntities } from '/state/lib'
 
 import { Page, PageBody, PageLeftGutter, PageRightGutter } from '/components/generic/Page'
 
+import AdminNavigationMenu from '/components/admin/AdminNavigationMenu'
 import AdminDashboard from '/components/admin/dashboard/AdminDashboard'
 import FeatureFlags from '/components/admin/features/FeatureFlags'
 import UserAdminListView from '/pages/admin/views/UserAdminListView'
 import AdminModerationView from '/pages/admin/views/AdminModerationView'
 import BlocklistView from '/pages/admin/views/BlocklistView'
+import NewsFormView from '/pages/admin/views/NewsFormView'
 import UserAdminView from '/pages/admin/views/UserAdminView'
 
 import './AdminPage.css'
@@ -69,17 +71,13 @@ const AdminPage = function(props) {
     return (
         <Page id="admin">
             <PageLeftGutter>
-                <menu className="admin__menu">
-                    <li><NavLink to={``} end><span className="nav-text"> Dashboard</span></NavLink></li>
-                    <li><NavLink to="moderation" end><span className="nav-text"> Moderation</span></NavLink></li> 
-                    <li><NavLink to="blocklist" end><span className="nav-text">Blocklist</span></NavLink></li>
-                    { canAdminSite === true && <li><NavLink to="features" end><span className="nav-text"> Features</span></NavLink></li> }
-                    <li><NavLink to="users" end><span className="nav-text"> Users</span></NavLink></li>
-                </menu> 
+                <AdminNavigationMenu />
             </PageLeftGutter>
             <PageBody>
                 <Routes>
                     { canAdminSite === true && <Route path="features" element={<FeatureFlags />} /> }
+                    { canAdminSite === true && <Route path="news/create" element={<NewsFormView />} /> }
+                    { canAdminSite === true && <Route path="news/:slug/edit" element={<NewsFormView />} /> }
                     <Route path="users" element={<UserAdminListView />} />
                     <Route path="user">
                         <Route path=":userId" element={<UserAdminView />} />

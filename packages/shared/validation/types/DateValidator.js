@@ -1,3 +1,5 @@
+const { parseUSDate } = require('../../lib/date')
+
 const BaseValidator = require('./BaseValidator')
 
 module.exports = class DateValidator extends BaseValidator {
@@ -55,6 +57,22 @@ module.exports = class DateValidator extends BaseValidator {
                 type: `${this.name}:invalid`,
                 log: `${this.name} must be a valid date.`,
                 message: `${this.name} must be a valid date of the format 'YYYY-MM-DD'.`
+            })
+        }
+
+        return this
+    }
+
+    mustBeValidUSDate() {
+        if ( this.shortCircuit() || this.value === '') {
+            return this
+        }
+
+        if ( parseUSDate(this.value) === null ) {
+            this.errors.push({
+                type: `${this.name}:invalid`,
+                log: `${this.name} must be a valid date.`,
+                message: `${this.name} must be a valid date of the format 'MM/DD/YYYY'.`
             })
         }
 

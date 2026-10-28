@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -31,7 +31,7 @@ import './Header.css'
  *
  * @param {object} props    Standard react props object - empty.
  */
-const Header = function(props) {
+const Header = function({ transparent }) {
 
     const currentUser = useSelector((state) => state.authentication.currentUser)
 
@@ -39,7 +39,7 @@ const Header = function(props) {
 
     if ( currentUser === null || currentUser === undefined ) {
         return (
-            <header>
+            <header className={`${ transparent ? 'header__transparent' : '' }`}>
                 <div className="header__unauthenticated">
                     <CommunitiesLogo className="header__logo" />
                     <NavigationButton to="/about" icon="InformationCircle" text="About" />
@@ -56,7 +56,7 @@ const Header = function(props) {
                     <NavigationButton to="/" icon="QueueList" text="Feeds" />
                     <NavigationButton to="/friends" icon="Users" text="Friends" />
                     <NavigationButton to="/groups" icon="UserGroup" text="Groups" />
-                    <NotificationMenu /> 
+                    <NotificationMenu />
                     <UserMenu />
                 </div>
             </header>

@@ -22,8 +22,6 @@ const mime = require('mime')
 
 const path = require('node:path')
 
-const S3FileService = require('./files/S3FileService')
-
 const FileDAO = require('../daos/FileDAO')
 
 module.exports = class FileService {
@@ -33,7 +31,7 @@ module.exports = class FileService {
 
         this.fileDAO = new FileDAO(core)
 
-        this.s3 = new S3FileService(core)
+        this.storage = core.storage
 
         // Default variants
         this.defaultVariants = [ 30, 200, 325, 450, 650 ]
@@ -130,6 +128,19 @@ module.exports = class FileService {
         return usageDictionary[fileId]
     }
 
+    /**
+     * Find where each of the files identified by `fileIds` is in use.
+     *
+     * A file is in use if it's attached to a post, a user, a group or a link
+     * preview, or if it's the thumbnail (eg. a video's poster) of another
+     * file.  In that last case, `parentId` is the id of the other file.
+     *
+     * @param {uuid[]} fileIds An array of File.id for the files we wish to check.
+     *
+     * @return {object} A dictionary, keyed by File.id, of the usage of each
+     * file that is in use: { id, postId, userId, groupId, linkPreviewId,
+     * parentId }.  Files that aren't in use are left out.
+     */
     async getUsageByFileIds(fileIds) {
         const usageDictionary = {}
 
@@ -140,18 +151,21 @@ module.exports = class FileService {
                 post_files.post_id as "postId",
                 users.id as "userId",
                 groups.id as "groupId",
-                link_previews.id as "linkPreviewId"
+                link_previews.id as "linkPreviewId",
+                parents.id as "parentId"
             FROM files
                 LEFT OUTER JOIN post_files ON files.id = post_files.file_id
                 LEFT OUTER JOIN users ON files.id = users.file_id
                 LEFT OUTER JOIN groups ON files.id = groups.file_id
                 LEFT OUTER JOIN link_previews ON files.id = link_previews.file_id
+                LEFT OUTER JOIN files as parents ON parents.thumb_id = files.id
             WHERE
                 files.id = ANY($1::uuid[]) AND (
                     post_files.post_id IS NOT NULL
                     OR users.id IS NOT NULL
                     OR groups.id IS NOT NULL
                     OR link_previews.id IS NOT NULL
+                    OR parents.id IS NOT NULL
                 )
         `, [ fileIds ])
 
@@ -195,7 +209,7 @@ module.exports = class FileService {
         }
 
         if ( file.filepath !== null && file.filepath !== undefined ) {
-            await this.s3.removeFile(file.filepath)
+            await this.storage.removeFile(file.filepath)
         } else {
             this.core.logger.warn(`Removing File(${file.id}) without a filepath.`)
         }
@@ -207,9 +221,9 @@ module.exports = class FileService {
     async deleteVariants(file) {
         for(const variant of file.variants) {
             const filepath = this.getPath(file, variant)
-            const hasFile = await this.s3.hasFile(filepath)
+            const hasFile = await this.storage.hasFile(filepath)
             if ( hasFile ) {
-                this.s3.removeFile(filepath)
+                this.storage.removeFile(filepath)
             }
         }
     }

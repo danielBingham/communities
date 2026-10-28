@@ -31,6 +31,10 @@ execute the test cases within.
 ## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
 ## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
 
+## [Create CommentReaction](documentation/testing/test-cases/CommentReaction/create.md)
+## [Read CommentReaction](documentation/testing/test-cases/CommentReaction/read.md)
+## [Delete CommentReaction](documentation/testing/test-cases/CommentReaction/delete.md)
+
 ## [Create PostSubscription](documentation/testing/test-cases/PostSubscription/create.md)
 ## [Delete PostSubscription](documentation/testing/test-cases/PostSubscription/delete.md)
 

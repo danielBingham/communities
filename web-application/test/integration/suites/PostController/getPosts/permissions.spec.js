@@ -37,7 +37,7 @@ const {
 const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
 const { isFeatureEnabled } = require('../../../lib/system')
 
-const userDictionary = require('../../../fixtures/users')
+const { getFixture } = require('../../../lib/fixtures')
 
 // Subgroups (and their compound types) are gated behind this feature flag; the
 // subgroup blocks skip themselves when it is off, exactly as in getPost.spec.js.
@@ -120,7 +120,7 @@ describe('GET /posts', function() {
     // up to meta.count.  The permission matrix below is the substance of the suite.
     it(`Should return a list of all public posts for a user with no posts`, async function() {
         const session = await initialize()
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
         const currentUser = await login({ email: user1.email, password: user1.password }, session)
 
         // Clear out User1's posts before running the test.

@@ -6,6 +6,10 @@
 #  the shared workspace packages bind-mounted in, so edits on the host reload
 #  and recompile inside the containers.
 #
+#  Both images are built from the repository root, where the npm workspace and
+#  its lockfile live. Inside the images the workspace is at /opt/communities
+#  and /src points at the app's own folder, as it always has.
+#
 #  Redis image is run from a default image, but the postgres image must be
 #  built separately following instructions found in the
 #  `documentation/running-locally.md`.
@@ -26,7 +30,8 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - /Users/danielbingham/volumes/communities-sql:/var/lib/postgresql/data
+      # The database, in a volume Docker manages (see `volumes:` at the end).
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -43,7 +48,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /Users/danielbingham/volumes/communities-redis:/data
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -57,24 +62,27 @@ services:
   # ---------------------------------------------------------------------------
   worker:
     build:
-      context: ./worker
-      dockerfile: Dockerfile
-      # Needed by `npm ci` in the Dockerfile to pull @communities/* from
-      # CodeArtifact. Export CODEARTIFACT_AUTH_TOKEN before building.
-      secrets:
-        - CODEARTIFACT_AUTH_TOKEN
+      context: .
+      dockerfile: worker/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    # NODE_ENV=development loads worker/config/index.development.js, your own
+    # copy of one of the -example files there. Values it declares as
+    # `env:COMMUNITIES_*` come from .env (see .env.local.example).
+    env_file:
+      - path: .env
+        required: false
     environment:
       NODE_ENV: development
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
+      # The Parameter Store path prefix for `aws-ssm-parameter:` values.
+      COMMUNITIES_ENVIRONMENT_NAME: ${COMMUNITIES_ENVIRONMENT_NAME:-local}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      COMMUNITIES_LOG_LEVEL: ${COMMUNITIES_LOG_LEVEL:-debug}
       # Force polling so file changes on bind mounts are seen reliably across
       # macOS / Windows / WSL. Drop for a small perf win on native Linux.
       CHOKIDAR_USEPOLLING: "true"
@@ -90,15 +98,21 @@ services:
       - ./worker/config:/src/config
       - ./worker/nodemon.json:/src/nodemon.json
       # --- shared workspace packages ---
-      # Mounted at /packages so nodemon's "../packages/*" watch paths resolve,
-      # AND over node_modules so require() loads the live source (both point at
-      # the same host directory, so one edit does both).
-      - ./packages:/packages
-      - ./packages/backend:/src/node_modules/@communities/backend
-      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
-      - ./packages/shared:/src/node_modules/@communities/shared
+      # require('@communities/*') follows the workspace links to
+      # /opt/communities/packages, which is also where nodemon's
+      # "../packages/*" watch paths resolve, so one mount does both. The
+      # anonymous volumes keep the image's installed node_modules instead of
+      # whatever (if anything) the host has installed in those folders.
+      - ./packages:/opt/communities/packages
+      - /opt/communities/packages/shared/node_modules
+      - /opt/communities/packages/backend/node_modules
+      - /opt/communities/packages/session/node_modules
       # --- Temp directory for file processing ---
       - ./worker/tmp:/src/tmp
+      # --- Uploaded files (filesystem storage driver), shared with the web
+      # application. The example config's '../local-data/storage' resolves
+      # here from either app's folder.
+      - ./local-data/storage:/opt/communities/local-data/storage
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -108,22 +122,24 @@ services:
   # ---------------------------------------------------------------------------
   web-application:
     build:
-      context: ./web-application
-      dockerfile: Dockerfile
-      secrets:
-        - CODEARTIFACT_AUTH_TOKEN
+      context: .
+      dockerfile: web-application/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:                   # see the worker note above (server/config here)
+      - path: .env
+        required: false
     environment:
       NODE_ENV: development
-      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-local}
+      # The Parameter Store path prefix for `aws-ssm-parameter:` values.
+      COMMUNITIES_ENVIRONMENT_NAME: ${COMMUNITIES_ENVIRONMENT_NAME:-local}
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      COMMUNITIES_LOG_LEVEL: ${COMMUNITIES_LOG_LEVEL:-debug}
       PORT: "8080"
       CHOKIDAR_USEPOLLING: "true"
     ports:
@@ -150,17 +166,23 @@ services:
       # Self-signed HTTPS certs the dev server + Express need in development.
       - ./web-application/security:/src/security
       # --- shared workspace packages (see worker note above) ---
-      - ./packages:/packages
-      - ./packages/backend:/src/node_modules/@communities/backend
-      - ./packages/shared:/src/node_modules/@communities/backend/node_modules/@communities/shared
-      - ./packages/shared:/src/node_modules/@communities/shared
-      - ./packages/session:/src/node_modules/@communities/session
+      - ./packages:/opt/communities/packages
+      - /opt/communities/packages/shared/node_modules
+      - /opt/communities/packages/backend/node_modules
+      - /opt/communities/packages/session/node_modules
       # --- Temp directory for image uploads ---
       - ./web-application/tmp:/src/tmp
+      # --- Uploaded files (filesystem storage driver), shared with the worker.
+      - ./local-data/storage:/opt/communities/local-data/storage
     restart: unless-stopped
 
-# The CodeArtifact token is read from the CODEARTIFACT_AUTH_TOKEN host env var
-# at build time and mounted as a BuildKit secret (never baked into a layer).
-secrets:
-  CODEARTIFACT_AUTH_TOKEN:
-    environment: CODEARTIFACT_AUTH_TOKEN
+# -----------------------------------------------------------------------------
+# Postgres and Redis data, in volumes Docker manages (communities_postgres-data
+# and communities_redis-data in `docker volume ls`). They're kept across
+# `docker compose down`, rebuilds and `up -V`; `docker compose down -v` deletes
+# them. To keep either in a folder of your own instead, see "Keeping the Data in
+# a Folder" in documentation/running-locally.md.
+# -----------------------------------------------------------------------------
+volumes:
+  postgres-data:
+  redis-data:

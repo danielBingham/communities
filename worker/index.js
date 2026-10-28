@@ -42,7 +42,7 @@ if ( process.argv.length >= 3 ) {
 
 async function initialize() {
 
-    const environmentName = process.env.ENVIRONMENT_NAME
+    const environmentName = process.env.COMMUNITIES_ENVIRONMENT_NAME
     const region = process.env.AWS_REGION
     const credentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -51,6 +51,7 @@ async function initialize() {
 
     const configLoader = new Config(environmentName, region, credentials)
     const config = await configLoader.loadConfig(configDefinition)
+    configLoader.validateConfig(config)
 
     const core = new Core('worker', config)
 

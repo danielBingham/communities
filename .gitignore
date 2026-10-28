@@ -1,4 +1,13 @@
 **/.env*
+!/.env.local.example
+# Each developer's own configuration; copy it from the -example files
+# alongside it (see documentation/running-locally.md).
+web-application/server/config/index.development.js
+worker/config/index.development.js
+# Each developer's own Compose changes, such as where to keep the data (see
+# documentation/running-locally.md).
+compose.override.yaml
+compose.override.yml
 node_modules/
 *.swp
 web-application/public/uploads/*
@@ -9,6 +18,8 @@ web-application/tmp/*
 worker/security/*
 worker/tmp
 worker/tmp/*
+# Uploaded files kept by the filesystem storage driver.
+local-data/
 *.tfstate
 *.tfstate.*
 *.tfvars

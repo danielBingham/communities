@@ -80,5 +80,36 @@ describe('DateValidator', function() {
             expect(errors.length).toBe(1)
         })
     })
-})
 
+    describe('mustBeValidUSDate()', function() {
+        it('should accept real dates written MM/DD/YYYY', function() {
+            for(const dateString of [ '09/30/2026', '01/01/2000', '12/31/1999', '03/31/2026', '02/29/2024', '02/29/2000' ]) {
+                const errors = new DateValidator('date', dateString).mustBeValidUSDate().getErrors()
+                expect(errors).toEqual([])
+            }
+        })
+
+        it('should reject days that aren\'t in the month', function() {
+            for(const dateString of [ '04/31/2026', '02/29/2025', '02/29/1900', '13/01/2026', '00/10/2026', '10/00/2026', '12/32/2026' ]) {
+                const errors = new DateValidator('date', dateString).mustBeValidUSDate().getErrors()
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('date:invalid')
+            }
+        })
+
+        it('should reject other formats', function() {
+            for(const dateString of [ '2026-09-30', '9/30/2026', '09/30/26', '09-30-2026', ' 09/30/2026', 'September 30, 2026', 'not a date' ]) {
+                const errors = new DateValidator('date', dateString).mustBeValidUSDate().getErrors()
+                expect(errors.length).toBe(1)
+                expect(errors[0].type).toBe('date:invalid')
+            }
+        })
+
+        it('should leave missing, empty and non-string values to the other checks', function() {
+            for(const value of [ undefined, null, '', 20260930 ]) {
+                const errors = new DateValidator('date', value).mustBeValidUSDate().getErrors()
+                expect(errors).toEqual([])
+            }
+        })
+    })
+})

@@ -164,6 +164,7 @@ module.exports = class PostValidation {
                                 && usage[fileId].userId === null
                                 && usage[fileId].groupId === null
                                 && usage[fileId].linkPreviewId === null
+                                && usage[fileId].parentId === null
                             ) {
                                 continue
                             }

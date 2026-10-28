@@ -10,6 +10,13 @@
     width: 100%;
     max-width: min(100vw, 650px);
 }
+/* PostForm's attachments container shrinks to fit its files.  Everything
+ * inside a video's play overlay is absolutely positioned, so the overlay has
+ * no width of its own to give it.  Give it the placeholders' width (below) as
+ * a minimum; alongside images, it still stretches to their width. */
+.draft-file .video--overlay {
+    min-width: min(100vw, 630px);
+}
 .draft-file__failed-load, .draft-file__pending {
     display: grid;
     width: min(100vw, 630px);

@@ -18,21 +18,66 @@
  *
  ******************************************************************************/
 
-// PATCH /authentication is the multi-factor verification endpoint.  Fully
-// exercising its happy paths (verifying a TOTP token or a recovery code)
-// requires a live authenticator device and is intentionally out of scope for
-// this suite.  What we *can* cover without a device are the guard clauses:
-// the not-authenticated case, the missing-token case, and the "already logged
-// in / not pending" case.  The device-dependent paths are included as skipped
-// (xit) tests documenting the intended coverage.
+// PATCH /authentication is the multi-factor verification endpoint.  It covers
+// the guard clauses (not logged in, missing token, already logged in) and the
+// second step of logging in an MFA user, with a TOTP token or a recovery code.
+//
+// The 'user-mfa' fixture is created with a real TOTP secret and ten recovery
+// codes (see fixtures/users.js), so this suite generates tokens from the
+// secret, as an authenticator app would (lib/multifactor.js), and uses the
+// codes directly.  Recovery codes are single-use: each test takes its own.
 
-const { describe, it, xit } = require('node:test')
+const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 
 const { initialize, login, logout } = require('../../lib/authentication')
 const { fetchEndpoint } = require('../../lib/fetchEndpoint')
+const { currentToken, wrongToken } = require('../../lib/multifactor')
 
-const userDictionary = require('../../fixtures/users')
+const { getFixture } = require('../../lib/fixtures')
+
+// Which of the fixture's recovery codes each test spends.
+const RECOVERY_CODE_FOR_LOGIN = 0
+const RECOVERY_CODE_FOR_REUSE = 1
+
+// Keep the session's auth header current: logging in regenerates the session.
+const useAuthHeader = function(response, session) {
+    if ( response.raw.headers.has('X-Communities-Auth') ) {
+        session.auth = response.raw.headers.get('X-Communities-Auth')
+    }
+}
+
+// Log the MFA fixture in as far as its password goes.  The session is left
+// pending, waiting for a TOTP token or a recovery code.
+const beginMultifactorLogin = async function() {
+    const fixture = getFixture('user-mfa')
+    const session = await initialize()
+
+    const response = await fetchEndpoint('POST', '/authentication', {
+        body: { email: fixture.email, password: fixture.password },
+        session: session
+    })
+    useAuthHeader(response, session)
+
+    assert.equal(response.status, 200)
+    assert.equal(response.content?.session?.user, undefined)
+    assert.equal(response.content?.session?.pendingUserId, fixture.id)
+
+    return { session, fixture }
+}
+
+const verify = async function(session, body) {
+    const response = await fetchEndpoint('PATCH', '/authentication', { body: body, session: session })
+    useAuthHeader(response, session)
+    return response
+}
+
+// Who GET /authentication says the session belongs to, if anyone.
+const currentSession = async function(session) {
+    const response = await fetchEndpoint('GET', '/authentication', { session: session })
+    assert.equal(response.status, 200)
+    return response.content?.session
+}
 
 describe('PATCH /authentication', function() {
     it('Should reject a request that has not logged in yet', async function() {
@@ -56,7 +101,7 @@ describe('PATCH /authentication', function() {
     it('Should reject a logged-in user who omits the token', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -81,7 +126,7 @@ describe('PATCH /authentication', function() {
     it('Should reject verification from a user who is not mid-MFA-setup', async function() {
         const session = await initialize()
 
-        const user1 = userDictionary['user1']
+        const user1 = getFixture('user1')
 
         const credentials = {
             email: user1.email,
@@ -104,27 +149,100 @@ describe('PATCH /authentication', function() {
         await logout(session)
     })
 
-    // SKIPPED: Requires a live TOTP device.  A user mid-MFA-login (pending
-    // session) who submits a valid 6-digit token should be fully logged in.
-    it.skip('Should complete login for a valid TOTP token', async function() {
-        // Would log in the MFA-enabled fixture (user3) to reach the pending
-        // state, then PATCH a freshly-generated TOTP token and assert a 200
-        // with a full user session.  Requires generating a live token.
-    })
+    describe('for a user mid-MFA-login', function() {
+        it('Should complete login for a valid TOTP token', async function() {
+            const { session, fixture } = await beginMultifactorLogin()
 
-    // SKIPPED: Requires a live TOTP device.  A user mid-MFA-login who submits
-    // an incorrect token should be rejected with a 404 'not-found'.
-    it.skip('Should reject an incorrect TOTP token for a pending user', async function() {
-        // Would reach the pending state for the MFA-enabled fixture (user3),
-        // PATCH an obviously-wrong 6-digit token, and assert 404 'not-found'.
-    })
+            const response = await verify(session, { token: await currentToken(fixture.multifactorSecret) })
 
-    // SKIPPED: Requires the fixture's recovery codes.  A user mid-MFA-login who
-    // submits a valid recovery code should be fully logged in; an invalid one
-    // should be rejected with 404 'not-found'.
-    it.skip('Should complete login for a valid recovery code', async function() {
-        // Would reach the pending state for the MFA-enabled fixture (user3) and
-        // PATCH one of its recovery codes.  Recovery codes are single-use and
-        // are only shown at enrollment, so this needs manual fixture capture.
+            assert.equal(response.status, 200)
+            assert.equal(response.content?.session?.user?.id, fixture.id)
+
+            // The session is fully logged in now.
+            const after = await currentSession(session)
+            assert.equal(after?.user?.id, fixture.id)
+
+            await logout(session)
+        })
+
+        it('Should reject an incorrect TOTP token', async function() {
+            const { session, fixture } = await beginMultifactorLogin()
+
+            const response = await verify(session, { token: await wrongToken(fixture.multifactorSecret) })
+
+            assert.equal(response.status, 404)
+            assert.equal(response.content?.error?.type, 'not-found')
+
+            // Still only pending: no user on the session.
+            const after = await currentSession(session)
+            assert.equal(after?.user, undefined)
+            assert.equal(after?.pendingUserId, fixture.id)
+
+            await logout(session)
+        })
+
+        it('Should reject a token that is not six characters', async function() {
+            const { session } = await beginMultifactorLogin()
+
+            const response = await verify(session, { token: '12345' })
+
+            assert.equal(response.status, 400)
+            assert.equal(response.content?.error?.type, 'invalid')
+
+            await logout(session)
+        })
+
+        it('Should reject a request with neither a token nor a recovery code', async function() {
+            const { session } = await beginMultifactorLogin()
+
+            const response = await verify(session, {})
+
+            assert.equal(response.status, 400)
+            assert.equal(response.content?.error?.type, 'invalid')
+
+            await logout(session)
+        })
+
+        it('Should complete login for a valid recovery code', async function() {
+            const { session, fixture } = await beginMultifactorLogin()
+
+            const response = await verify(session, {
+                recoveryCode: fixture.recoveryCodes[RECOVERY_CODE_FOR_LOGIN]
+            })
+
+            assert.equal(response.status, 200)
+            assert.equal(response.content?.session?.user?.id, fixture.id)
+
+            const after = await currentSession(session)
+            assert.equal(after?.user?.id, fixture.id)
+
+            await logout(session)
+        })
+
+        it('Should reject an invalid recovery code', async function() {
+            const { session } = await beginMultifactorLogin()
+
+            const response = await verify(session, { recoveryCode: 'not-a-recovery-code' })
+
+            assert.equal(response.status, 404)
+            assert.equal(response.content?.error?.type, 'not-found')
+
+            await logout(session)
+        })
+
+        it('Should accept a recovery code only once', async function() {
+            const code = getFixture('user-mfa').recoveryCodes[RECOVERY_CODE_FOR_REUSE]
+
+            const first = await beginMultifactorLogin()
+            const used = await verify(first.session, { recoveryCode: code })
+            assert.equal(used.status, 200)
+            await logout(first.session)
+
+            const second = await beginMultifactorLogin()
+            const reused = await verify(second.session, { recoveryCode: code })
+            assert.equal(reused.status, 404)
+            assert.equal(reused.content?.error?.type, 'not-found')
+            await logout(second.session)
+        })
     })
 })

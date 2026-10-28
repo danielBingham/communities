@@ -39,6 +39,7 @@ const WelcomeNotice = function({}) {
 
     const [ request, makeRequest] = useRequest()
     const apiRoot = useSelector((state) => state.system.api)
+    const host = useSelector((state) => state.system.host)
 
     const navigate = useNavigate()
 
@@ -64,15 +65,20 @@ const WelcomeNotice = function({}) {
         return null
     }
 
-    let introVideoUrl = null
+    let introVideoHref = null
+    let posterHref = undefined
     try {
-        const url = new URL('./assets/intro-video.mp4', apiRoot)
-        introVideoUrl = url.href
+        const introVideoUrl = new URL('./assets/intro-video.mp4', apiRoot)
+        introVideoHref = introVideoUrl.href
+
+        const posterUrl = new URL('./intro-poster.png', host)
+        posterHref = posterUrl.href
+
     } catch (error) {
         logger.error(`Failed to generate intro video url: `, error)
     }
 
-    if ( introVideoUrl === null || videoFailed === true) {
+    if ( introVideoHref=== null || videoFailed === true) {
         return (
             <Modal key="video-fallback" isVisible={isVisible} setIsVisible={setIsVisible} hideX={true}>
                 <div className="welcome-notice">
@@ -104,9 +110,7 @@ const WelcomeNotice = function({}) {
     return (
         <Modal key="video" isVisible={isVisible} setIsVisible={setIsVisible} hideX={true}>
             <div className="welcome-notice">
-                <h1>Welcome to Communities</h1>
-                <p>Let us show you around!</p>
-                <Video className="welcome-notice__intro" src={introVideoUrl} preload="auto" onError={() => setVideoFailed(true)} />
+                <Video className="welcome-notice__intro" src={introVideoHref} poster={posterHref} preload="auto" onError={() => setVideoFailed(true)} playOverlay />
                 <div className="welcome-notice__close">
                     <Button type="success" onClick={(e) => { setIsVisible(false); navigate('/account/contribute') }}>Contribute</Button>
                     <Button type="primary" onClick={(e) => setIsVisible(false)}>Get Started</Button>

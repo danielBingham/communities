@@ -30,6 +30,7 @@ const express = require('express')
 const cors = require('cors')
 
 const path = require('path')
+const fs = require('fs')
 
 const {
     FeatureFlags,
@@ -40,6 +41,8 @@ const { createLogMiddleware } = require('./log')
 const { createCSRFMiddleware } = require('./csrf')
 const { createSecurityHeadersMiddleware } = require('./middleware/security-headers')
 const { createErrorsMiddleware } = require('./errors')
+const { mountStorageRoute } = require('./storage')
+const { createPageRouter } = require('./pages')
 
 const createRouter = require('./router')
 
@@ -71,6 +74,14 @@ const createExpressApp = function(core, sessionParser) {
         ],
         exposedHeaders: '*'
     }))
+
+    // Files kept by the filesystem storage driver (development only), served
+    // from the signed links it hands out.  This comes ahead of the API's
+    // middleware because, as with S3's signed URLs, the signature is the
+    // permission: these requests don't need a session.
+    if ( core.config.storage.driver === 'filesystem' ) {
+        mountStorageRoute(app, core)
+    }
 
     app.use('/api', function(request, response, next) {
         // Don't cache API responses.  We'll take care of that in redux.
@@ -198,31 +209,43 @@ const createExpressApp = function(core, sessionParser) {
         response.json(json)
     })
 
-    app.get('/favicon.svg', function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/', request.originalUrl)
-        response.sendFile(filepath)
-    })
-
     /**
      * Any other static images are going to be bundled into the dist.
      */
     app.get(/.*\.(svg|ico|jpg|png)$/, function(request, response) {
-        const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
-        response.sendFile(filepath)
+        // Check in dist first.
+        const distPath = path.join(process.cwd(), 'public/dist', request.originalUrl)
+        if ( fs.existsSync(distPath) ) {
+            response.sendFile(distPath)
+            return
+        }
+
+        // If we didn't find it in the dist, then fall back to public.
+        const publicPath = path.join(process.cwd(), 'public', request.originalUrl)
+        if ( fs.existsSync(publicPath) ) {
+            response.sendFile(publicPath)
+            return
+        }
+
+        response.status(404).send()
     })
 
     // Javascript files go to dist.
     app.get(/.*\.(css|js|js.map)$/, function(request, response) {
         const filepath = path.join(process.cwd(), 'public/dist', request.originalUrl)
-        response.sendFile(filepath)
+        if ( fs.existsSync(filepath) ) {
+            response.sendFile(filepath)
+            return
+        }
+
+        response.status(404).send()
     })
 
-    // Everything else goes to the index file.
-    app.all('{*any}', function(request,response) {
-        request.logger.verbose(`Loading index file.`)
-        const filepath = path.join(process.cwd(), 'public/dist/index.html')
-        response.sendFile(filepath)
-    })
+    // ==================== Page Requests ===================================
+    // Everything else is a page: the index file, with the page's metadata
+    // rendered into its <head>.  See `./pages.js`.
+    // ========================================================================
+    app.use(createPageRouter(core))
 
     // Register the error handler.
     app.use(createErrorsMiddleware(core))

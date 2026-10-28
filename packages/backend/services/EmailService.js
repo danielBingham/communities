@@ -30,21 +30,27 @@ module.exports = class EmailService {
         this.config = core.config
     }
 
+    /**
+     * Send a message through the configured email driver
+     * (`core.emailDriver`, see services/email).
+     *
+     * @param {Object} data A Postmark-shaped message: From, To, Subject,
+     * HtmlBody, MessageStream. Every driver takes this shape.
+     *
+     * @throws {ServiceError} `invalid-email` when the recipient address is
+     * known to be bad, otherwise `email-failed`.
+     */
     async sendEmail(data) {
         try {
-            await this.core.postmarkClient.sendEmail(data)
+            await this.core.emailDriver.send(data)
         } catch (error) {
             this.logger.error(error)
 
-            // Inactive recipients error.  The message bounced because that
-            // email address doesn't exist or isn't valid.
-            if ( error.code === 406 ) {
-                throw new ServiceError('invalid-email',
-                    `Message bounced.  That email doesn't exist or isn't valid.`)
-            } else {
-                throw new ServiceError('email-failed', 
-                    `Attempt to send an email failed with message: ${error.message}.`)
+            if ( error instanceof ServiceError ) {
+                throw error
             }
+            throw new ServiceError('email-failed',
+                `Attempt to send an email failed with message: ${error.message}.`)
         }
     }
 

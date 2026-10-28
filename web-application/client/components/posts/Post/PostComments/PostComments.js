@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import logger from '/logger'
@@ -47,6 +47,14 @@ const PostComments = function({ postId, expanded }) {
     })
 
     const dispatch = useDispatch()
+
+    // The new comment form at the end of the thread, which replies are
+    // started in.
+    const commentFormRef = useRef(null)
+
+    const replyTo = function(username) {
+        commentFormRef.current?.replyTo(username)
+    }
 
     useEffect(function() {
         if ( expanded ) {
@@ -101,7 +109,7 @@ const PostComments = function({ postId, expanded }) {
             if ( draftEdit || (commentId in editing) ) {
                 commentViews.push(<PostCommentForm key={commentId} postId={postId} commentId={commentId} groupId={ post.groupId } setShowComments={setShowComments} />)
             } else {
-                commentViews.push(<PostComment key={commentId} postId={postId} id={commentId} />)
+                commentViews.push(<PostComment key={commentId} postId={postId} id={commentId} onReply={replyTo} />)
             }
         }
     }
@@ -112,7 +120,7 @@ const PostComments = function({ postId, expanded }) {
             { showComments && post.comments.length > 0 && <div className="show-comments">
                 <a href="" onClick={(e) => { e.preventDefault(); setShowComments(false)}}>Hide { post.comments.length } comments.</a>
             </div> }
-            <PostCommentForm postId={postId} groupId={ post?.groupId } setShowComments={setShowComments} />
+            <PostCommentForm ref={commentFormRef} postId={postId} groupId={ post?.groupId } setShowComments={setShowComments} />
         </div>
     )
 }

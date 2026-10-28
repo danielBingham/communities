@@ -161,11 +161,47 @@ const getAgeFromDate = function(dateString) {
     return age
 }
 
+/**
+ * Parse a date written 'MM/DD/YYYY', e.g. '09/30/2026'.
+ *
+ * Only real calendar dates parse: '02/29/2025' and '04/31/2026' don't.
+ *
+ * @param {string} value    The date to parse.
+ *
+ * @return {{ year: number, month: number, day: number }|null} The date's
+ * parts, with `month` counted from 1, or null when `value` isn't a real date
+ * written 'MM/DD/YYYY'.
+ */
+const parseUSDate = function(value) {
+    if ( typeof value !== 'string' ) {
+        return null
+    }
+
+    const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+    if ( match === null ) {
+        return null
+    }
+
+    const month = parseInt(match[1], 10)
+    const day = parseInt(match[2], 10)
+    const year = parseInt(match[3], 10)
+
+    // Let Date check the calendar: an impossible day or month rolls over into
+    // the next one, so the parts won't round trip.
+    const date = new Date(Date.UTC(year, month - 1, day))
+    if ( date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day ) {
+        return null
+    }
+
+    return { year: year, month: month, day: day }
+}
+
 module.exports = {
     coerceDateFormat: coerceDateFormat,
     coerceDateSegmentFormat: coerceDateSegmentFormat,
     isLeapYear: isLeapYear,
     getDaysInMonth: getDaysInMonth,
-    getAgeFromDate: getAgeFromDate
+    getAgeFromDate: getAgeFromDate,
+    parseUSDate: parseUSDate
 }
 

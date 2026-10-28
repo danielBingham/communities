@@ -50,9 +50,9 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		743A7F302F3A69CF00210C15 /* App LocalRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "App LocalRelease.entitlements"; sourceTree = "<group>"; };
 		74530B7B2E6A0EA400A5F70A /* App Staging.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "App Staging.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		74530B7C2E6A0EA400A5F70A /* App Staging-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "App Staging-Info.plist"; path = "/Users/danielbingham/src/danielbingham/communities/ios/App/App Staging-Info.plist"; sourceTree = "<absolute>"; };
+		74530B7C2E6A0EA400A5F70A /* App Staging-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App Staging-Info.plist"; sourceTree = "<group>"; };
 		74530B8E2E6A26A900A5F70A /* App Local.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "App Local.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		74530B8F2E6A26A900A5F70A /* App Local-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "App Local-Info.plist"; path = "/Users/danielbingham/src/danielbingham/communities/ios/App/App Local-Info.plist"; sourceTree = "<absolute>"; };
+		74530B8F2E6A26A900A5F70A /* App Local-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "App Local-Info.plist"; sourceTree = "<group>"; };
 		74E198D52E578D4900D15343 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		7B89C4026B93665AC4357BA7 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		B9F5CDAADE45F1557BC6A692 /* Pods-App Local.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App Local.debug.xcconfig"; path = "Target Support Files/Pods-App Local/Pods-App Local.debug.xcconfig"; sourceTree = "<group>"; };

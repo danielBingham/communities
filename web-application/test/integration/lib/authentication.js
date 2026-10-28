@@ -20,12 +20,13 @@
 
 const { fetchEndpoint } = require('./fetchEndpoint')
 
-const userDictionary = require('../fixtures/users')
+const { getFixture } = require('./fixtures')
 
-// Log in a fixture user by dictionary key and return both the session and the
-// authenticated user record (which carries the runtime `id`).
+// Log in a fixture user by their key in fixtures/users.js and return the
+// session, the authenticated user record and the fixture as this run created
+// it (lib/fixtures.js), password included.
 const loginAs = async function(key) {
-    const fixture = userDictionary[key]
+    const fixture = getFixture(key)
     const session = await initialize()
     const user = await login({ email: fixture.email, password: fixture.password }, session)
     return { session, user, fixture }

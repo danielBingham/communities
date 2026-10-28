@@ -32,6 +32,9 @@ proguard/
 # Log Files
 *.log
 
+# Android Studio target selector
+.idea/deploymentTargetSelector.xml
+
 # Android Studio Navigation editor temp files
 .navigation/
 

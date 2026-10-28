@@ -154,7 +154,7 @@ module.exports = class PostCommentNotifications {
 
                 const canViewPostComment = await this.permissionService.can(subscribers.dictionary[subscription.userId], 'view', 'PostComment', { post: context.post, postComment: context.comment })
                 if ( canViewPostComment !== true ) {
-                    return
+                    continue
                 }
 
                 const subscriberContext = { ...context, subscriber: subscribers.dictionary[subscription.userId] }
@@ -195,7 +195,7 @@ module.exports = class PostCommentNotifications {
 
             const canViewPostComment = await this.permissionService.can(userResults.dictionary[userId], 'view', 'PostComment', { post: context.post, postComment: context.comment })
             if ( canViewPostComment !== true ) {
-                return
+                continue
             }
 
             const mentionContext = { ...context, mentioned: userResults.dictionary[userId] }

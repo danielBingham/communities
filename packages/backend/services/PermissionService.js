@@ -23,6 +23,7 @@ const GroupMemberDAO = require('../daos/GroupMemberDAO')
 const PostDAO = require('../daos/PostDAO')
 const UserRelationshipDAO = require('../daos/UserRelationshipDAO')
 
+const CommentReactionPermissions = require('./permission/CommentReactionPermissions')
 const FilePermissions = require('./permission/FilePermissions')
 const GroupPermissions = require('./permission/GroupPermissions')
 const GroupMemberPermissions = require('./permission/GroupMemberPermissions')
@@ -61,6 +62,7 @@ module.exports = class PermissionService {
         this.groupMemberDAO = new GroupMemberDAO(core)
         this.userRelationshipDAO = new UserRelationshipDAO(core)
 
+        this.commentReaction = new CommentReactionPermissions(core, this)
         this.file = new FilePermissions(core, this)
         this.group = new GroupPermissions(core, this)
         this.groupMember = new GroupMemberPermissions(core, this)
@@ -111,7 +113,17 @@ module.exports = class PermissionService {
             return false
         }
 
-        if ( entity === 'File' ) {
+        if ( entity === 'CommentReaction' ) {
+            if ( action === PermissionService.ACTIONS.VIEW ) {
+                return await this.commentReaction.canViewCommentReaction(user, context)
+            } else if ( action === PermissionService.ACTIONS.CREATE ) {
+                return await this.commentReaction.canCreateCommentReaction(user, context)
+            } else if ( action === PermissionService.ACTIONS.UPDATE ) {
+                return await this.commentReaction.canUpdateCommentReaction(user, context)
+            } else if ( action === PermissionService.ACTIONS.DELETE ) {
+                return await this.commentReaction.canDeleteCommentReaction(user, context)
+            }
+        } else if ( entity === 'File' ) {
             if ( action === PermissionService.ACTIONS.QUERY ) {
                 return await this.file.canQueryFile(user, context)
             } else if ( action === PermissionService.ACTIONS.CREATE ) {
