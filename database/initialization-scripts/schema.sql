@@ -75,7 +75,8 @@ INSERT INTO features (name, status, created_date, updated_date)
         ('feat-61-multifactor-authentication', 'enabled', now(), now()),
         ('fix-563-video-poster-fails-on-mobile', 'enabled', now(), now()),
         ('video-uploads', 'enabled', now(), now()),
-        ('feat-268-comment-reactions', 'enabled', now(), now());
+        ('feat-268-comment-reactions', 'enabled', now(), now()),
+        ('recovery-codes-primary-key', 'enabled', now(), now());
 
 
 
@@ -134,6 +135,7 @@ CREATE INDEX users_username ON users (username);
 CREATE INDEX users__name_trgm ON users USING GIN (name gin_trgm_ops);
 
 CREATE TABLE user_recovery_codes (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     code text,
     user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );

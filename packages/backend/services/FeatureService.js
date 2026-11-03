@@ -34,6 +34,7 @@ const Feat377ImprovedFilePipelinesMigration = require('../migrations/Feat377Impr
 const Feat61MultifactorAuthenticationMigration = require('../migrations/Feat61MultifactorAuthenticationMigration')
 const Fix563VideoPosterFailsOnMobileMigration = require('../migrations/Fix563VideoPosterFailsOnMobileMigration')
 const Feat268CommentReactionsMigration = require('../migrations/Feat268CommentReactionsMigration')
+const RecoveryCodesPrimaryKeyMigration = require('../migrations/RecoveryCodesPrimaryKeyMigration')
 
 const ServiceError = require('../errors/ServiceError')
 const MigrationError = require('../errors/MigrationError')
@@ -108,6 +109,9 @@ module.exports = class FeatureService {
             'video-uploads': {},
             'feat-268-comment-reactions': {
                 migration: new Feat268CommentReactionsMigration(core)
+            },
+            'recovery-codes-primary-key': {
+                migration: new RecoveryCodesPrimaryKeyMigration(core)
             }
 
         }
