@@ -298,6 +298,74 @@ describe('Config', function() {
             ])
         })
 
+        describe('database.ssl and database.certificateAuthorities', function() {
+            const tls = require('tls')
+            const { X509Certificate } = require('crypto')
+            const { checkSSLConfig } = require('../lib/database-tls')
+
+            // Real certificates without committing any: Node's own list of
+            // root certificate authorities. Any one that's valid now will do.
+            const now = new Date()
+            const current = tls.rootCertificates.find(function(pem) {
+                const certificate = new X509Certificate(pem)
+                return new Date(certificate.validFrom) <= now && now <= new Date(certificate.validTo)
+            })
+
+            const database = (settings) => ({ ...valid(), database: { ...valid().database, ...settings } })
+
+            it('Should accept no TLS, which is the default, whether certificate authorities are set or not', function() {
+                expect(problems(valid())).toEqual([])
+                expect(problems(database({ ssl: 'disable' }))).toEqual([])
+                // Staging and production always load them, and setting
+                // /<environment>/database/ssl to disable has to keep working.
+                expect(problems(database({ ssl: 'disable', certificateAuthorities: 'unused' }))).toEqual([])
+            })
+
+            it('Should accept verify-full with a currently valid PEM certificate authority', function() {
+                expect(problems(database({ ssl: 'verify-full', certificateAuthorities: current }))).toEqual([])
+            })
+
+            it('Should require certificate authorities with verify-full', function() {
+                expect(problems(database({ ssl: 'verify-full' }))).toEqual([
+                    `database.ssl is 'verify-full', so the configuration needs database.certificateAuthorities: `
+                        + `the PEM certificates of the certificate authorities to trust.`
+                ])
+            })
+
+            it('Should refuse certificate authorities that aren\'t PEM certificates', function() {
+                expect(problems(database({ ssl: 'verify-full', certificateAuthorities: '/path/to/ca.pem' })))
+                    .toEqual([ `database.certificateAuthorities has no PEM certificates in it.` ])
+
+                // A PEM block whose body isn't a certificate, framed by a real
+                // one's first and last lines.
+                const lines = current.trim().split('\n')
+                const broken = problems(database({ ssl: 'verify-full',
+                    certificateAuthorities: [ lines[0], 'bm90IGEgY2VydGlmaWNhdGU=', lines[lines.length - 1] ].join('\n') }))
+                expect(broken.length).toBe(1)
+                expect(broken[0]).toMatch(/^A certificate in database.certificateAuthorities doesn't parse: /)
+            })
+
+            it('Should refuse certificate authorities none of which is valid now', function() {
+                const later = new Date('2200-01-01T00:00:00Z')
+                const found = checkSSLConfig({ ...valid().database, ssl: 'verify-full', certificateAuthorities: current }, later)
+                expect(found.length).toBe(1)
+                expect(found[0]).toMatch(/^None of the certificate authorities in database.certificateAuthorities is valid now: /)
+            })
+
+            it('Should refuse a mode it doesn\'t know, including ones that skip verification', function() {
+                for (const mode of [ 'require', 'prefer', 'verify-ca', 'on' ]) {
+                    expect(problems(database({ ssl: mode })))
+                        .toEqual([ `database.ssl in the configuration must be one of 'disable' or 'verify-full', but it's '${mode}'.` ])
+                }
+            })
+
+            it('Should refuse an IP address for the host with verify-full, since its name couldn\'t be checked', function() {
+                expect(problems(database({ host: '10.0.12.7', ssl: 'verify-full', certificateAuthorities: current })))
+                    .toEqual([ `database.ssl is 'verify-full', so database.host has to be the host name on the `
+                        + `server's certificate, not an IP address ('10.0.12.7').` ])
+            })
+        })
+
         it('Should require known email and storage drivers', function() {
             expect(problems({ ...valid(), email: { driver: 'smtp' }, storage: undefined })).toEqual([
                 `email.driver in the configuration must be one of 'postmark' or 'log', but it's 'smtp'.`,

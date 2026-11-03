@@ -32,7 +32,13 @@ module.exports = {
         port: 'aws-ssm-parameter:/database/port',
         user: 'aws-ssm-parameter:/database/user',
         password: 'aws-ssm-parameter:/database/password',
-        name: 'aws-ssm-parameter:/database/name' 
+        name: 'aws-ssm-parameter:/database/name',
+        // TLS to the database: 'verify-full' checks the server's certificate
+        // and host name against certificateAuthorities, the Amazon RDS root
+        // certificate authority (PEM) the database uses; 'disable' connects
+        // without TLS. See packages/backend/lib/database-tls.js.
+        ssl: 'aws-ssm-parameter:/database/ssl',
+        certificateAuthorities: 'aws-ssm-parameter:/database/certificate-authorities'
     },
     redis: {
         host: 'aws-ssm-parameter:/redis/host',
