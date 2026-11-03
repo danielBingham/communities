@@ -25,6 +25,7 @@ const { SSMClient, GetParameterCommand } = require("@aws-sdk/client-ssm")
 const { LogEmailDriver, PostmarkEmailDriver } = require('./services/email')
 const { FilesystemStorage, S3Storage } = require('./services/storage')
 const { AndroidPushDriver, IOSPushDriver, LogPushDriver } = require('./services/push')
+const { checkSSLConfig } = require('./lib/database-tls')
 
 /**
  * The environments a configuration definition file can exist for, selected by
@@ -299,6 +300,9 @@ module.exports = class Config {
      * rather than when something first uses them:
      *
      * - the `database` and `redis` blocks have their required settings;
+     * - `database.ssl` is a known mode, and with 'verify-full',
+     *   `database.certificateAuthorities` holds a currently valid PEM
+     *   certificate and the host is a name (see lib/database-tls.js);
      * - `email.driver` and `storage.driver` name a known driver, and each
      *   block under `notifications` is a known push driver;
      * - each driver that's selected or turned on accepts its block (see each
@@ -319,6 +323,8 @@ module.exports = class Config {
                 }
             }
         }
+
+        problems.push(...checkSSLConfig(config.database))
 
         // Ask a driver to check its block, recording what it finds.
         const validate = (Driver, settings) => {

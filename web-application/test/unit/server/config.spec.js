@@ -5,8 +5,10 @@
  * examples. When a value is added to production, staging and both examples
  * need it too; these tests fail until they have it. The exceptions are the
  * email, storage and notifications blocks, where the environment example uses
- * the log, filesystem and log drivers, and the web application's `test`
- * block, which production must never have. Covers the web application and
+ * the log, filesystem and log drivers; the web application's `test` block,
+ * which production must never have; and `database.certificateAuthorities`,
+ * which only `database.ssl: 'verify-full'` uses, so the environment example,
+ * which connects without TLS, leaves it out. Covers the web application and
  * the worker.
  ******************************************************************************/
 
@@ -37,6 +39,10 @@ const flatten = function(definition, prefix = '') {
 
 // The integration test fixtures' secret: staging and development only.
 const testBlock = (key) => key.startsWith('test.')
+
+// The database's certificate authorities: only used with verify-full, which
+// the environment example (no TLS to the local database) doesn't use.
+const verifyFullOnly = (key) => key === 'database.certificateAuthorities'
 const withoutTestBlock = (definition) => Object.fromEntries(
     Object.entries(definition).filter(([key]) => ! testBlock(key)))
 
@@ -126,11 +132,11 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         // the example uses the log, filesystem and log drivers.
         const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.') || key.startsWith('notifications.')
         const outsideDriverBlocks = (definition) => Object.keys(definition)
-            .filter((key) => ! driverBlock(key) && ! testBlock(key)).sort()
+            .filter((key) => ! driverBlock(key) && ! testBlock(key) && ! verifyFullOnly(key)).sort()
         expect(outsideDriverBlocks(envExample)).toEqual(outsideDriverBlocks(production))
 
         for (const [key, value] of Object.entries(production)) {
-            if ( key === 'environment' || driverBlock(key) ) {
+            if ( key === 'environment' || driverBlock(key) || verifyFullOnly(key) ) {
                 continue
             }
             const expected = value.startsWith('aws-ssm-parameter:')

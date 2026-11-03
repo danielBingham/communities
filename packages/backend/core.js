@@ -17,14 +17,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
-const fs = require('fs')
-
 const { Client, Pool } = require('pg')
 const BullQueue = require('bull')
 const { createClient } = require('redis')
 
 const Events = require('./events')
 const Logger = require('./logger')
+const { sslMode, sslOptions, describeCertificateAuthorities } = require('./lib/database-tls')
 const { createEmailDriver } = require('./services/email')
 const { createStorage } = require('./services/storage')
 
@@ -102,31 +101,59 @@ module.exports = class Core {
 
     /**
      * Create a connection pool for the database the configuration names.
-     * Also used by the integration test fixture seed, so it connects exactly
-     * the way the apps do.
      *
      * @param {Object} database The configuration's `database` block: host,
-     * port, user, password, name and, optionally, certificate.
+     * port, user, password, name and, optionally, ssl and
+     * certificateAuthorities (see lib/database-tls.js).
+     * @param {Object} [logger] Where to report connections the pool loses.
+     * Anything with an `error()` method; defaults to the console.
      *
      * @return {Pool}
      */
-    static createDatabasePool(database) {
+    static createDatabasePool(database, logger = console) {
         const databaseConfig = {
             host: database.host,
             user: database.user,
             password: database.password,
             database: database.name,
-            port: database.port
+            port: database.port,
+            ssl: sslOptions(database)
         }
 
-        if ( database.certificate ) {
-            databaseConfig.ssl = {
-                rejectUnauthorized: false,
-                cert: fs.readFileSync(database.certificate).toString()
-            }
-        }
+        const pool = new Pool(databaseConfig)
 
-        return new Pool(databaseConfig)
+        // An idle connection in the pool can still fail: the database
+        // restarts, fails over, or drops every connection during a
+        // blue/green switchover. pg-pool takes the connection out of the pool
+        // and emits the error on the pool. Without a listener, Node treats
+        // that as an uncaught exception and the process exits, so every pod
+        // holding an idle connection would crash at once. With one, the pool
+        // simply opens a new connection the next time it needs one.
+        pool.on('error', function(error) {
+            logger.error(`Lost an idle database connection; the pool will open a new one when it's needed. `
+                + `(${error?.message})`)
+        })
+
+        return pool
+    }
+
+    /**
+     * Check the database answers, and log whether the connection is
+     * encrypted, before the app starts taking work. A configuration that
+     * can't connect, such as a server certificate that doesn't verify, stops
+     * the app as it starts instead of failing every request.
+     */
+    async checkDatabaseConnection() {
+        const results = await this.database.query(`
+            SELECT ssl, version, cipher FROM pg_stat_ssl WHERE pid = pg_backend_pid()
+        `, [])
+
+        const connection = results.rows[0]
+        if ( connection?.ssl === true ) {
+            this.logger.info(`Connected to postgres over TLS (${connection.version}, ${connection.cipher}).`)
+        } else {
+            this.logger.info(`Connected to postgres without TLS (database.ssl is '${sslMode(this.config.database)}').`)
+        }
     }
 
     /**
@@ -144,7 +171,12 @@ module.exports = class Core {
          * Database Connection Initialization
          **********************************************************************/
         this.logger.info(`Connecting to postgres database at ${this.config.database.host}:${this.config.database.port} with ${this.config.database.user}.`)
-        this.database = Core.createDatabasePool(this.config.database)
+        if ( sslMode(this.config.database) === 'verify-full' ) {
+            this.logger.info(`Trusting these certificate authorities for the database: `
+                + `${describeCertificateAuthorities(this.config.database)}.`)
+        }
+        this.database = Core.createDatabasePool(this.config.database, this.logger)
+        await this.checkDatabaseConnection()
 
         /**********************************************************************
          * Bull Queue Initialization

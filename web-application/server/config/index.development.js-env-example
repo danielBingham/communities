@@ -33,7 +33,11 @@ module.exports = {
         port: 'env:COMMUNITIES_DATABASE_PORT',
         user: 'env:COMMUNITIES_DATABASE_USER',
         password: 'env:COMMUNITIES_DATABASE_PASSWORD',
-        name: 'env:COMMUNITIES_DATABASE_NAME'
+        name: 'env:COMMUNITIES_DATABASE_NAME',
+        // TLS to the database: 'disable' for the local database. To try
+        // 'verify-full', add certificateAuthorities too (see
+        // packages/backend/lib/database-tls.js).
+        ssl: 'env:COMMUNITIES_DATABASE_SSL'
     },
     encryption: {
         mfa: {
