@@ -20,14 +20,14 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
 const {
     getUserRelationship,
     sendFriendRequest,
     makeFriends,
     blockUser,
     clearRelationship
-} = require('../../lib/relationships')
+} = require('../../../lib/relationships')
 
 // ===========================================================================
 // About this suite

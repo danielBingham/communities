@@ -20,9 +20,9 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { logout, loginAs } = require('../../lib/authentication')
-const { getNews, createNews, cleanupNews } = require('../../lib/news')
-const { fetchPage } = require('../../lib/pages')
+const { logout, loginAs } = require('../../../lib/authentication')
+const { getNews, createNews, cleanupNews } = require('../../../lib/news')
+const { fetchPage } = require('../../../lib/pages')
 
 // ============================================================================
 // GET /about/news/:slug and /about/news (the pages, not the API) drive

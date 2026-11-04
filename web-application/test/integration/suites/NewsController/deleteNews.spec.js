@@ -20,8 +20,8 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { deleteNewsRequest, getNews, createNews, cleanupNews } = require('../../lib/news')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { deleteNewsRequest, getNews, createNews, cleanupNews } = require('../../../lib/news')
 
 // ============================================================================
 // DELETE /news/:slug drives NewsController.deleteNews(), which runs, in order:
