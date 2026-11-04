@@ -20,10 +20,12 @@ system libraries it needs.) Install it again whenever the `playwright`
 version in `package.json` changes; the run tells you if it's missing.
 
 Then, with the environment running (including the worker, which sends
-notifications), from the repository root:
+notifications), from the repository root, run either suite (see
+[Suites](#suites)):
 
 ```
-npm run test:e2e            # https://localhost:3000
+npm run test:e2e:smoke-test    # the Smoke Test, on https://localhost:3000
+npm run test:e2e               # a Full Regression: every test
 ```
 
 To run one file, from `web-application`:
@@ -32,10 +34,12 @@ To run one file, from `web-application`:
 npm run test:e2e:single -- test/e2e/suites/Post/create.spec.js
 ```
 
-And to run some tests by name, add Node's `--test-name-pattern`:
+To run some tests by name, add Node's `--test-name-pattern`; to run one
+suite's tests, its tag filter:
 
 ```
 npm run test:e2e:single -- --test-name-pattern="drafts" test/e2e/suites/Post/create.spec.js
+npm run test:e2e:single -- --experimental-test-tag-filter=smoke-test test/e2e/suites/Post/create.spec.js
 ```
 
 As with the integration tests, each run creates its fixture users and deletes
@@ -53,6 +57,8 @@ COMMUNITIES_TEST_SECRET="$(aws ssm get-parameter --region us-east-1 --name /stag
   --with-decryption --query Parameter.Value --output text)" \
   npm run test:e2e:staging    # https://staging.communities.social
 ```
+
+or `npm run test:e2e:smoke-test:staging` for the Smoke Test.
 
 The tests post as their fixture users on staging, and delete what they post
 when they're done.
@@ -119,21 +125,51 @@ Each run clears the last run's results; git ignores the folder.
   production, and every window aborts any request the page makes to it
   ([`../lib/production.js`](../lib/production.js)).
 
+## Suites
+
+The tests are organized into two suites, like
+[the manual tests](../../../documentation/testing/README.md), and each test
+is tagged with the suite it's in:
+
+| Tag | Tests | Run |
+| --- | ----- | --- |
+| `smoke-test` | The cases in a case file's Smoke Test section: the core interface and security cases. | `npm run test:e2e:smoke-test` |
+| `full-regression` | The rest: the cases in its Manual Regression and Full Regression sections. | |
+
+A Full Regression, as with the manual suites, runs both: every test, with
+`npm run test:e2e`.
+
+A test's suite is a tag on the test itself, from Node's test runner:
+
+```
+it('As a user, I should be able to make a post.', { tags: [ 'smoke-test' ] }, async function() {
+```
+
+The smoke test runs only the tests with that tag, with Node's
+`--experimental-test-tag-filter=smoke-test`. Node's filters can't combine
+tags with an "or", which is why a Full Regression runs without a filter
+rather than with both tags. A filter also leaves out any test without its tag
+and doesn't say so, so `checkSuite(t)` ([`lib/suites.js`](lib/suites.js)),
+in every file's `afterEach`, fails a test that isn't tagged with exactly one
+suite. Test tags are experimental in Node 24, which prints a warning to say
+so.
+
 ## Organization
 
-The suites follow [the manual test cases](../../../documentation/testing/test-cases):
+The files follow [the manual test cases](../../../documentation/testing/test-cases):
 one file for each entity and action, so
 `documentation/testing/test-cases/Post/update.md` is automated in
-`suites/Post/update.spec.js`. In a file, a `describe` for each of the case
-file's sections (Smoke Test, Manual Regression, Full Regression, and their
-subsections), and an `it` for each case, named as the case is.
+`suites/Post/update.spec.js`. In a file, an `it` for each case, named as the
+case is and tagged with its suite, and a `describe` for each of the case
+file's subsections (Post Drafts, say) that has cases in it.
 
 Some cases are only partly automated. "(text only)" at the end of a test's
 name means it runs the text steps of a case that also attaches an image, a
 video or a link. Where an image case and a link case have the same text
 steps, one test covers both, and a comment above it names the cases.
 
-When you automate a case, mark it in its case file: `(covered: e2e)`, or
+When you automate a case, tag its test with the suite of the section the
+case is in, and mark it in its case file: `(covered: e2e)`, or
 `(partially covered: e2e)` if part of it still needs testing by hand.
 
 ### What's covered

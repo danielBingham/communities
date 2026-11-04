@@ -25,6 +25,10 @@
  * Smoke Test's permissions at the API (PostController/getPost.spec.js); these
  * check the pages show what the API allows. The Full Regression cases are the
  * integration tests'.
+ *
+ * Each test is tagged with its suite, from the section its case is in:
+ * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
+ * ../../lib/suites.js).
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -35,6 +39,7 @@ const { createPost, deleteAllPostsForUser } = require('../../../lib/posts')
 const { makeFriends, clearRelationship } = require('../../../lib/relationships')
 
 const { startBrowser, stopBrowser, openAs, cleanUp } = require('../../lib/browser')
+const { checkSuite } = require('../../lib/suites')
 const { openPage } = require('../../lib/app')
 const posts = require('../../lib/posts')
 
@@ -74,6 +79,7 @@ describe('Read Post', function() {
 
     afterEach(async function(t) {
         await cleanUp(t)
+        checkSuite(t)
     })
 
     after(async function() {
@@ -90,66 +96,60 @@ describe('Read Post', function() {
 
     const permalinkOf = (post) => `/${user1.fixture.username}/${post.id}`
 
-    describe('Smoke Test', function() {
+    it('A user can see a public post.', { tags: [ 'smoke-test' ] }, async function() {
+        // A stranger: the user least likely to see it.
+        const { page } = await openAs('user3')
 
-        it('A user can see a public post.', async function() {
-            // A stranger: the user least likely to see it.
-            const { page } = await openAs('user3')
+        await openPage(page, permalinkOf(publicPost))
+        await posts.findPost(page, publicPost.content).waitFor()
 
-            await openPage(page, permalinkOf(publicPost))
-            await posts.findPost(page, publicPost.content).waitFor()
-
-            await openPage(page, `/${user1.fixture.username}`)
-            await posts.findPost(page, publicPost.content).waitFor()
-        })
-
-        it(`A friend of a user can see that user's private post.`, async function() {
-            const { page } = await openAs('user2')
-
-            await openPage(page, '/')
-            await posts.findPost(page, privatePost.content).waitFor()
-
-            await openPage(page, permalinkOf(privatePost))
-            await posts.findPost(page, privatePost.content).waitFor()
-        })
-
-        it(`A stranger cannot see a user's private post.`, async function() {
-            const { page } = await openAs('user3')
-
-            await openPage(page, permalinkOf(privatePost))
-            await posts.postNotFound(page).waitFor()
-            assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
-
-            // On User1's profile, the public post shows and the private one
-            // doesn't.
-            await openPage(page, `/${user1.fixture.username}`)
-            await posts.waitForPostList(page)
-            await posts.findPost(page, publicPost.content).waitFor()
-            assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
-        })
+        await openPage(page, `/${user1.fixture.username}`)
+        await posts.findPost(page, publicPost.content).waitFor()
     })
 
-    describe('Manual Regression', function() {
+    it(`A friend of a user can see that user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
+        const { page } = await openAs('user2')
 
-        it('As a user, a post I cannot see is not reachable by permalink.', async function() {
-            const author = await openAs('user1')
-            const stranger = await openAs('user3')
-            const text = posts.uniqueText('A private post to keep to friends')
+        await openPage(page, '/')
+        await posts.findPost(page, privatePost.content).waitFor()
 
-            // Make a private post (the form's default) and copy its
-            // permalink.
-            await openPage(author.page, '/')
-            await posts.openPostForm(author.page)
-            await posts.postTextbox(author.page).fill(text)
-            await posts.submitPost(author.page, '/')
+        await openPage(page, permalinkOf(privatePost))
+        await posts.findPost(page, privatePost.content).waitFor()
+    })
 
-            const post = posts.findPost(author.page, text)
-            await post.waitFor()
-            const permalink = await posts.permalink(post)
+    it(`A stranger cannot see a user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
+        const { page } = await openAs('user3')
 
-            await openPage(stranger.page, permalink)
-            await posts.postNotFound(stranger.page).waitFor()
-            assert.equal(await stranger.page.getByText(text).count(), 0)
-        })
+        await openPage(page, permalinkOf(privatePost))
+        await posts.postNotFound(page).waitFor()
+        assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
+
+        // On User1's profile, the public post shows and the private one
+        // doesn't.
+        await openPage(page, `/${user1.fixture.username}`)
+        await posts.waitForPostList(page)
+        await posts.findPost(page, publicPost.content).waitFor()
+        assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
+    })
+
+    it('As a user, a post I cannot see is not reachable by permalink.', { tags: [ 'full-regression' ] }, async function() {
+        const author = await openAs('user1')
+        const stranger = await openAs('user3')
+        const text = posts.uniqueText('A private post to keep to friends')
+
+        // Make a private post (the form's default) and copy its
+        // permalink.
+        await openPage(author.page, '/')
+        await posts.openPostForm(author.page)
+        await posts.postTextbox(author.page).fill(text)
+        await posts.submitPost(author.page, '/')
+
+        const post = posts.findPost(author.page, text)
+        await post.waitFor()
+        const permalink = await posts.permalink(post)
+
+        await openPage(stranger.page, permalink)
+        await posts.postNotFound(stranger.page).waitFor()
+        assert.equal(await stranger.page.getByText(text).count(), 0)
     })
 })

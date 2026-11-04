@@ -460,9 +460,10 @@ npx playwright install chromium
 ```
 
 Then, with the environment running (the worker too), run them from your
-machine:
+machine, the Smoke Test or every test (a Full Regression):
 
 ```
+npm run test:e2e:smoke-test
 npm run test:e2e
 ```
 

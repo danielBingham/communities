@@ -254,7 +254,11 @@ leave the attachment steps for manual testing.
 The integration tests live in `web-application/test/integration` and the
 end-to-end tests in `web-application/test/e2e`, organized like these case
 files: `test-cases/Post/update.md` is automated in
-`web-application/test/e2e/suites/Post/update.spec.js`.
+`web-application/test/e2e/suites/Post/update.spec.js`. Each end-to-end test is
+tagged with its suite, `smoke-test` for a case in the Smoke Test section and
+`full-regression` for the rest, so the automated Smoke Test can be run on its
+own (`npm run test:e2e:smoke-test`) and a Full Regression runs them all
+(`npm run test:e2e`).
 
 #### Example Test Case Definitions
 

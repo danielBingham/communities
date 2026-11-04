@@ -26,6 +26,10 @@
  * posts have text and nothing else, which makes each image case the same as
  * its link case, and one test covers both. The Full Regression cases are the
  * integration tests'.
+ *
+ * Each test is tagged with its suite, from the section its case is in:
+ * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
+ * ../../lib/suites.js).
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -36,6 +40,7 @@ const { createPost, deleteAllPostsForUser } = require('../../../lib/posts')
 const { makeFriends, clearRelationship } = require('../../../lib/relationships')
 
 const { startBrowser, stopBrowser, openAs, cleanUp } = require('../../lib/browser')
+const { checkSuite } = require('../../lib/suites')
 const { openPage } = require('../../lib/app')
 const posts = require('../../lib/posts')
 
@@ -61,6 +66,7 @@ describe('Delete Post', function() {
 
     afterEach(async function(t) {
         await cleanUp(t)
+        checkSuite(t)
     })
 
     after(async function() {
@@ -95,61 +101,55 @@ describe('Delete Post', function() {
         assert.equal(await page.getByText(post.content).count(), 0)
     }
 
-    describe('Smoke Test', function() {
+    // "As a user, I can delete a private post with an image." and, in the
+    // Manual Regression, "... with a link."
+    it('As a user, I can delete a private post. (text only)', { tags: [ 'smoke-test' ] }, async function() {
+        const post = await createPostToDelete('A private post to delete', 'private')
+        const author = await openAs('user1')
+        const friend = await openAs('user2')
 
-        // "As a user, I can delete a private post with an image." and, in the
-        // Manual Regression, "... with a link."
-        it('As a user, I can delete a private post. (text only)', async function() {
-            const post = await createPostToDelete('A private post to delete', 'private')
-            const author = await openAs('user1')
-            const friend = await openAs('user2')
+        // User2 comments and reacts.
+        await openPage(friend.page, post.permalink)
+        const friendsView = posts.findPost(friend.page, post.content)
+        await posts.react(friendsView, 'Like')
+        await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
 
-            // User2 comments and reacts.
-            await openPage(friend.page, post.permalink)
-            const friendsView = posts.findPost(friend.page, post.content)
-            await posts.react(friendsView, 'Like')
-            await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
+        await deleteFromFeed(author.page, post)
 
-            await deleteFromFeed(author.page, post)
-
-            // Gone for User2 too.
-            await openPage(friend.page, post.permalink)
-            await posts.postNotFound(friend.page).waitFor()
-            assert.equal(await friend.page.getByText(post.content).count(), 0)
-        })
+        // Gone for User2 too.
+        await openPage(friend.page, post.permalink)
+        await posts.postNotFound(friend.page).waitFor()
+        assert.equal(await friend.page.getByText(post.content).count(), 0)
     })
 
-    describe('Manual Regression', function() {
+    // "As a user, I can delete a public post with an image that has been
+    // shared." and "... with a link ...".
+    it('As a user, I can delete a public post that has been shared. (text only)', { tags: [ 'full-regression' ] }, async function() {
+        const post = await createPostToDelete('A public post to share and delete', 'public')
+        const sharing = posts.uniqueText('Sharing a doomed post')
+        const author = await openAs('user1')
+        const friend = await openAs('user2')
 
-        // "As a user, I can delete a public post with an image that has been
-        // shared." and "... with a link ...".
-        it('As a user, I can delete a public post that has been shared. (text only)', async function() {
-            const post = await createPostToDelete('A public post to share and delete', 'public')
-            const sharing = posts.uniqueText('Sharing a doomed post')
-            const author = await openAs('user1')
-            const friend = await openAs('user2')
+        // User2 comments, reacts and shares.
+        await openPage(friend.page, post.permalink)
+        const friendsView = posts.findPost(friend.page, post.content)
+        await posts.react(friendsView, 'Like')
+        await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
+        await posts.share(friend.page, friendsView, sharing)
 
-            // User2 comments, reacts and shares.
-            await openPage(friend.page, post.permalink)
-            const friendsView = posts.findPost(friend.page, post.content)
-            await posts.react(friendsView, 'Like')
-            await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
-            await posts.share(friend.page, friendsView, sharing)
+        await deleteFromFeed(author.page, post)
 
-            await deleteFromFeed(author.page, post)
+        // Gone for User2 too.
+        await openPage(friend.page, post.permalink)
+        await posts.postNotFound(friend.page).waitFor()
+        assert.equal(await friend.page.getByText(post.content).count(), 0)
 
-            // Gone for User2 too.
-            await openPage(friend.page, post.permalink)
-            await posts.postNotFound(friend.page).waitFor()
-            assert.equal(await friend.page.getByText(post.content).count(), 0)
-
-            // And from User2's share. The share itself is User2's post, and
-            // stays, with User2's own text.
-            await openPage(friend.page, '/')
-            const share = posts.findPost(friend.page, sharing)
-            await share.waitFor()
-            assert.equal(await share.getByText(post.content).count(), 0,
-                `Expected User2's share to no longer show the deleted post.`)
-        })
+        // And from User2's share. The share itself is User2's post, and
+        // stays, with User2's own text.
+        await openPage(friend.page, '/')
+        const share = posts.findPost(friend.page, sharing)
+        await share.waitFor()
+        assert.equal(await share.getByText(post.content).count(), 0,
+            `Expected User2's share to no longer show the deleted post.`)
     })
 })

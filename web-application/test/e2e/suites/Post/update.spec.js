@@ -26,6 +26,10 @@
  * posts have text and nothing else. Where an image case and a link case have
  * the same text steps, one test covers both. The Full Regression cases are
  * the integration tests'.
+ *
+ * Each test is tagged with its suite, from the section its case is in:
+ * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
+ * ../../lib/suites.js).
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -36,6 +40,7 @@ const { createPost, deleteAllPostsForUser } = require('../../../lib/posts')
 const { makeFriends, clearRelationship } = require('../../../lib/relationships')
 
 const { startBrowser, stopBrowser, openAs, cleanUp } = require('../../lib/browser')
+const { checkSuite } = require('../../lib/suites')
 const { openPage, followHeaderLink, logOut, logIn } = require('../../lib/app')
 const posts = require('../../lib/posts')
 const { eventually } = require('../../lib/wait')
@@ -62,6 +67,7 @@ describe('Update Post', function() {
 
     afterEach(async function(t) {
         await cleanUp(t)
+        checkSuite(t)
     })
 
     after(async function() {
@@ -84,143 +90,137 @@ describe('Update Post', function() {
         })
     }
 
-    describe('Smoke Test', function() {
+    // "As a user, I can edit the text of my post." The post has no image.
+    it('As a user, I can edit the text of my post. (text only)', { tags: [ 'smoke-test' ] }, async function() {
+        const original = await createPostToEdit('Before the edit')
+        const edited = posts.uniqueText('After the edit')
+        const { page } = await openAs('user1')
 
-        // "As a user, I can edit the text of my post." The post has no image.
-        it('As a user, I can edit the text of my post. (text only)', async function() {
-            const original = await createPostToEdit('Before the edit')
-            const edited = posts.uniqueText('After the edit')
+        await openPage(page, '/')
+        await posts.editPost(page, posts.findPost(page, original.content))
+        await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), original.content))
+        await posts.postTextbox(page).fill(edited)
+        await posts.saveEdit(page)
+
+        // The post's page shows the edit, and so does the feed.
+        await posts.findPost(page, edited).waitFor()
+        await openPage(page, '/')
+        await posts.findPost(page, edited).waitFor()
+        assert.equal(await posts.findPost(page, original.content).count(), 0)
+    })
+
+    describe('Post Editing', function() {
+
+        // "As a user, I can edit a post with a link." Its text steps:
+        // change the text and save, then change it and cancel. They
+        // include the one text step of "As a user, I can edit a post with
+        // an image.": change the text and cancel.
+        it('As a user, I can edit a post with a link. (text only)', { tags: [ 'full-regression' ] }, async function() {
+            const original = await createPostToEdit('Before any edits')
+            const saved = posts.uniqueText('An edit to keep')
+            const cancelled = posts.uniqueText('An edit to cancel')
             const { page } = await openAs('user1')
 
             await openPage(page, '/')
             await posts.editPost(page, posts.findPost(page, original.content))
-            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), original.content))
-            await posts.postTextbox(page).fill(edited)
+            await posts.postTextbox(page).fill(saved)
             await posts.saveEdit(page)
+            await posts.findPost(page, saved).waitFor()
 
-            // The post's page shows the edit, and so does the feed.
-            await posts.findPost(page, edited).waitFor()
-            await openPage(page, '/')
-            await posts.findPost(page, edited).waitFor()
-            assert.equal(await posts.findPost(page, original.content).count(), 0)
+            await posts.editPost(page, posts.findPost(page, saved))
+            await posts.postTextbox(page).fill(cancelled)
+            await posts.discardPostForm(page)
+
+            // Not updated, here or after a reload.
+            await posts.findPost(page, saved).waitFor()
+            assert.equal(await page.getByText(cancelled).count(), 0)
+            await page.reload()
+            await posts.findPost(page, saved).waitFor()
+            assert.equal(await page.getByText(cancelled).count(), 0)
+        })
+
+        it('As a user, edits to a post I made propagate to shares of that post. (text only)', { tags: [ 'full-regression' ] }, async function() {
+            const original = await createPostToEdit('A post to share', 'public')
+            const sharing = posts.uniqueText('Sharing my friend\'s post')
+            const edited = posts.uniqueText('The shared post, edited')
+
+            const author = await openAs('user1')
+            const sharer = await openAs('user2')
+
+            // User2 shares the post.
+            await openPage(sharer.page, `/${user1.fixture.username}/${original.id}`)
+            await posts.share(sharer.page, posts.findPost(sharer.page, original.content), sharing)
+
+            // User1 edits it.
+            await openPage(author.page, '/')
+            await posts.editPost(author.page, posts.findPost(author.page, original.content))
+            await posts.postTextbox(author.page).fill(edited)
+            await posts.saveEdit(author.page)
+            await posts.findPost(author.page, edited).waitFor()
+
+            // User2's share shows the edit.
+            await openPage(sharer.page, '/')
+            const share = posts.findPost(sharer.page, sharing)
+            await posts.findSharedPost(share, edited).waitFor()
+            assert.equal(await posts.findSharedPost(share, original.content).count(), 0)
         })
     })
 
-    describe('Manual Regression', function() {
+    describe('Post Edit Drafts', function() {
 
-        describe('Post Editing', function() {
+        // "As a user, my edit draft of a post with an image is saved
+        // across reloads." and "... with a link ...": their text steps
+        // are the same.
+        it('As a user, my edit draft of a post is saved across reloads. (text only)', { tags: [ 'full-regression' ] }, async function() {
+            const original = await createPostToEdit('Saved before the draft')
+            const draft = posts.uniqueText('An edit in progress')
+            const window = await openAs('user1')
+            let page = window.page
 
-            // "As a user, I can edit a post with a link." Its text steps:
-            // change the text and save, then change it and cancel. They
-            // include the one text step of "As a user, I can edit a post with
-            // an image.": change the text and cancel.
-            it('As a user, I can edit a post with a link. (text only)', async function() {
-                const original = await createPostToEdit('Before any edits')
-                const saved = posts.uniqueText('An edit to keep')
-                const cancelled = posts.uniqueText('An edit to cancel')
-                const { page } = await openAs('user1')
+            await openPage(page, '/')
+            await posts.editPost(page, posts.findPost(page, original.content))
+            await posts.postTextbox(page).fill(draft)
 
-                await openPage(page, '/')
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await posts.postTextbox(page).fill(saved)
-                await posts.saveEdit(page)
-                await posts.findPost(page, saved).waitFor()
+            // Navigate away from the feed and back. The post is
+            // unchanged, but editing it again picks up the draft.
+            await followHeaderLink(page, 'Friends')
+            await page.waitForURL('/friends')
+            await followHeaderLink(page, 'Feeds')
+            await posts.editPost(page, posts.findPost(page, original.content))
+            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
 
-                await posts.editPost(page, posts.findPost(page, saved))
-                await posts.postTextbox(page).fill(cancelled)
-                await posts.discardPostForm(page)
+            // Close the window, open a new one and load the feed.
+            await page.close()
+            page = await window.context.newPage()
+            await openPage(page, '/')
+            await posts.editPost(page, posts.findPost(page, original.content))
+            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
 
-                // Not updated, here or after a reload.
-                await posts.findPost(page, saved).waitFor()
-                assert.equal(await page.getByText(cancelled).count(), 0)
-                await page.reload()
-                await posts.findPost(page, saved).waitFor()
-                assert.equal(await page.getByText(cancelled).count(), 0)
-            })
-
-            it('As a user, edits to a post I made propagate to shares of that post. (text only)', async function() {
-                const original = await createPostToEdit('A post to share', 'public')
-                const sharing = posts.uniqueText('Sharing my friend\'s post')
-                const edited = posts.uniqueText('The shared post, edited')
-
-                const author = await openAs('user1')
-                const sharer = await openAs('user2')
-
-                // User2 shares the post.
-                await openPage(sharer.page, `/${user1.fixture.username}/${original.id}`)
-                await posts.share(sharer.page, posts.findPost(sharer.page, original.content), sharing)
-
-                // User1 edits it.
-                await openPage(author.page, '/')
-                await posts.editPost(author.page, posts.findPost(author.page, original.content))
-                await posts.postTextbox(author.page).fill(edited)
-                await posts.saveEdit(author.page)
-                await posts.findPost(author.page, edited).waitFor()
-
-                // User2's share shows the edit.
-                await openPage(sharer.page, '/')
-                const share = posts.findPost(sharer.page, sharing)
-                await posts.findSharedPost(share, edited).waitFor()
-                assert.equal(await posts.findSharedPost(share, original.content).count(), 0)
-            })
+            // Post the draft.
+            await posts.saveEdit(page)
+            await posts.findPost(page, draft).waitFor()
+            assert.equal(await posts.findPost(page, original.content).count(), 0)
         })
 
-        describe('Post Edit Drafts', function() {
+        // "As a user, my edit draft of a post with an image is cleared
+        // when I log out." and "... with a link ...".
+        it('As a user, my edit draft of a post is cleared when I log out. (text only)', { tags: [ 'full-regression' ] }, async function() {
+            const original = await createPostToEdit('Saved before the lost draft')
+            const draft = posts.uniqueText('An edit to lose')
+            // Its own session, since logging out ends it.
+            const { page, fixture } = await openAs('user1', { fresh: true })
 
-            // "As a user, my edit draft of a post with an image is saved
-            // across reloads." and "... with a link ...": their text steps
-            // are the same.
-            it('As a user, my edit draft of a post is saved across reloads. (text only)', async function() {
-                const original = await createPostToEdit('Saved before the draft')
-                const draft = posts.uniqueText('An edit in progress')
-                const window = await openAs('user1')
-                let page = window.page
+            await openPage(page, '/')
+            await posts.editPost(page, posts.findPost(page, original.content))
+            await posts.postTextbox(page).fill(draft)
+            await followHeaderLink(page, 'Feeds')
 
-                await openPage(page, '/')
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await posts.postTextbox(page).fill(draft)
+            await logOut(page)
+            await logIn(page, fixture)
+            await openPage(page, '/')
 
-                // Navigate away from the feed and back. The post is
-                // unchanged, but editing it again picks up the draft.
-                await followHeaderLink(page, 'Friends')
-                await page.waitForURL('/friends')
-                await followHeaderLink(page, 'Feeds')
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
-
-                // Close the window, open a new one and load the feed.
-                await page.close()
-                page = await window.context.newPage()
-                await openPage(page, '/')
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
-
-                // Post the draft.
-                await posts.saveEdit(page)
-                await posts.findPost(page, draft).waitFor()
-                assert.equal(await posts.findPost(page, original.content).count(), 0)
-            })
-
-            // "As a user, my edit draft of a post with an image is cleared
-            // when I log out." and "... with a link ...".
-            it('As a user, my edit draft of a post is cleared when I log out. (text only)', async function() {
-                const original = await createPostToEdit('Saved before the lost draft')
-                const draft = posts.uniqueText('An edit to lose')
-                // Its own session, since logging out ends it.
-                const { page, fixture } = await openAs('user1', { fresh: true })
-
-                await openPage(page, '/')
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await posts.postTextbox(page).fill(draft)
-                await followHeaderLink(page, 'Feeds')
-
-                await logOut(page)
-                await logIn(page, fixture)
-                await openPage(page, '/')
-
-                await posts.editPost(page, posts.findPost(page, original.content))
-                await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), original.content))
-            })
+            await posts.editPost(page, posts.findPost(page, original.content))
+            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), original.content))
         })
     })
 })
