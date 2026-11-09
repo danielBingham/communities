@@ -43,6 +43,9 @@ module.exports = {
     redis: {
         host: 'aws-ssm-parameter:/redis/host',
         port: 'aws-ssm-parameter:/redis/port'
+        // tls and auth default to 'disable' and 'none'. To connect the way
+        // staging and production do, add tls, auth and password as they do
+        // (see packages/backend/lib/redis-connection.js).
     },
     session: {
         cookieName: 'aws-ssm-parameter:/session/cookie-name',

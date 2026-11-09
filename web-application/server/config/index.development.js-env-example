@@ -54,6 +54,9 @@ module.exports = {
     redis: {
         host: 'env:COMMUNITIES_REDIS_HOST',
         port: 'env:COMMUNITIES_REDIS_PORT'
+        // The local Redis has no TLS or password, so tls and auth are left
+        // to their defaults, 'disable' and 'none'. Staging and production
+        // set them (see packages/backend/lib/redis-connection.js).
     },
     session: {
         cookieName: 'env:COMMUNITIES_SESSION_COOKIE_NAME',

@@ -26,6 +26,7 @@ const { LogEmailDriver, PostmarkEmailDriver } = require('./services/email')
 const { FilesystemStorage, S3Storage } = require('./services/storage')
 const { AndroidPushDriver, IOSPushDriver, LogPushDriver } = require('./services/push')
 const { checkSSLConfig } = require('./lib/database-tls')
+const { checkRedisConfig } = require('./lib/redis-connection')
 
 /**
  * The environments a configuration definition file can exist for, selected by
@@ -303,6 +304,9 @@ module.exports = class Config {
      * - `database.ssl` is a known mode, and with 'verify-full',
      *   `database.certificateAuthorities` holds a currently valid PEM
      *   certificate and the host is a name (see lib/database-tls.js);
+     * - `redis.tls` and `redis.auth` are known modes, a token goes with
+     *   'verify-full' and is one ElastiCache accepts, and with 'verify-full'
+     *   the host is a name (see lib/redis-connection.js);
      * - `email.driver` and `storage.driver` name a known driver, and each
      *   block under `notifications` is a known push driver;
      * - each driver that's selected or turned on accepts its block (see each
@@ -325,6 +329,7 @@ module.exports = class Config {
         }
 
         problems.push(...checkSSLConfig(config.database))
+        problems.push(...checkRedisConfig(config.redis))
 
         // Ask a driver to check its block, recording what it finds.
         const validate = (Driver, settings) => {

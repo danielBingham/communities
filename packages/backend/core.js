@@ -24,6 +24,7 @@ const { createClient } = require('redis')
 const Events = require('./events')
 const Logger = require('./logger')
 const { sslMode, sslOptions, describeCertificateAuthorities } = require('./lib/database-tls')
+const { nodeRedisOptions, bullRedisOptions, describeRedisConnection } = require('./lib/redis-connection')
 const { createEmailDriver } = require('./services/email')
 const { createStorage } = require('./services/storage')
 
@@ -156,6 +157,48 @@ module.exports = class Core {
     }
 
     /**
+     * Create the node-redis client the configuration names. Not connected
+     * yet: call connect(). Its duplicate()s connect the same way.
+     *
+     * Left to itself, node-redis retries a failed connection forever, and
+     * connect() never returns: an app given the wrong token, or a server
+     * whose certificate doesn't verify, would hang as it starts, logging the
+     * error over and over. So until `isStarted()` says the app has started, a
+     * failed connection isn't retried, connect() rejects with the error, and
+     * the app stops; Kubernetes restarts it. Once it's started, node-redis's
+     * own backoff reconnects through failovers and maintenance.
+     *
+     * @param {Object} redis The configuration's `redis` block: host, port
+     * and, optionally, tls, auth and password (see lib/redis-connection.js).
+     * @param {function} [isStarted] Whether the app has started. By default,
+     * it always has: failed connections are retried.
+     *
+     * @return {RedisClient}
+     */
+    static createRedisClient(redis, isStarted = () => true) {
+        const options = nodeRedisOptions(redis)
+        return createClient({
+            ...options,
+            socket: {
+                ...options.socket,
+                reconnectStrategy: (retries) => isStarted() ? Core.redisBackoff(retries) : false
+            }
+        })
+    }
+
+    /**
+     * node-redis's default reconnect delay: exponential, from 50 ms up to 2
+     * seconds, plus up to 200 ms of jitter.
+     *
+     * @param {number} retries How many times it's retried so far.
+     *
+     * @return {number} Milliseconds to wait before the next attempt.
+     */
+    static redisBackoff(retries) {
+        return Math.min(Math.pow(2, retries) * 50, 2000) + Math.floor(Math.random() * 200)
+    }
+
+    /**
      * Check the database answers, and log whether the connection is
      * encrypted, before the app starts taking work. A configuration that
      * can't connect, such as a server certificate that doesn't verify, stops
@@ -199,17 +242,26 @@ module.exports = class Core {
         /**********************************************************************
          * Bull Queue Initialization
          **********************************************************************/
-        this.logger.info(`Connecting to redis ${this.config.redis.host}:${this.config.redis.port}.`)
+        // See lib/redis-connection.js. A connection that fails as the app
+        // starts, such as a certificate that doesn't verify or a token the
+        // server doesn't accept, stops the app rather than leaving it hanging
+        // (see createRedisClient()).
+        const redisConnection = describeRedisConnection(this.config.redis)
+        this.logger.info(`Connecting to redis ${this.config.redis.host}:${this.config.redis.port} (${redisConnection}).`)
 
-        this.redis = createClient({ url: `redis://${this.config.redis.host}:${this.config.redis.port}` })
+        let redisStarted = false
+        this.redis = Core.createRedisClient(this.config.redis, () => redisStarted)
         this.redis.on('error', err => this.logger.error(`Redis connection error: `, err))
         await this.redis.connect()
 
         this.events = new Events(this.redis, this.logger)
         await this.events.initialize()
+        redisStarted = true
+        this.logger.info(`Connected to redis (${redisConnection}).`)
 
+        const redis = bullRedisOptions(this.config.redis)
         for (const name of QUEUES) {
-            this.queues[name] = new BullQueue(name, { redis: this.config.redis })
+            this.queues[name] = new BullQueue(name, { redis })
         }
 
         /**********************************************************************
