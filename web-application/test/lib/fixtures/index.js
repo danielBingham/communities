@@ -21,20 +21,20 @@
 /******************************************************************************
  * The fixture users this test run created, as the tests see them.
  *
- * setup.js creates them before any test file runs and hands them to every
+ * ../setup.js creates them before any test file runs and hands them to every
  * test process in the environment variable FIXTURES_VARIABLE, as JSON keyed
- * like fixtures/users.js. Each one carries what the run generated for it:
+ * like users.js. Each one carries what the run generated for it:
  *
  *   { key, id, name, username, email, password, status, siteRole, multifactor,
  *     multifactorSecret, recoveryCodes }
  *
  * `password` is undefined for an invited user, who has none.
- * `multifactorSecret` (the TOTP secret, for lib/multifactor.js) and
+ * `multifactorSecret` (the TOTP secret, for ../multifactor.js) and
  * `recoveryCodes` (ten, single-use) are only there for a fixture with
  * multi-factor authentication enabled.
  ******************************************************************************/
 
-const FIXTURES_VARIABLE = 'COMMUNITIES_INTEGRATION_TEST_FIXTURES'
+const FIXTURES_VARIABLE = 'COMMUNITIES_TEST_FIXTURES'
 
 let fixtures = null
 
@@ -43,8 +43,8 @@ const loadFixtures = function() {
         const json = process.env[FIXTURES_VARIABLE]
         if ( ! json ) {
             throw new Error(`This test run has no fixture users. Run the tests through `
-                + `'npm run test:integration' (or :staging, or :single), whose setup creates `
-                + `them; see test/integration/README.md.`)
+                + `'npm run test:integration' or 'npm run test:e2e' (or their :staging and `
+                + `:single variants), whose setup creates them; see test/lib/README.md.`)
         }
         fixtures = JSON.parse(json)
     }
@@ -52,12 +52,12 @@ const loadFixtures = function() {
 }
 
 /**
- * The fixture with this key from fixtures/users.js, as this run created it.
+ * The fixture with this key from users.js, as this run created it.
  */
 const getFixture = function(key) {
     const all = loadFixtures()
     if ( ! ( key in all ) ) {
-        throw new Error(`There's no fixture user '${key}'; see fixtures/users.js.`)
+        throw new Error(`There's no fixture user '${key}'; see test/lib/fixtures/users.js.`)
     }
     return all[key]
 }

@@ -20,15 +20,16 @@
 /******************************************************************************
  *      TestController
  *
- * Creates and deletes the users the integration tests log in as. A test run
- * creates every user it needs when it starts and deletes them when it ends
- * (see test/integration/README.md), so nothing is seeded ahead of time and no
- * password is kept in the repository.
+ * Creates and deletes the users the integration and end-to-end tests log in
+ * as. A test run creates every user it needs when it starts and deletes them
+ * when it ends (see test/lib/README.md), so nothing is seeded ahead of time
+ * and no password is kept in the repository.
  *
  * It can create the accounts registration can't: confirmed without an email,
  * banned, invited, a site moderator or admin, with multi-factor
  * authentication on (with a real secret and recovery codes, which it hands
- * back), or with a moderation of their profile.
+ * back), with a moderation of their profile, or with notices (the Terms of
+ * Service, the welcome notice) already seen.
  *
  * LOCAL DEVELOPMENT AND STAGING ONLY. The router only loads it there, and
  * only when the configuration has a `test.secret`; it refuses to be
@@ -36,7 +37,7 @@
  * request must also carry:
  *
  *   - the platform header set to 'test' (`X-Communities-Platform: test`), as
- *     the integration tests' requests do;
+ *     the test suites' API requests do;
  *   - that secret in SECRET_HEADER (`X-Communities-Test-Secret`). The
  *     platform header is no secret, and on staging these routes are on the
  *     internet.
@@ -84,6 +85,13 @@ const STATUSES = [ 'confirmed', 'unconfirmed', 'invited', 'banned' ]
 const SITE_ROLES = [ 'user', 'moderator', 'admin' ]
 const MULTIFACTOR_STATES = [ 'disabled', 'enabled' ]
 const SITE_MODERATION_STATUSES = [ 'flagged', 'approved', 'rejected' ]
+
+// The notices a fixture can start with already seen, as the client records
+// them in `users.notices`: `termsOfService` once the Terms of Service are
+// accepted (until then, the client sends a user to
+// /accept-terms-of-service), and `welcomeNotice` once the welcome modal is
+// closed.
+const NOTICES = [ 'termsOfService', 'welcomeNotice' ]
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -189,7 +197,8 @@ module.exports = class TestController extends BaseController {
             status: body.status ?? 'confirmed',
             siteRole: body.siteRole ?? 'user',
             multifactor: body.multifactor ?? 'disabled',
-            siteModeration: body.siteModeration ?? null
+            siteModeration: body.siteModeration ?? null,
+            notices: body.notices ?? {}
         }
 
         if ( typeof fixture.name !== 'string' || fixture.name.trim() === '' ) {
@@ -230,6 +239,18 @@ module.exports = class TestController extends BaseController {
             }
         }
 
+        if ( typeof fixture.notices !== 'object' || Array.isArray(fixture.notices) ) {
+            errors.push(`'notices' must be an object.`)
+        } else {
+            for (const [ notice, seen ] of Object.entries(fixture.notices)) {
+                if ( ! NOTICES.includes(notice) ) {
+                    errors.push(`'notices.${notice}' isn't a notice; they're: ${NOTICES.join(', ')}.`)
+                } else if ( typeof seen !== 'boolean' ) {
+                    errors.push(`'notices.${notice}' must be true or false.`)
+                }
+            }
+        }
+
         if ( errors.length > 0 ) {
             throw new ControllerError(400, 'invalid',
                 `Invalid test fixture: ${errors.join(' ')}`,
@@ -260,6 +281,11 @@ module.exports = class TestController extends BaseController {
      * @param {Object} request.body.siteModeration  (Optional) A moderation of
      * the user's profile: `{ status, flaggedBy }`, where `status` is
      * 'flagged', 'approved' or 'rejected' and `flaggedBy` is a user's id.
+     * @param {Object} request.body.notices (Optional) The notices the user
+     * has already seen, as `users.notices` records them: any of
+     * `termsOfService` and `welcomeNotice`, each true or false. None, by
+     * default, as for a new account, which the client sends to accept the
+     * Terms of Service before anything else.
      *
      * Responds 201 with `{ entity }`: the user, with every field. With
      * multi-factor authentication enabled, also `multifactorSecret` (the TOTP
@@ -303,8 +329,8 @@ module.exports = class TestController extends BaseController {
             const inserted = await client.query(`
                 INSERT INTO users (
                     email, name, username, password, birthdate, status, site_role, settings,
-                    authentication__multifactor_state, created_date, updated_date
-                ) VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $8, now(), now())
+                    authentication__multifactor_state, notices, created_date, updated_date
+                ) VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $8, $9, now(), now())
                 RETURNING id
             `, [
                 fixture.email,
@@ -314,7 +340,8 @@ module.exports = class TestController extends BaseController {
                 fixture.status,
                 fixture.siteRole,
                 this.fixtureSettings(),
-                fixture.multifactor
+                fixture.multifactor,
+                fixture.notices
             ])
             userId = inserted.rows[0].id
 
@@ -368,9 +395,11 @@ module.exports = class TestController extends BaseController {
             }
         }
 
+        const seen = Object.keys(fixture.notices).filter((notice) => fixture.notices[notice] === true)
         this.logger.info(`Created test fixture User(${userId}) '${fixture.username}': ${fixture.status}, `
             + `site ${fixture.siteRole}, multi-factor ${fixture.multifactor}`
-            + `${fixture.siteModeration ? `, profile ${fixture.siteModeration.status}` : ''}.`)
+            + `${fixture.siteModeration ? `, profile ${fixture.siteModeration.status}` : ''}`
+            + `${seen.length > 0 ? `, seen ${seen.join(' and ')}` : ''}.`)
 
         const results = await this.userDAO.selectUsers({
             where: `users.id = $1`,

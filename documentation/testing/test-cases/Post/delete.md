@@ -15,7 +15,7 @@ Deleting posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with an image.
+- [ ] As a user, I can delete a private post with an image. (partially covered: e2e)
     - As User1:
         - Create a private post with an image.
     - As User2:
@@ -38,7 +38,7 @@ Deleting posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with a link.
+- [ ] As a user, I can delete a private post with a link. (partially covered: e2e)
     - As User1:
         - Create a private post with a link.
     - As User2:
@@ -51,7 +51,7 @@ Deleting posts made to a group is covered separately in
         - Attempt to view the post.
             - **Confirm it's gone.**
 
-- [ ] As a user, I can delete a public post with an image that has been shared.
+- [ ] As a user, I can delete a public post with an image that has been shared. (partially covered: e2e)
     - As User1:
         - Create a public post with an image.
     - As User2:
@@ -66,7 +66,7 @@ Deleting posts made to a group is covered separately in
             - **Confirm it's gone.**
             - **Confirm the share is also gone.**
 
-- [ ] As a user, I can delete a public post with a link that has been shared.
+- [ ] As a user, I can delete a public post with a link that has been shared. (partially covered: e2e)
     - As User1:
         - Create a public post with a link.
     - As User2:

@@ -18,13 +18,13 @@
  *
  ******************************************************************************/
 
+const { refuseProduction } = require('./production')
+
 const API_ROOT = process.env.API_ROOT ?? 'https://localhost:3000/api/0.0.0/'
 
 const fetchEndpoint = async function(method, endpoint, options) {
 
-    if ( API_ROOT.startsWith('https://communities.social') || API_ROOT.startsWith('http://communities.social') ) {
-        throw new Error('Integration tests may not be run against production!')
-    }
+    refuseProduction(API_ROOT, 'API_ROOT')
 
     const fetchOptions = {
         method: method,

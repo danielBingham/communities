@@ -20,9 +20,9 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, login, logout, loginAs } = require('../../../lib/authentication')
-const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
-const { getPost, createPost, createGroupPost, deleteAllPostsForUser } = require('../../../lib/posts')
+const { initialize, login, logout, loginAs } = require('../../../../lib/authentication')
+const { fetchEndpoint } = require('../../../../lib/fetchEndpoint')
+const { getPost, createPost, createGroupPost, deleteAllPostsForUser } = require('../../../../lib/posts')
 const {
     createGroup,
     createSubgroup,
@@ -33,11 +33,11 @@ const {
     setGroupMemberStatus,
     setGroupMemberRole,
     removeGroupMember
-} = require('../../../lib/groups')
-const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
-const { isFeatureEnabled } = require('../../../lib/system')
+} = require('../../../../lib/groups')
+const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../../lib/relationships')
+const { isFeatureEnabled } = require('../../../../lib/system')
 
-const { getFixture } = require('../../../lib/fixtures')
+const { getFixture } = require('../../../../lib/fixtures')
 
 // Subgroups (and their compound types) are gated behind this feature flag; the
 // subgroup blocks skip themselves when it is off, exactly as in getPost.spec.js.
