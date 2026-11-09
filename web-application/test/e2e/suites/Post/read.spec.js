@@ -101,35 +101,35 @@ describe('Read Post', function() {
         const { page } = await openAs('user3')
 
         await openPage(page, permalinkOf(publicPost))
-        await posts.findPost(page, publicPost.content).waitFor()
+        await posts.getPostByText(page, publicPost.content).waitFor()
 
         await openPage(page, `/${user1.fixture.username}`)
-        await posts.findPost(page, publicPost.content).waitFor()
+        await posts.getPostByText(page, publicPost.content).waitFor()
     })
 
     it(`A friend of a user can see that user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
         const { page } = await openAs('user2')
 
         await openPage(page, '/')
-        await posts.findPost(page, privatePost.content).waitFor()
+        await posts.getPostByText(page, privatePost.content).waitFor()
 
         await openPage(page, permalinkOf(privatePost))
-        await posts.findPost(page, privatePost.content).waitFor()
+        await posts.getPostByText(page, privatePost.content).waitFor()
     })
 
     it(`A stranger cannot see a user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
         const { page } = await openAs('user3')
 
         await openPage(page, permalinkOf(privatePost))
-        await posts.postNotFound(page).waitFor()
-        assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
+        await posts.getPostNotFoundError(page).waitFor()
+        assert.equal(await posts.getPostByText(page, privatePost.content).count(), 0)
 
         // On User1's profile, the public post shows and the private one
         // doesn't.
         await openPage(page, `/${user1.fixture.username}`)
         await posts.waitForPostList(page)
-        await posts.findPost(page, publicPost.content).waitFor()
-        assert.equal(await posts.findPost(page, privatePost.content).count(), 0)
+        await posts.getPostByText(page, publicPost.content).waitFor()
+        assert.equal(await posts.getPostByText(page, privatePost.content).count(), 0)
     })
 
     it('As a user, a post I cannot see is not reachable by permalink.', { tags: [ 'full-regression' ] }, async function() {
@@ -141,15 +141,15 @@ describe('Read Post', function() {
         // permalink.
         await openPage(author.page, '/')
         await posts.openPostForm(author.page)
-        await posts.postTextbox(author.page).fill(text)
+        await posts.getPostFormTextbox(author.page).fill(text)
         await posts.submitPost(author.page, '/')
 
-        const post = posts.findPost(author.page, text)
+        const post = posts.getPostByText(author.page, text)
         await post.waitFor()
-        const permalink = await posts.permalink(post)
+        const permalink = await posts.getPermalink(post)
 
         await openPage(stranger.page, permalink)
-        await posts.postNotFound(stranger.page).waitFor()
+        await posts.getPostNotFoundError(stranger.page).waitFor()
         assert.equal(await stranger.page.getByText(text).count(), 0)
     })
 })

@@ -94,10 +94,10 @@ describe('Delete Post', function() {
     // its permalink.
     const deleteFromFeed = async function(page, post) {
         await openPage(page, '/')
-        await posts.deletePost(page, posts.findPost(page, post.content))
+        await posts.deletePost(page, posts.getPostByText(page, post.content))
 
         await openPage(page, post.permalink)
-        await posts.postNotFound(page).waitFor()
+        await posts.getPostNotFoundError(page).waitFor()
         assert.equal(await page.getByText(post.content).count(), 0)
     }
 
@@ -110,7 +110,7 @@ describe('Delete Post', function() {
 
         // User2 comments and reacts.
         await openPage(friend.page, post.permalink)
-        const friendsView = posts.findPost(friend.page, post.content)
+        const friendsView = posts.getPostByText(friend.page, post.content)
         await posts.react(friendsView, 'Like')
         await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
 
@@ -118,7 +118,7 @@ describe('Delete Post', function() {
 
         // Gone for User2 too.
         await openPage(friend.page, post.permalink)
-        await posts.postNotFound(friend.page).waitFor()
+        await posts.getPostNotFoundError(friend.page).waitFor()
         assert.equal(await friend.page.getByText(post.content).count(), 0)
     })
 
@@ -132,7 +132,7 @@ describe('Delete Post', function() {
 
         // User2 comments, reacts and shares.
         await openPage(friend.page, post.permalink)
-        const friendsView = posts.findPost(friend.page, post.content)
+        const friendsView = posts.getPostByText(friend.page, post.content)
         await posts.react(friendsView, 'Like')
         await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
         await posts.share(friend.page, friendsView, sharing)
@@ -141,13 +141,13 @@ describe('Delete Post', function() {
 
         // Gone for User2 too.
         await openPage(friend.page, post.permalink)
-        await posts.postNotFound(friend.page).waitFor()
+        await posts.getPostNotFoundError(friend.page).waitFor()
         assert.equal(await friend.page.getByText(post.content).count(), 0)
 
         // And from User2's share. The share itself is User2's post, and
         // stays, with User2's own text.
         await openPage(friend.page, '/')
-        const share = posts.findPost(friend.page, sharing)
+        const share = posts.getPostByText(friend.page, sharing)
         await share.waitFor()
         assert.equal(await share.getByText(post.content).count(), 0,
             `Expected User2's share to no longer show the deleted post.`)

@@ -113,8 +113,13 @@ Each run clears the last run's results; git ignores the folder.
 - **Finding things.** The helpers in [`lib/`](lib) find elements the way a
   person or a screen reader does, by role and accessible name
   (`page.getByRole('button', { name: 'Edit Post' })`), not by class names.
-  Each test posts text from `uniqueText()`, unique to the run, and finds its
-  posts by it, since staging has everyone else's too.
+  A helper that gets something from the page, without doing anything to it,
+  is named `get...()`, like Playwright's own `getByRole()`: `getPostByText()`
+  and `getPostFormTextbox()` return a Locator to act on or check, and
+  `getPermalink()` a value read from the page. Helpers named for an action
+  (`openPostForm()`, `editPost()`) do it. Each test posts text from
+  `uniqueText()`, unique to the run, and finds its posts by it with
+  `getPostByText()`, since staging has everyone else's too.
 - **Waiting.** Playwright waits for an element before acting on it. To check
   something the page will show eventually, wait for it
   (`locator.waitFor()`), or wrap a `node:assert` check in `eventually()`

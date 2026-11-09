@@ -97,11 +97,11 @@ describe('Create Post', function() {
 
         await openPage(page, '/')
         await posts.openPostForm(page)
-        await posts.postTextbox(page).fill(text)
+        await posts.getPostFormTextbox(page).fill(text)
         await posts.submitPost(page, '/')
 
         // Back on the feed, with the post.
-        const post = posts.findPost(page, text)
+        const post = posts.getPostByText(page, text)
         await post.waitFor()
         await post.getByRole('link', { name: user1.fixture.name }).waitFor()
     })
@@ -114,7 +114,7 @@ describe('Create Post', function() {
         await openPage(page, '/')
         await posts.openPostForm(page)
 
-        const textbox = posts.postTextbox(page)
+        const textbox = posts.getPostFormTextbox(page)
         const suggestions = page.getByRole('listbox', { name: 'User suggestions' })
 
         await textbox.pressSequentially(`${text}: `)
@@ -144,7 +144,7 @@ describe('Create Post', function() {
         await posts.submitPost(page, '/')
 
         // Both mentions are links to the friend's profile.
-        const post = posts.findPost(page, text)
+        const post = posts.getPostByText(page, text)
         const mentions = post.getByRole('link', { name: `@${friend.name}`, exact: true })
         await eventually(async () => assert.equal(await mentions.count(), 2))
         for (const mention of await mentions.all()) {
@@ -159,10 +159,10 @@ describe('Create Post', function() {
 
         await openPage(page, '/')
         await posts.openPostForm(page)
-        await posts.postTextbox(page).fill(`${text} ${unbroken}`)
+        await posts.getPostFormTextbox(page).fill(`${text} ${unbroken}`)
         await posts.submitPost(page, '/')
 
-        const post = posts.findPost(page, text)
+        const post = posts.getPostByText(page, text)
         await post.waitFor()
 
         // Neither the post nor the page grows wider than the window, on
@@ -193,7 +193,7 @@ describe('Create Post', function() {
 
             await openPage(page, '/')
             await posts.openPostForm(page)
-            await posts.postTextbox(page).fill(draft)
+            await posts.getPostFormTextbox(page).fill(draft)
 
             // Navigate away from the feed and back.
             await followHeaderLink(page, 'Friends')
@@ -202,7 +202,7 @@ describe('Create Post', function() {
 
             // The create post link shows the draft, and the form has it.
             await posts.openPostForm(page, draft)
-            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
+            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
             await followHeaderLink(page, 'Feeds')
 
             // Close the window, open a new one and load the feed.
@@ -211,15 +211,15 @@ describe('Create Post', function() {
             await openPage(page, '/')
 
             await posts.openPostForm(page, draft)
-            await eventually(async () => assert.equal(await posts.postTextbox(page).inputValue(), draft))
+            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
 
             // Post it.
             await posts.submitPost(page, '/')
-            await posts.findPost(page, draft).waitFor()
+            await posts.getPostByText(page, draft).waitFor()
 
             // Posted, it's no longer a draft.
-            await posts.createPostLink(page).waitFor()
-            assert.equal(await posts.createPostLink(page, draft).count(), 0)
+            await posts.getCreatePostLink(page).waitFor()
+            assert.equal(await posts.getCreatePostLink(page, draft).count(), 0)
         })
 
         it('As a user, my drafts are cleared out when I log out. (text only)', { tags: [ 'full-regression' ] }, async function() {
@@ -229,19 +229,19 @@ describe('Create Post', function() {
 
             await openPage(page, '/')
             await posts.openPostForm(page)
-            await posts.postTextbox(page).fill(draft)
+            await posts.getPostFormTextbox(page).fill(draft)
             await followHeaderLink(page, 'Feeds')
-            await posts.createPostLink(page, draft).waitFor()
+            await posts.getCreatePostLink(page, draft).waitFor()
 
             await logOut(page)
             await logIn(page, fixture)
             await openPage(page, '/')
 
-            await posts.createPostLink(page).waitFor()
-            assert.equal(await posts.createPostLink(page, draft).count(), 0)
+            await posts.getCreatePostLink(page).waitFor()
+            assert.equal(await posts.getCreatePostLink(page, draft).count(), 0)
 
             await posts.openPostForm(page)
-            assert.equal(await posts.postTextbox(page).inputValue(), '')
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), '')
         })
     })
 
@@ -259,9 +259,9 @@ describe('Create Post', function() {
 
             await openPage(author.page, '/')
             await posts.openPostForm(author.page)
-            await posts.postTextbox(author.page).fill(text)
+            await posts.getPostFormTextbox(author.page).fill(text)
             await posts.submitPost(author.page, '/')
-            await posts.findPost(author.page, intro).waitFor()
+            await posts.getPostByText(author.page, intro).waitFor()
 
             // The worker sends the notification, so it may take a moment
             // to arrive: check the notification menu until it does.
@@ -276,7 +276,7 @@ describe('Create Post', function() {
 
             // It links to the post.
             await notification.click()
-            await posts.findPost(page, intro).waitFor()
+            await posts.getPostByText(page, intro).waitFor()
             assert.equal(new URL(page.url()).pathname.startsWith(`/${author.fixture.username}/`), true,
                 `Expected the notification to open the post's permalink, but it opened ${page.url()}.`)
         })

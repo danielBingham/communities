@@ -22,6 +22,9 @@
  * Posts in the browser: the post form, finding posts on a page, and what a
  * post's controls do (its menu, reactions, comments, sharing).
  *
+ * The get...() functions return a Locator (or, for getPermalink(), a value
+ * read from the page) and do nothing to the page; the rest are actions.
+ *
  * For creating posts as a test's starting point, without the UI, use
  * test/lib/posts.js.
  ******************************************************************************/
@@ -56,13 +59,14 @@ const waitForPostList = async function(page) {
 }
 
 /**
- * The posts in `scope` (a page, or part of one) that include `text`.
+ * Get the posts in `scope` (a page, or part of one) whose text includes
+ * `text`.
  *
  * A shared post shows inside the post that shares it, as an article of its
  * own. Neither that article nor the post sharing it counts as including the
- * shared post's text; findSharedPost() finds it there.
+ * shared post's text; getSharedPostByText() gets it there.
  */
-const findPost = function(scope, text) {
+const getPostByText = function(scope, text) {
     const page = typeof scope.page === 'function' ? scope.page() : scope
     return scope.locator('[role="article"]:not(.shared)').filter({
         hasText: text,
@@ -71,26 +75,26 @@ const findPost = function(scope, text) {
 }
 
 /**
- * The post shared by `post` that includes `text`.
+ * Get the post that `post` shares, if its text includes `text`.
  */
-const findSharedPost = function(post, text) {
+const getSharedPostByText = function(post, text) {
     return post.locator('[role="article"].shared').filter({ hasText: text })
 }
 
 /**
- * Where `post` lives: the link on its timestamp, which is what a user copies
- * to share it. A path, like '/test-1a2b3c4d-user1/<post id>'.
+ * Get where `post` lives: the link on its timestamp, which is what a user
+ * copies to share it. A path, like '/test-1a2b3c4d-user1/<post id>'.
  */
-const permalink = async function(post) {
+const getPermalink = async function(post) {
     const id = await post.getAttribute('id')
     return await post.locator(`a[href$="/${id}"]`).first().getAttribute('href')
 }
 
 /**
- * The 404 a permalink shows when the post doesn't exist or the user can't see
- * it.
+ * Get the 404 error a permalink shows when the post doesn't exist or the user
+ * can't see it.
  */
-const postNotFound = function(page) {
+const getPostNotFoundError = function(page) {
     return page.getByRole('heading', { name: '404 Error' })
 }
 
@@ -101,17 +105,18 @@ const postNotFound = function(page) {
 const PLACEHOLDER = 'Write a new post to your feed...'
 
 /**
- * The link at the top of a feed that opens the post form. It shows the draft,
- * if there is one, and otherwise invites a new post.
+ * Get the link at the top of a feed that opens the post form. It shows the
+ * draft, if there is one, so pass `draft` to get it showing that; otherwise
+ * it invites a new post.
  */
-const createPostLink = function(page, draft) {
+const getCreatePostLink = function(page, draft) {
     return page.getByRole('link', { name: draft ?? PLACEHOLDER })
 }
 
 /**
- * The post form's text box.
+ * Get the post form's text box.
  */
-const postTextbox = function(page) {
+const getPostFormTextbox = function(page) {
     return page.getByRole('combobox', { name: 'Write a post to your feed...' })
 }
 
@@ -120,9 +125,9 @@ const postTextbox = function(page) {
  * there is one).
  */
 const openPostForm = async function(page, draft) {
-    await createPostLink(page, draft).click()
+    await getCreatePostLink(page, draft).click()
     await page.waitForURL(/\/create\?/)
-    await postTextbox(page).waitFor()
+    await getPostFormTextbox(page).waitFor()
 }
 
 /**
@@ -163,7 +168,7 @@ const editPost = async function(page, post) {
     const id = await post.getAttribute('id')
     await choosePostAction(post, 'Edit')
     await page.waitForURL((url) => url.pathname === '/create' && url.searchParams.get('postId') === id)
-    await postTextbox(page).waitFor()
+    await getPostFormTextbox(page).waitFor()
 }
 
 /**
@@ -210,7 +215,7 @@ const share = async function(page, post, text) {
     const origin = new URL(page.url()).pathname
     await post.getByRole('button', { name: 'Share post' }).click()
     await page.waitForURL(/\/create\?.*sharedPostId=/)
-    await postTextbox(page).fill(text)
+    await getPostFormTextbox(page).fill(text)
     await submitPost(page, origin)
 }
 
@@ -218,13 +223,13 @@ module.exports = {
     uniqueText: uniqueText,
 
     waitForPostList: waitForPostList,
-    findPost: findPost,
-    findSharedPost: findSharedPost,
-    permalink: permalink,
-    postNotFound: postNotFound,
+    getPostByText: getPostByText,
+    getSharedPostByText: getSharedPostByText,
+    getPermalink: getPermalink,
+    getPostNotFoundError: getPostNotFoundError,
 
-    createPostLink: createPostLink,
-    postTextbox: postTextbox,
+    getCreatePostLink: getCreatePostLink,
+    getPostFormTextbox: getPostFormTextbox,
     openPostForm: openPostForm,
     submitPost: submitPost,
     discardPostForm: discardPostForm,

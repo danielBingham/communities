@@ -26,12 +26,17 @@
  * screen reader) does, by role and accessible name, so they don't break when
  * markup or class names change. Playwright waits for each element before it
  * acts on it, up to config.TIMEOUT.
+ *
+ * Across test/e2e/lib, a function named get...() returns something from the
+ * page, usually a Playwright Locator for the test to act on or check, and
+ * does nothing to the page. The rest are actions.
  ******************************************************************************/
 
 /**
- * The header's account menu, which only a logged in user has.
+ * Get the button that opens the header's account menu, which only a logged in
+ * user has.
  */
-const accountMenu = function(page) {
+const getAccountMenuButton = function(page) {
     return page.getByRole('banner').getByRole('button', { name: 'Account Menu' })
 }
 
@@ -40,7 +45,7 @@ const accountMenu = function(page) {
  */
 const openPage = async function(page, path) {
     await page.goto(path)
-    await accountMenu(page).waitFor()
+    await getAccountMenuButton(page).waitFor()
 }
 
 /**
@@ -55,7 +60,7 @@ const followHeaderLink = async function(page, name) {
  * reloads the root page, logged out.
  */
 const logOut = async function(page) {
-    await accountMenu(page).click()
+    await getAccountMenuButton(page).click()
     await page.getByRole('menuitem', { name: 'Log Out' }).click()
     await page.getByRole('banner').getByRole('button', { name: 'Log In' }).waitFor()
 }
@@ -71,11 +76,11 @@ const logIn = async function(page, fixture) {
     await form.getByRole('textbox', { name: 'Password', exact: true }).fill(fixture.password)
     await form.getByRole('button', { name: 'Log In' }).click()
 
-    await accountMenu(page).waitFor()
+    await getAccountMenuButton(page).waitFor()
 }
 
 module.exports = {
-    accountMenu: accountMenu,
+    getAccountMenuButton: getAccountMenuButton,
     openPage: openPage,
     followHeaderLink: followHeaderLink,
     logOut: logOut,
