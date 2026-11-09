@@ -27,6 +27,18 @@ const { sslMode, sslOptions, describeCertificateAuthorities } = require('./lib/d
 const { createEmailDriver } = require('./services/email')
 const { createStorage } = require('./services/storage')
 
+/**
+ * The Bull queues, one for each kind of job. Each worker Deployment processes
+ * one of them (see worker/index.js); the web application adds jobs to them.
+ */
+const QUEUES = [
+    'process-video',
+    'resize-image',
+    'send-notifications',
+    'add-mutuals-for-relationship',
+    'remove-mutuals-for-relationship'
+]
+
 /***
  * A wrapper around our core dependencies that will be used by most of our
  * services and controllers.
@@ -58,8 +70,14 @@ module.exports = class Core {
         this.redis = null
 
         /**
-         * An instance of of a bull queue that we'll use to queue up long
-         * running jobs for pickup by the workers.
+         * An instance of Events, which publishes events to the other
+         * instances through Redis and listens for theirs.
+         */
+        this.events = null
+
+        /**
+         * The bull queues, by name (see QUEUES), that we'll use to queue up
+         * long running jobs for pickup by the workers.
          */
         this.queues = {}
 
@@ -190,11 +208,9 @@ module.exports = class Core {
         this.events = new Events(this.redis, this.logger)
         await this.events.initialize()
 
-        this.queues['process-video'] = new BullQueue('process-video', { redis: this.config.redis })
-        this.queues['resize-image'] = new BullQueue('resize-image', { redis: this.config.redis })
-        this.queues['send-notifications'] = new BullQueue('send-notifications', { redis: this.config.redis })
-        this.queues['add-mutuals-for-relationship'] = new BullQueue('add-mutuals-for-relationship', { redis: this.config.redis })
-        this.queues['remove-mutuals-for-relationship'] = new BullQueue('remove-mutuals-for-relationship', { redis: this.config.redis })
+        for (const name of QUEUES) {
+            this.queues[name] = new BullQueue(name, { redis: this.config.redis })
+        }
 
         /**********************************************************************
          * Email Driver Initialization
@@ -229,19 +245,45 @@ module.exports = class Core {
         this.logger.info('Beginning shutdown of core dependencies...')
         this.shutdownInProgress = true
 
+        // The queues go first. Closing a queue a worker is processing waits
+        // for the jobs it's running to finish, and they need Redis and the
+        // database to do it.
+        this.logger.info('Closing the redis queues.')
+        const queues = Object.entries(this.queues)
+        const closed = await Promise.allSettled(queues.map(([ , queue ]) => queue.close()))
+        closed.forEach((result, index) => {
+            if ( result.status === 'rejected' ) {
+                this.logger.error(`Couldn't close the '${queues[index][0]}' queue: ${result.reason?.message}`)
+            }
+        })
+        this.queues = {}
+        this.logger.info('Redis queues closed.')
+
+        this.logger.info('Closing the redis connections.')
+        await this.closeQuietly('the events subscriber', () => this.events?.shutdown())
+        await this.closeQuietly('the redis client', () => this.redis?.close())
+        this.events = null
+        this.redis = null
+        this.logger.info('Redis connections closed.')
+
         this.logger.info('Closing the connection pool.')
         await this.database.end()
         this.database = null
         this.logger.info('Connection pool closed.')
+    }
 
-        this.logger.info('Closing the redis queue connection.')
-
-        await this.queues['process-video'].close()
-        await this.queues['resize-image'].close()
-        await this.queues['send-notifications'].close()
-
-        this.queues = {}
-
-        this.logger.info('Redis queue closed.')
+    /**
+     * Close something during shutdown, logging rather than throwing if it
+     * fails, so the rest still gets closed.
+     *
+     * @param {string} name What's being closed, for the log.
+     * @param {function} close Closes it; may return a promise.
+     */
+    async closeQuietly(name, close) {
+        try {
+            await close()
+        } catch (error) {
+            this.logger.error(`Couldn't close ${name}: ${error?.message}`)
+        }
     }
 }
