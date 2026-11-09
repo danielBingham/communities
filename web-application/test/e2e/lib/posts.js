@@ -50,35 +50,69 @@ const uniqueText = function(label) {
 
 /**
  * Wait for the post list on the page to have loaded: its header counts the
- * posts ('0 posts', '1 to 3 of 3 Posts') once it has them. Before checking a
- * post isn't on a page, wait for this, or the check passes because nothing
- * has loaded yet.
+ * posts ('0 posts', '1 to 3 of 3 Posts') once it has them, and they're on the
+ * page.
  */
 const waitForPostList = async function(page) {
     await page.getByText(/^(0 posts|\d+ to \d+ of \d+ Posts)$/).waitFor()
 }
 
+// A post, as a list or a permalink page shows it. Posts aren't the only
+// articles on a page (comments and the profile card beside a permalink are
+// too), so it's found by its class as well as its role. A post that's shared
+// shows inside the post sharing it, as an article of its own with the same id
+// (SHARED_POST), and isn't one of these.
+const POST = '.post[role="article"]:not(.shared)'
+const SHARED_POST = '.post.shared[role="article"]'
+
+/**
+ * Wait for the page a post's permalink opens to have loaded: either the post,
+ * or the 404 error saying it doesn't exist or can't be seen.
+ */
+const waitForPermalinkPage = async function(page) {
+    await page.locator(POST).or(getPostNotFoundError(page)).first().waitFor()
+}
+
+/**
+ * Get the post with this id in `scope` (a page, or part of one).
+ *
+ * To check what a post shows, get it by its id, which doesn't change, and
+ * then check its content: getting it by the text you expect it to show would
+ * only find it if it did.
+ */
+const getPostById = function(scope, id) {
+    return scope.locator(`${POST}[id="${id}"]`)
+}
+
 /**
  * Get the posts in `scope` (a page, or part of one) whose text includes
- * `text`.
+ * `text`. For a post the test made in the browser, whose id it doesn't know.
  *
- * A shared post shows inside the post that shares it, as an article of its
- * own. Neither that article nor the post sharing it counts as including the
- * shared post's text; getSharedPostByText() gets it there.
+ * Neither the shared post inside a post that shares it, nor the post sharing
+ * it, counts as including the shared post's text; getSharedPost() gets that.
  */
 const getPostByText = function(scope, text) {
     const page = typeof scope.page === 'function' ? scope.page() : scope
-    return scope.locator('[role="article"]:not(.shared)').filter({
+    return scope.locator(POST).filter({
         hasText: text,
-        hasNot: page.locator('[role="article"].shared', { hasText: text })
+        hasNot: page.locator(SHARED_POST, { hasText: text })
     })
 }
 
 /**
- * Get the post that `post` shares, if its text includes `text`.
+ * Get the text the author wrote in `post`: its own content, without anything
+ * it shares. Its innerText() is the post as it reads, with mentions shown as
+ * '@' and the name of the person mentioned.
  */
-const getSharedPostByText = function(post, text) {
-    return post.locator('[role="article"].shared').filter({ hasText: text })
+const getPostContent = function(post) {
+    return post.locator(':scope > .post__content')
+}
+
+/**
+ * Get the post that `post` shares, which shows inside it.
+ */
+const getSharedPost = function(post) {
+    return post.locator(`:scope > ${SHARED_POST}`)
 }
 
 /**
@@ -102,15 +136,14 @@ const getPostNotFoundError = function(page) {
 // The post form
 // ============================================================================
 
-const PLACEHOLDER = 'Write a new post to your feed...'
-
 /**
  * Get the link at the top of a feed that opens the post form. It shows the
- * draft, if there is one, so pass `draft` to get it showing that; otherwise
- * it invites a new post.
+ * draft, if there is one, and otherwise 'Write a new post to your feed...'.
+ *
+ * Since its name is whatever the draft says, it's found by its class instead.
  */
-const getCreatePostLink = function(page, draft) {
-    return page.getByRole('link', { name: draft ?? PLACEHOLDER })
+const getCreatePostLink = function(page) {
+    return page.locator('a.create-post__button')
 }
 
 /**
@@ -121,11 +154,10 @@ const getPostFormTextbox = function(page) {
 }
 
 /**
- * Open the post form from the feed's create post link (showing `draft`, if
- * there is one).
+ * Open the post form from the feed's create post link.
  */
-const openPostForm = async function(page, draft) {
-    await getCreatePostLink(page, draft).click()
+const openPostForm = async function(page) {
+    await getCreatePostLink(page).click()
     await page.waitForURL(/\/create\?/)
     await getPostFormTextbox(page).waitFor()
 }
@@ -223,8 +255,11 @@ module.exports = {
     uniqueText: uniqueText,
 
     waitForPostList: waitForPostList,
+    waitForPermalinkPage: waitForPermalinkPage,
+    getPostById: getPostById,
     getPostByText: getPostByText,
-    getSharedPostByText: getSharedPostByText,
+    getPostContent: getPostContent,
+    getSharedPost: getSharedPost,
     getPermalink: getPermalink,
     getPostNotFoundError: getPostNotFoundError,
 

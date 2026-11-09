@@ -106,29 +106,91 @@ Each run clears the last run's results; git ignores the folder.
   client does, and later windows reuse that session. A test that logs out
   asks for a session of its own, `openAs(key, { fresh: true })`, so it
   doesn't end the shared one.
-- **Setting up.** What a case starts from (a post to edit, a friendship) is
-  set up through the API with the shared helpers in [`../lib`](../lib), and
-  cleaned up in the file's `after`. The steps of the case itself happen in the
-  browser.
-- **Finding things.** The helpers in [`lib/`](lib) find elements the way a
-  person or a screen reader does, by role and accessible name
-  (`page.getByRole('button', { name: 'Edit Post' })`), not by class names.
-  A helper that gets something from the page, without doing anything to it,
-  is named `get...()`, like Playwright's own `getByRole()`: `getPostByText()`
-  and `getPostFormTextbox()` return a Locator to act on or check, and
-  `getPermalink()` a value read from the page. Helpers named for an action
-  (`openPostForm()`, `editPost()`) do it. Each test posts text from
-  `uniqueText()`, unique to the run, and finds its posts by it with
-  `getPostByText()`, since staging has everyone else's too.
-- **Waiting.** Playwright waits for an element before acting on it. To check
-  something the page will show eventually, wait for it
-  (`locator.waitFor()`), or wrap a `node:assert` check in `eventually()`
-  ([`lib/wait.js`](lib/wait.js)), which retries it. Before checking that
-  something *isn't* on the page, wait for the page to have loaded, for
-  example with `waitForPostList()`.
 - **Staying off production.** The run refuses a `BASE_URL` or `API_ROOT` on
   production, and every window aborts any request the page makes to it
   ([`../lib/production.js`](../lib/production.js)).
+
+## Writing tests
+
+The standards every end-to-end test follows, so they read alike and say
+plainly what they check.
+
+### Wait for the page, then assert on it
+
+A test states each outcome it expects with an assertion from `node:assert`:
+what should be on the page *and* what shouldn't. Waiting is only for the page
+to be ready to check. A `waitFor()` that times out does fail a test, but it
+doesn't say what was expected, and a reader can't tell a wait for a page to
+load from a check of what it shows. So never let a wait be the check:
+
+```
+// Wait for the page to load...
+await posts.waitForPermalinkPage(page)
+
+// ...then assert on what it shows: the post, with the edit...
+const post = posts.getPostById(page, original.id)
+assert.equal(await posts.getPostContent(post).innerText(), edited)
+
+// ...and without the text it had before.
+assert.equal(await page.getByText(original.content).count(), 0)
+```
+
+- **Waiting.** Wait for what tells you the page has loaded, not for the thing
+  you're about to check: `waitForPostList()` for a feed or a profile,
+  `waitForPermalinkPage()` for a post's page, `page.waitForURL()` after a
+  navigation, or `locator.waitFor()` on something that loads separately (the
+  post inside a share, the list of mention suggestions).
+- **Asserting.** Then compare what the page shows to exactly what you expect:
+  `assert.equal(await locator.innerText(), expected)` for text,
+  `inputValue()` for a form field, `getAttribute()` for a link. To assert
+  something is on the page, `assert.equal(await locator.count(), 1, message)`
+  before reading it says what's missing better than a timeout would. To
+  assert it isn't, `count()` should be 0, and since `count()` doesn't wait,
+  the page has to have loaded first, or the check passes because nothing has
+  arrived yet.
+- **Things that change on their own time.** When something settles after an
+  action with nothing to wait for (a menu closing, names in mentions loading,
+  a notification the worker sends), retry the assertion itself with
+  `eventually()` ([`lib/wait.js`](lib/wait.js)) rather than waiting for the
+  outcome and asserting it afterward.
+- **Every outcome the case confirms.** Each "Confirm..." in the case file is
+  an assertion in the test.
+- **Actions wait for themselves.** Helpers that act (`submitPost()`,
+  `saveEdit()`, `deletePost()`, `react()`) wait for their action to finish
+  (the navigation, the post going), so the next step doesn't start halfway
+  through. That's not the test's check: after one, the test still asserts
+  the outcome.
+
+### Find what you check by what doesn't change
+
+To check what something shows, find it by something that doesn't depend on
+the answer. A post a test set up through the API has an id: get it with
+`getPostById()` and assert its content. Getting it with `getPostByText()` and
+the text you expect would only find it if the test had already passed. For a
+post the test makes in the browser, whose id it doesn't know, find it by the
+unique text it was given, and then assert its content in full.
+
+The helpers in [`lib/`](lib) find elements the way a person or a screen
+reader does, by role and accessible name
+(`page.getByRole('button', { name: 'Edit Post' })`), and only fall back on
+markup (an id, a class) when there's nothing else to go on, with a comment
+saying why.
+
+### Name helpers for what they do
+
+A helper that gets something from the page, without doing anything to it, is
+named `get...()`, like Playwright's own `getByRole()`: `getPostById()` and
+`getPostFormTextbox()` return a Locator to act on or check, and
+`getPermalink()` a value read from the page. A helper named for an action
+(`openPostForm()`, `editPost()`) does it. Assertions stay in the tests.
+
+### Set up through the API, act in the browser
+
+What a case starts from (a post to edit, a friendship) is set up through the
+API with the shared helpers in [`../lib`](../lib) and cleaned up in the
+file's `after`. The steps of the case itself happen in the browser. Each test
+posts text from `uniqueText()`, unique to the run, since staging has
+everyone else's posts too.
 
 ## Suites
 

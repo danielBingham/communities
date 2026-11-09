@@ -43,7 +43,6 @@ const { startBrowser, stopBrowser, openAs, cleanUp } = require('../../lib/browse
 const { checkSuite } = require('../../lib/suites')
 const { openPage, followHeaderLink, logOut, logIn } = require('../../lib/app')
 const posts = require('../../lib/posts')
-const { eventually } = require('../../lib/wait')
 
 describe('Update Post', function() {
 
@@ -95,18 +94,27 @@ describe('Update Post', function() {
         const original = await createPostToEdit('Before the edit')
         const edited = posts.uniqueText('After the edit')
         const { page } = await openAs('user1')
+        const post = posts.getPostById(page, original.id)
+        const textbox = posts.getPostFormTextbox(page)
 
         await openPage(page, '/')
-        await posts.editPost(page, posts.getPostByText(page, original.content))
-        await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), original.content))
-        await posts.getPostFormTextbox(page).fill(edited)
+        await posts.waitForPostList(page)
+        assert.equal(await posts.getPostContent(post).innerText(), original.content)
+
+        // The form starts with the post's text.
+        await posts.editPost(page, post)
+        assert.equal(await textbox.inputValue(), original.content)
+        await textbox.fill(edited)
         await posts.saveEdit(page)
 
         // The post's page shows the edit, and so does the feed.
-        await posts.getPostByText(page, edited).waitFor()
+        await posts.waitForPermalinkPage(page)
+        assert.equal(await posts.getPostContent(post).innerText(), edited)
+
         await openPage(page, '/')
-        await posts.getPostByText(page, edited).waitFor()
-        assert.equal(await posts.getPostByText(page, original.content).count(), 0)
+        await posts.waitForPostList(page)
+        assert.equal(await posts.getPostContent(post).innerText(), edited)
+        assert.equal(await page.getByText(original.content).count(), 0)
     })
 
     describe('Post Editing', function() {
@@ -120,22 +128,30 @@ describe('Update Post', function() {
             const saved = posts.uniqueText('An edit to keep')
             const cancelled = posts.uniqueText('An edit to cancel')
             const { page } = await openAs('user1')
+            const post = posts.getPostById(page, original.id)
+            const textbox = posts.getPostFormTextbox(page)
 
             await openPage(page, '/')
-            await posts.editPost(page, posts.getPostByText(page, original.content))
-            await posts.getPostFormTextbox(page).fill(saved)
+            await posts.waitForPostList(page)
+
+            // Change the text and save: it's updated.
+            await posts.editPost(page, post)
+            await textbox.fill(saved)
             await posts.saveEdit(page)
-            await posts.getPostByText(page, saved).waitFor()
+            await posts.waitForPermalinkPage(page)
+            assert.equal(await posts.getPostContent(post).innerText(), saved)
 
-            await posts.editPost(page, posts.getPostByText(page, saved))
-            await posts.getPostFormTextbox(page).fill(cancelled)
+            // Change it and cancel: it isn't, here or after a reload.
+            await posts.editPost(page, post)
+            await textbox.fill(cancelled)
             await posts.discardPostForm(page)
-
-            // Not updated, here or after a reload.
-            await posts.getPostByText(page, saved).waitFor()
+            await posts.waitForPermalinkPage(page)
+            assert.equal(await posts.getPostContent(post).innerText(), saved)
             assert.equal(await page.getByText(cancelled).count(), 0)
+
             await page.reload()
-            await posts.getPostByText(page, saved).waitFor()
+            await posts.waitForPermalinkPage(page)
+            assert.equal(await posts.getPostContent(post).innerText(), saved)
             assert.equal(await page.getByText(cancelled).count(), 0)
         })
 
@@ -149,20 +165,31 @@ describe('Update Post', function() {
 
             // User2 shares the post.
             await openPage(sharer.page, `/${user1.fixture.username}/${original.id}`)
-            await posts.share(sharer.page, posts.getPostByText(sharer.page, original.content), sharing)
+            await posts.waitForPermalinkPage(sharer.page)
+            await posts.share(sharer.page, posts.getPostById(sharer.page, original.id), sharing)
 
             // User1 edits it.
+            const post = posts.getPostById(author.page, original.id)
             await openPage(author.page, '/')
-            await posts.editPost(author.page, posts.getPostByText(author.page, original.content))
+            await posts.waitForPostList(author.page)
+            await posts.editPost(author.page, post)
             await posts.getPostFormTextbox(author.page).fill(edited)
             await posts.saveEdit(author.page)
-            await posts.getPostByText(author.page, edited).waitFor()
+            await posts.waitForPermalinkPage(author.page)
+            assert.equal(await posts.getPostContent(post).innerText(), edited)
 
-            // User2's share shows the edit.
+            // User2's share still has their own text, and the post it
+            // shares shows the edit.
             await openPage(sharer.page, '/')
+            await posts.waitForPostList(sharer.page)
             const share = posts.getPostByText(sharer.page, sharing)
-            await posts.getSharedPostByText(share, edited).waitFor()
-            assert.equal(await posts.getSharedPostByText(share, original.content).count(), 0)
+            assert.equal(await share.count(), 1, `Expected User2's share in their feed.`)
+            assert.equal(await posts.getPostContent(share).innerText(), sharing)
+
+            const shared = posts.getSharedPost(share)
+            await shared.waitFor()
+            assert.equal(await shared.getAttribute('id'), original.id)
+            assert.equal(await posts.getPostContent(shared).innerText(), edited)
         })
     })
 
@@ -176,9 +203,11 @@ describe('Update Post', function() {
             const draft = posts.uniqueText('An edit in progress')
             const window = await openAs('user1')
             let page = window.page
+            let post = posts.getPostById(page, original.id)
 
             await openPage(page, '/')
-            await posts.editPost(page, posts.getPostByText(page, original.content))
+            await posts.waitForPostList(page)
+            await posts.editPost(page, post)
             await posts.getPostFormTextbox(page).fill(draft)
 
             // Navigate away from the feed and back. The post is
@@ -186,20 +215,28 @@ describe('Update Post', function() {
             await followHeaderLink(page, 'Friends')
             await page.waitForURL('/friends')
             await followHeaderLink(page, 'Feeds')
-            await posts.editPost(page, posts.getPostByText(page, original.content))
-            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getPostContent(post).innerText(), original.content)
 
-            // Close the window, open a new one and load the feed.
+            await posts.editPost(page, post)
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft)
+
+            // Close the window, open a new one and load the feed: the same.
             await page.close()
             page = await window.context.newPage()
+            post = posts.getPostById(page, original.id)
             await openPage(page, '/')
-            await posts.editPost(page, posts.getPostByText(page, original.content))
-            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getPostContent(post).innerText(), original.content)
 
-            // Post the draft.
+            await posts.editPost(page, post)
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft)
+
+            // Post the draft: the post is updated.
             await posts.saveEdit(page)
-            await posts.getPostByText(page, draft).waitFor()
-            assert.equal(await posts.getPostByText(page, original.content).count(), 0)
+            await posts.waitForPermalinkPage(page)
+            assert.equal(await posts.getPostContent(post).innerText(), draft)
+            assert.equal(await page.getByText(original.content).count(), 0)
         })
 
         // "As a user, my edit draft of a post with an image is cleared
@@ -209,18 +246,26 @@ describe('Update Post', function() {
             const draft = posts.uniqueText('An edit to lose')
             // Its own session, since logging out ends it.
             const { page, fixture } = await openAs('user1', { fresh: true })
+            const post = posts.getPostById(page, original.id)
 
             await openPage(page, '/')
-            await posts.editPost(page, posts.getPostByText(page, original.content))
+            await posts.waitForPostList(page)
+            await posts.editPost(page, post)
             await posts.getPostFormTextbox(page).fill(draft)
             await followHeaderLink(page, 'Feeds')
+            await posts.waitForPostList(page)
 
             await logOut(page)
             await logIn(page, fixture)
             await openPage(page, '/')
 
-            await posts.editPost(page, posts.getPostByText(page, original.content))
-            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), original.content))
+            // The post is unchanged, and editing it starts from its saved
+            // text, not the draft.
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getPostContent(post).innerText(), original.content)
+
+            await posts.editPost(page, post)
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), original.content)
         })
     })
 })

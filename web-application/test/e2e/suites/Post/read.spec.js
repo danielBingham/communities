@@ -94,42 +94,63 @@ describe('Read Post', function() {
         if ( user3 ) await logout(user3.session)
     })
 
+
     const permalinkOf = (post) => `/${user1.fixture.username}/${post.id}`
 
     it('A user can see a public post.', { tags: [ 'smoke-test' ] }, async function() {
         // A stranger: the user least likely to see it.
         const { page } = await openAs('user3')
+        const post = posts.getPostById(page, publicPost.id)
 
+        // On its permalink...
         await openPage(page, permalinkOf(publicPost))
-        await posts.getPostByText(page, publicPost.content).waitFor()
+        await posts.waitForPermalinkPage(page)
+        assert.equal(await post.count(), 1, `Expected the public post on its permalink.`)
+        assert.equal(await posts.getPostContent(post).innerText(), publicPost.content)
 
+        // ... and on User1's profile.
         await openPage(page, `/${user1.fixture.username}`)
-        await posts.getPostByText(page, publicPost.content).waitFor()
+        await posts.waitForPostList(page)
+        assert.equal(await post.count(), 1, `Expected the public post on User1's profile.`)
+        assert.equal(await posts.getPostContent(post).innerText(), publicPost.content)
     })
 
     it(`A friend of a user can see that user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
         const { page } = await openAs('user2')
+        const post = posts.getPostById(page, privatePost.id)
 
+        // In their feed...
         await openPage(page, '/')
-        await posts.getPostByText(page, privatePost.content).waitFor()
+        await posts.waitForPostList(page)
+        assert.equal(await post.count(), 1, `Expected the private post in User2's feed.`)
+        assert.equal(await posts.getPostContent(post).innerText(), privatePost.content)
 
+        // ... and on its permalink.
         await openPage(page, permalinkOf(privatePost))
-        await posts.getPostByText(page, privatePost.content).waitFor()
+        await posts.waitForPermalinkPage(page)
+        assert.equal(await post.count(), 1, `Expected the private post on its permalink.`)
+        assert.equal(await posts.getPostContent(post).innerText(), privatePost.content)
     })
 
     it(`A stranger cannot see a user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
         const { page } = await openAs('user3')
 
+        // Its permalink shows the 404 instead.
         await openPage(page, permalinkOf(privatePost))
-        await posts.getPostNotFoundError(page).waitFor()
-        assert.equal(await posts.getPostByText(page, privatePost.content).count(), 0)
+        await posts.waitForPermalinkPage(page)
+        assert.equal(await posts.getPostNotFoundError(page).isVisible(), true, `Expected the 404 on the private post's permalink.`)
+        assert.equal(await posts.getPostById(page, privatePost.id).count(), 0)
+        assert.equal(await page.getByText(privatePost.content).count(), 0)
 
         // On User1's profile, the public post shows and the private one
         // doesn't.
         await openPage(page, `/${user1.fixture.username}`)
         await posts.waitForPostList(page)
-        await posts.getPostByText(page, publicPost.content).waitFor()
-        assert.equal(await posts.getPostByText(page, privatePost.content).count(), 0)
+        const shown = posts.getPostById(page, publicPost.id)
+        assert.equal(await shown.count(), 1, `Expected the public post on User1's profile.`)
+        assert.equal(await posts.getPostContent(shown).innerText(), publicPost.content)
+        assert.equal(await posts.getPostById(page, privatePost.id).count(), 0)
+        assert.equal(await page.getByText(privatePost.content).count(), 0)
     })
 
     it('As a user, a post I cannot see is not reachable by permalink.', { tags: [ 'full-regression' ] }, async function() {
@@ -144,12 +165,18 @@ describe('Read Post', function() {
         await posts.getPostFormTextbox(author.page).fill(text)
         await posts.submitPost(author.page, '/')
 
+        await posts.waitForPostList(author.page)
         const post = posts.getPostByText(author.page, text)
-        await post.waitFor()
+        assert.equal(await post.count(), 1, `Expected the post on User1's feed.`)
+        const id = await post.getAttribute('id')
         const permalink = await posts.getPermalink(post)
+        assert.equal(permalink, `/${user1.fixture.username}/${id}`)
 
+        // The stranger gets the 404, and not the post.
         await openPage(stranger.page, permalink)
-        await posts.getPostNotFoundError(stranger.page).waitFor()
+        await posts.waitForPermalinkPage(stranger.page)
+        assert.equal(await posts.getPostNotFoundError(stranger.page).isVisible(), true, `Expected the 404 on the permalink.`)
+        assert.equal(await posts.getPostById(stranger.page, id).count(), 0)
         assert.equal(await stranger.page.getByText(text).count(), 0)
     })
 })

@@ -41,6 +41,15 @@ const getAccountMenuButton = function(page) {
 }
 
 /**
+ * Get the button that opens the header's notification menu. Its accessible
+ * name counts what's unread: 'Notifications, 2 unread', or just
+ * 'Notifications'.
+ */
+const getNotificationsButton = function(page) {
+    return page.getByRole('banner').getByRole('button', { name: /^Notifications\b/ })
+}
+
+/**
  * Open `path` and wait for the app to have loaded it, logged in.
  */
 const openPage = async function(page, path) {
@@ -81,6 +90,7 @@ const logIn = async function(page, fixture) {
 
 module.exports = {
     getAccountMenuButton: getAccountMenuButton,
+    getNotificationsButton: getNotificationsButton,
     openPage: openPage,
     followHeaderLink: followHeaderLink,
     logOut: logOut,

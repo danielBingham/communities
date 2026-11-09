@@ -90,15 +90,11 @@ describe('Delete Post', function() {
         return { ...post, permalink: `/${user1.fixture.username}/${post.id}` }
     }
 
-    // As User1, delete the post from the feed, and confirm it's gone from
-    // its permalink.
+    // As User1, delete the post from the feed.
     const deleteFromFeed = async function(page, post) {
         await openPage(page, '/')
-        await posts.deletePost(page, posts.getPostByText(page, post.content))
-
-        await openPage(page, post.permalink)
-        await posts.getPostNotFoundError(page).waitFor()
-        assert.equal(await page.getByText(post.content).count(), 0)
+        await posts.waitForPostList(page)
+        await posts.deletePost(page, posts.getPostById(page, post.id))
     }
 
     // "As a user, I can delete a private post with an image." and, in the
@@ -110,15 +106,28 @@ describe('Delete Post', function() {
 
         // User2 comments and reacts.
         await openPage(friend.page, post.permalink)
-        const friendsView = posts.getPostByText(friend.page, post.content)
+        await posts.waitForPermalinkPage(friend.page)
+        const friendsView = posts.getPostById(friend.page, post.id)
         await posts.react(friendsView, 'Like')
         await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
 
+        // User1 deletes it: it's gone from their feed, and its permalink
+        // shows the 404.
         await deleteFromFeed(author.page, post)
+        await openPage(author.page, '/')
+        await posts.waitForPostList(author.page)
+        assert.equal(await posts.getPostById(author.page, post.id).count(), 0)
+        assert.equal(await author.page.getByText(post.content).count(), 0)
+
+        await openPage(author.page, post.permalink)
+        await posts.waitForPermalinkPage(author.page)
+        assert.equal(await posts.getPostNotFoundError(author.page).isVisible(), true, `Expected the 404 on the deleted post's permalink.`)
+        assert.equal(await author.page.getByText(post.content).count(), 0)
 
         // Gone for User2 too.
         await openPage(friend.page, post.permalink)
-        await posts.getPostNotFoundError(friend.page).waitFor()
+        await posts.waitForPermalinkPage(friend.page)
+        assert.equal(await posts.getPostNotFoundError(friend.page).isVisible(), true, `Expected the 404 on the deleted post's permalink.`)
         assert.equal(await friend.page.getByText(post.content).count(), 0)
     })
 
@@ -132,24 +141,33 @@ describe('Delete Post', function() {
 
         // User2 comments, reacts and shares.
         await openPage(friend.page, post.permalink)
-        const friendsView = posts.getPostByText(friend.page, post.content)
+        await posts.waitForPermalinkPage(friend.page)
+        const friendsView = posts.getPostById(friend.page, post.id)
         await posts.react(friendsView, 'Like')
         await posts.comment(friendsView, posts.uniqueText('A comment on a doomed post'))
         await posts.share(friend.page, friendsView, sharing)
 
+        // User1 deletes it: its permalink shows the 404.
         await deleteFromFeed(author.page, post)
+        await openPage(author.page, post.permalink)
+        await posts.waitForPermalinkPage(author.page)
+        assert.equal(await posts.getPostNotFoundError(author.page).isVisible(), true, `Expected the 404 on the deleted post's permalink.`)
+        assert.equal(await author.page.getByText(post.content).count(), 0)
 
         // Gone for User2 too.
         await openPage(friend.page, post.permalink)
-        await posts.getPostNotFoundError(friend.page).waitFor()
+        await posts.waitForPermalinkPage(friend.page)
+        assert.equal(await posts.getPostNotFoundError(friend.page).isVisible(), true, `Expected the 404 on the deleted post's permalink.`)
         assert.equal(await friend.page.getByText(post.content).count(), 0)
 
         // And from User2's share. The share itself is User2's post, and
         // stays, with User2's own text.
         await openPage(friend.page, '/')
+        await posts.waitForPostList(friend.page)
         const share = posts.getPostByText(friend.page, sharing)
-        await share.waitFor()
-        assert.equal(await share.getByText(post.content).count(), 0,
-            `Expected User2's share to no longer show the deleted post.`)
+        assert.equal(await share.count(), 1, `Expected User2's share to stay in their feed.`)
+        assert.equal(await posts.getPostContent(share).innerText(), sharing)
+        assert.equal(await posts.getSharedPost(share).count(), 0, `Expected User2's share to no longer show the deleted post.`)
+        assert.equal(await friend.page.getByText(post.content).count(), 0)
     })
 })

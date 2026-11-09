@@ -47,7 +47,7 @@ const { makeFriends, clearRelationship } = require('../../../lib/relationships')
 const config = require('../../lib/config')
 const { startBrowser, stopBrowser, openAs, cleanUp } = require('../../lib/browser')
 const { checkSuite } = require('../../lib/suites')
-const { openPage, followHeaderLink, logOut, logIn } = require('../../lib/app')
+const { getNotificationsButton, openPage, followHeaderLink, logOut, logIn } = require('../../lib/app')
 const posts = require('../../lib/posts')
 const { eventually } = require('../../lib/wait')
 
@@ -91,6 +91,7 @@ describe('Create Post', function() {
         if ( user3 ) await logout(user3.session)
     })
 
+
     it('As a user, I should be able to make a post.', { tags: [ 'smoke-test' ] }, async function() {
         const { page } = await openAs('user1')
         const text = posts.uniqueText('A post from the feed')
@@ -100,10 +101,14 @@ describe('Create Post', function() {
         await posts.getPostFormTextbox(page).fill(text)
         await posts.submitPost(page, '/')
 
-        // Back on the feed, with the post.
+        // Back on the feed, with the post, by User1.
+        assert.equal(new URL(page.url()).pathname, '/')
+        await posts.waitForPostList(page)
         const post = posts.getPostByText(page, text)
-        await post.waitFor()
-        await post.getByRole('link', { name: user1.fixture.name }).waitFor()
+        assert.equal(await post.count(), 1, `Expected the post on the feed.`)
+        assert.equal(await posts.getPostContent(post).innerText(), text)
+        assert.equal(await post.getByRole('link', { name: user1.fixture.name, exact: true }).getAttribute('href'),
+            `/${user1.fixture.username}`)
     })
 
     it('As a user, I should be able to mention my friends in a post.', { tags: [ 'smoke-test' ] }, async function() {
@@ -119,34 +124,42 @@ describe('Create Post', function() {
 
         await textbox.pressSequentially(`${text}: `)
 
-        // Start a mention with part of the friend's name.
+        // Start a mention with part of the friend's name. Only friends are
+        // suggested: User3's name matches too, but they're a stranger.
         await textbox.pressSequentially('@Test Us')
-        await suggestions.getByRole('option', { name: friend.name, exact: true }).waitFor()
-        // Only friends are suggested: User3's name matches too, but
-        // they're a stranger.
-        assert.deepEqual(await suggestions.getByRole('option').allTextContents(), [ friend.name ],
-            `Expected only User1's friend to be suggested.`)
+        await suggestions.getByRole('option').first().waitFor()
+        assert.deepEqual(await suggestions.getByRole('option').allInnerTexts(), [ friend.name ])
 
-        // Select it.
+        // Select it: the mention is completed with the friend's username.
         await textbox.press('Enter')
-        await suggestions.waitFor({ state: 'hidden' })
-        await eventually(async () => assert.equal(await textbox.inputValue(), `${text}: @${friend.username} `))
+        await eventually(async () => assert.equal(await suggestions.isVisible(), false,
+            `Expected the suggestions to close once one was chosen.`))
+        assert.equal(await textbox.inputValue(), `${text}: @${friend.username} `)
 
         // Start another with the friend's username, and finish typing it
         // without choosing the suggestion. Pausing before the last
         // character, as a person would, lets the suggestions catch up:
         // the list only closes when they include the username typed.
         await textbox.pressSequentially(`and @${friend.username.slice(0, -1)}`)
-        await suggestions.getByRole('option', { name: friend.name, exact: true }).waitFor()
+        await suggestions.getByRole('option').first().waitFor()
+        assert.deepEqual(await suggestions.getByRole('option').allInnerTexts(), [ friend.name ])
+
         await textbox.pressSequentially(friend.username.slice(-1))
-        await suggestions.waitFor({ state: 'hidden' })
+        await eventually(async () => assert.equal(await suggestions.isVisible(), false,
+            `Expected the suggestions to close once the username was typed in full.`))
+        assert.equal(await textbox.inputValue(), `${text}: @${friend.username} and @${friend.username}`)
 
         await posts.submitPost(page, '/')
 
-        // Both mentions are links to the friend's profile.
+        // The post shows both mentions by the friend's name, as links to
+        // their profile.
+        await posts.waitForPostList(page)
         const post = posts.getPostByText(page, text)
-        const mentions = post.getByRole('link', { name: `@${friend.name}`, exact: true })
-        await eventually(async () => assert.equal(await mentions.count(), 2))
+        assert.equal(await post.count(), 1, `Expected the post on the feed.`)
+        const mentions = post.getByRole('link', { name: /^@/ })
+        await eventually(async () => assert.deepEqual(await mentions.allInnerTexts(), [ `@${friend.name}`, `@${friend.name}` ],
+            `Expected both mentions to show the friend's name.`))
+        assert.equal(await posts.getPostContent(post).innerText(), `${text}: @${friend.name} and @${friend.name}`)
         for (const mention of await mentions.all()) {
             assert.equal(await mention.getAttribute('href'), `/${friend.username}`)
         }
@@ -154,16 +167,17 @@ describe('Create Post', function() {
 
     it('As a user, I should be able to post long strings without breaking the app.', { tags: [ 'full-regression' ] }, async function() {
         const { page } = await openAs('user1')
-        const text = posts.uniqueText('A long unbroken string:')
-        const unbroken = 'a'.repeat(600)
+        const text = `${posts.uniqueText('A long unbroken string:')} ${'a'.repeat(600)}`
 
         await openPage(page, '/')
         await posts.openPostForm(page)
-        await posts.getPostFormTextbox(page).fill(`${text} ${unbroken}`)
+        await posts.getPostFormTextbox(page).fill(text)
         await posts.submitPost(page, '/')
 
+        await posts.waitForPostList(page)
         const post = posts.getPostByText(page, text)
-        await post.waitFor()
+        assert.equal(await post.count(), 1, `Expected the post on the feed.`)
+        assert.equal(await posts.getPostContent(post).innerText(), text)
 
         // Neither the post nor the page grows wider than the window, on
         // a desktop or on a phone.
@@ -195,31 +209,36 @@ describe('Create Post', function() {
             await posts.openPostForm(page)
             await posts.getPostFormTextbox(page).fill(draft)
 
-            // Navigate away from the feed and back.
+            // Navigate away from the feed and back. The create post link
+            // shows the draft, and the form has it.
             await followHeaderLink(page, 'Friends')
             await page.waitForURL('/friends')
             await followHeaderLink(page, 'Feeds')
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getCreatePostLink(page).innerText(), draft)
 
-            // The create post link shows the draft, and the form has it.
-            await posts.openPostForm(page, draft)
-            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
+            await posts.openPostForm(page)
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft)
             await followHeaderLink(page, 'Feeds')
 
-            // Close the window, open a new one and load the feed.
+            // Close the window, open a new one and load the feed. The draft
+            // is still there.
             await page.close()
             page = await window.context.newPage()
             await openPage(page, '/')
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getCreatePostLink(page).innerText(), draft)
 
-            await posts.openPostForm(page, draft)
-            await eventually(async () => assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft))
+            await posts.openPostForm(page)
+            assert.equal(await posts.getPostFormTextbox(page).inputValue(), draft)
 
-            // Post it.
+            // Post it: it's on the feed, and no longer a draft.
             await posts.submitPost(page, '/')
-            await posts.getPostByText(page, draft).waitFor()
-
-            // Posted, it's no longer a draft.
-            await posts.getCreatePostLink(page).waitFor()
-            assert.equal(await posts.getCreatePostLink(page, draft).count(), 0)
+            await posts.waitForPostList(page)
+            const post = posts.getPostByText(page, draft)
+            assert.equal(await post.count(), 1, `Expected the post on the feed.`)
+            assert.equal(await posts.getPostContent(post).innerText(), draft)
+            assert.equal(await posts.getCreatePostLink(page).innerText(), 'Write a new post to your feed...')
         })
 
         it('As a user, my drafts are cleared out when I log out. (text only)', { tags: [ 'full-regression' ] }, async function() {
@@ -231,14 +250,16 @@ describe('Create Post', function() {
             await posts.openPostForm(page)
             await posts.getPostFormTextbox(page).fill(draft)
             await followHeaderLink(page, 'Feeds')
-            await posts.getCreatePostLink(page, draft).waitFor()
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getCreatePostLink(page).innerText(), draft)
 
             await logOut(page)
             await logIn(page, fixture)
             await openPage(page, '/')
 
-            await posts.getCreatePostLink(page).waitFor()
-            assert.equal(await posts.getCreatePostLink(page, draft).count(), 0)
+            // The draft is gone, from the create post link and the form.
+            await posts.waitForPostList(page)
+            assert.equal(await posts.getCreatePostLink(page).innerText(), 'Write a new post to your feed...')
 
             await posts.openPostForm(page)
             assert.equal(await posts.getPostFormTextbox(page).inputValue(), '')
@@ -261,24 +282,34 @@ describe('Create Post', function() {
             await posts.openPostForm(author.page)
             await posts.getPostFormTextbox(author.page).fill(text)
             await posts.submitPost(author.page, '/')
-            await posts.getPostByText(author.page, intro).waitFor()
+            await posts.waitForPostList(author.page)
+            const post = posts.getPostByText(author.page, intro)
+            assert.equal(await post.count(), 1, `Expected the post on the feed.`)
+            const id = await post.getAttribute('id')
 
-            // The worker sends the notification, so it may take a moment
-            // to arrive: check the notification menu until it does.
+            // The worker sends the notification, so it may take a moment to
+            // arrive: open the notification menu until it's there.
             const page = mentioned.page
-            const notification = page.getByRole('menuitem')
-                .filter({ hasText: `${author.fixture.name} mentioned you in their post, "${intro}` })
+            const notifications = getNotificationsButton(page)
+            const notification = page.getByRole('menuitem').filter({ hasText: `mentioned you in their post, "${intro}` })
             await eventually(async () => {
                 await openPage(page, '/')
-                await page.getByRole('banner').getByRole('button', { name: /^Notifications, \d+ unread$/ }).click()
+                await notifications.click()
                 await notification.waitFor({ timeout: 1000 })
             }, { timeout: Math.max(config.TIMEOUT, 30000) })
 
+            assert.match(await notifications.getAttribute('aria-label'), /^Notifications, [1-9]\d* unread$/)
+            assert.equal(await notification.innerText(),
+                `${author.fixture.name} mentioned you in their post, "${text.substring(0, 20)}...".`)
+
             // It links to the post.
             await notification.click()
-            await posts.getPostByText(page, intro).waitFor()
-            assert.equal(new URL(page.url()).pathname.startsWith(`/${author.fixture.username}/`), true,
-                `Expected the notification to open the post's permalink, but it opened ${page.url()}.`)
+            await posts.waitForPermalinkPage(page)
+            assert.equal(new URL(page.url()).pathname, `/${author.fixture.username}/${id}`)
+            // The mention shows the username until the user has loaded, and
+            // then their name.
+            await eventually(async () => assert.equal(await posts.getPostContent(posts.getPostById(page, id)).innerText(),
+                `${intro} @${mentioned.fixture.name}, this is for you.`))
         })
     })
 })
