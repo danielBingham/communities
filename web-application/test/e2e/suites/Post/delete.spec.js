@@ -27,9 +27,9 @@
  * its link case, and one test covers both. The Full Regression cases are the
  * integration tests'.
  *
- * Each test is tagged with its suite, from the section its case is in:
- * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
- * ../../lib/suites.js).
+ * Each test is tagged with every suite it's in (see ../../lib/suites.js):
+ * all of them 'full-regression', and the Smoke Test's cases 'smoke-test'
+ * too.
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -99,7 +99,7 @@ describe('Delete Post', function() {
 
     // "As a user, I can delete a private post with an image." and, in the
     // Manual Regression, "... with a link."
-    it('As a user, I can delete a private post. (text only)', { tags: [ 'smoke-test' ] }, async function() {
+    it('As a user, I can delete a private post. (text only)', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const post = await createPostToDelete('A private post to delete', 'private')
         const author = await openAs('user1')
         const friend = await openAs('user2')

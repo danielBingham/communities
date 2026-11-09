@@ -32,9 +32,9 @@
  * The draft cases are run with text only: "(text only)" in a test's name
  * means it covers the text half of a case that also attaches media.
  *
- * Each test is tagged with its suite, from the section its case is in:
- * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
- * ../../lib/suites.js).
+ * Each test is tagged with every suite it's in (see ../../lib/suites.js):
+ * all of them 'full-regression', and the Smoke Test's cases 'smoke-test'
+ * too.
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -92,7 +92,7 @@ describe('Create Post', function() {
     })
 
 
-    it('As a user, I should be able to make a post.', { tags: [ 'smoke-test' ] }, async function() {
+    it('As a user, I should be able to make a post.', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const { page } = await openAs('user1')
         const text = posts.uniqueText('A post from the feed')
 
@@ -111,7 +111,7 @@ describe('Create Post', function() {
             `/${user1.fixture.username}`)
     })
 
-    it('As a user, I should be able to mention my friends in a post.', { tags: [ 'smoke-test' ] }, async function() {
+    it('As a user, I should be able to mention my friends in a post.', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const { page } = await openAs('user1')
         const friend = user2.fixture
         const text = posts.uniqueText('Mentioning a friend')

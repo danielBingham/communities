@@ -26,9 +26,9 @@
  * check the pages show what the API allows. The Full Regression cases are the
  * integration tests'.
  *
- * Each test is tagged with its suite, from the section its case is in:
- * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
- * ../../lib/suites.js).
+ * Each test is tagged with every suite it's in (see ../../lib/suites.js):
+ * all of them 'full-regression', and the Smoke Test's cases 'smoke-test'
+ * too.
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -97,7 +97,7 @@ describe('Read Post', function() {
 
     const permalinkOf = (post) => `/${user1.fixture.username}/${post.id}`
 
-    it('A user can see a public post.', { tags: [ 'smoke-test' ] }, async function() {
+    it('A user can see a public post.', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         // A stranger: the user least likely to see it.
         const { page } = await openAs('user3')
         const post = posts.getPostById(page, publicPost.id)
@@ -115,7 +115,7 @@ describe('Read Post', function() {
         assert.equal(await posts.getPostContent(post).innerText(), publicPost.content)
     })
 
-    it(`A friend of a user can see that user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
+    it(`A friend of a user can see that user's private post.`, { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const { page } = await openAs('user2')
         const post = posts.getPostById(page, privatePost.id)
 
@@ -132,7 +132,7 @@ describe('Read Post', function() {
         assert.equal(await posts.getPostContent(post).innerText(), privatePost.content)
     })
 
-    it(`A stranger cannot see a user's private post.`, { tags: [ 'smoke-test' ] }, async function() {
+    it(`A stranger cannot see a user's private post.`, { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const { page } = await openAs('user3')
 
         // Its permalink shows the 404 instead.

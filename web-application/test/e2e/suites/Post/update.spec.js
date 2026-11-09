@@ -27,9 +27,9 @@
  * the same text steps, one test covers both. The Full Regression cases are
  * the integration tests'.
  *
- * Each test is tagged with its suite, from the section its case is in:
- * 'smoke-test' for the Smoke Test, 'full-regression' for the rest (see
- * ../../lib/suites.js).
+ * Each test is tagged with every suite it's in (see ../../lib/suites.js):
+ * all of them 'full-regression', and the Smoke Test's cases 'smoke-test'
+ * too.
  ******************************************************************************/
 
 const { describe, it, before, after, afterEach } = require('node:test')
@@ -90,7 +90,7 @@ describe('Update Post', function() {
     }
 
     // "As a user, I can edit the text of my post." The post has no image.
-    it('As a user, I can edit the text of my post. (text only)', { tags: [ 'smoke-test' ] }, async function() {
+    it('As a user, I can edit the text of my post. (text only)', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
         const original = await createPostToEdit('Before the edit')
         const edited = posts.uniqueText('After the edit')
         const { page } = await openAs('user1')

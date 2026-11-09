@@ -20,44 +20,46 @@
 
 /******************************************************************************
  * The suites the end-to-end tests are organized into, which follow the
- * manual test suites (documentation/testing/README.md):
+ * manual test suites (documentation/testing/README.md). Like those, they
+ * nest: a Full Regression includes the Smoke Test.
  *
+ *   full-regression   Every test.
  *   smoke-test        The cases in a case file's Smoke Test section.
- *   full-regression   The rest: its Manual Regression and Full Regression
- *                     sections.
  *
- * Each test names its suite with a tag, on the test itself:
+ * Each test is tagged with every suite it's in, on the test itself:
  *
- *     it('As a user, I should be able to make a post.', { tags: [ 'smoke-test' ] }, ...)
+ *     it('As a user, I should be able to make a post.', { tags: [ 'smoke-test', 'full-regression' ] }, ...)
+ *     it('As a user, I should be able to post long strings ...', { tags: [ 'full-regression' ] }, ...)
  *
  * `npm run test:e2e:smoke-test` runs only the smoke-test tests, with Node's
- * `--experimental-test-tag-filter=smoke-test`. A full regression, like the
- * manual one, is every test, both suites: `npm run test:e2e`, with no filter.
+ * `--experimental-test-tag-filter=smoke-test`. `npm run test:e2e`, a full
+ * regression, runs every test without a filter; the full-regression tag
+ * says so in the test.
  *
  * A tag filter leaves out every test without the tag, and says nothing about
- * it. So a test without a suite would never be in a smoke test run, and a
- * misspelled tag would drop a smoke test without anyone noticing.
- * checkSuite(t), in each file's `afterEach`, fails any test that doesn't name
- * exactly one of the suites, so a full regression run catches it.
+ * it. Since every test is in the full regression, checkSuite(t), in each
+ * file's `afterEach`, fails any test without the full-regression tag. That
+ * catches a test someone forgot to tag, or tagged with a misspelling. More
+ * tags for narrower suites (`permissions`, say) can go alongside it.
  ******************************************************************************/
 
-const SUITES = [ 'smoke-test', 'full-regression' ]
+const FULL_REGRESSION = 'full-regression'
 
 /**
- * Throw unless the test that just ran is tagged with exactly one suite.
+ * Throw unless the test that just ran is tagged as part of the full
+ * regression, as every test is.
  *
  * @param {TestContext} t   The test's context, which `afterEach` is given.
  */
 const checkSuite = function(t) {
-    const suites = t.tags.filter((tag) => SUITES.includes(tag))
-    if ( suites.length !== 1 ) {
-        throw new Error(`'${t.name}' must be tagged with exactly one suite, `
-            + `{ tags: [ '${SUITES.join(`' ] } or { tags: [ '`)}' ] }, but its tags are `
-            + `${JSON.stringify(t.tags)}. See test/e2e/README.md.`)
+    if ( ! t.tags.includes(FULL_REGRESSION) ) {
+        throw new Error(`'${t.name}' must be tagged '${FULL_REGRESSION}', as every test is, `
+            + `along with any other suite it's in: { tags: [ '${FULL_REGRESSION}' ] } or `
+            + `{ tags: [ 'smoke-test', '${FULL_REGRESSION}' ] }. Its tags are ${JSON.stringify(t.tags)}. `
+            + `See test/e2e/README.md.`)
     }
 }
 
 module.exports = {
-    SUITES: SUITES,
     checkSuite: checkSuite
 }

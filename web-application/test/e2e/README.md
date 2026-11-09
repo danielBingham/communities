@@ -195,31 +195,34 @@ everyone else's posts too.
 ## Suites
 
 The tests are organized into two suites, like
-[the manual tests](../../../documentation/testing/README.md), and each test
-is tagged with the suite it's in:
+[the manual tests](../../../documentation/testing/README.md), and as with
+those, a Full Regression includes the Smoke Test. Each test is tagged with
+every suite it's in:
 
 | Tag | Tests | Run |
 | --- | ----- | --- |
+| `full-regression` | Every test. | `npm run test:e2e` |
 | `smoke-test` | The cases in a case file's Smoke Test section: the core interface and security cases. | `npm run test:e2e:smoke-test` |
-| `full-regression` | The rest: the cases in its Manual Regression and Full Regression sections. | |
 
-A Full Regression, as with the manual suites, runs both: every test, with
-`npm run test:e2e`.
-
-A test's suite is a tag on the test itself, from Node's test runner:
+The tags go on the test itself, with Node's test runner:
 
 ```
-it('As a user, I should be able to make a post.', { tags: [ 'smoke-test' ] }, async function() {
+it('As a user, I should be able to make a post.', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
+it('As a user, I should be able to post long strings without breaking the app.', { tags: [ 'full-regression' ] }, async function() {
 ```
 
-The smoke test runs only the tests with that tag, with Node's
-`--experimental-test-tag-filter=smoke-test`. Node's filters can't combine
-tags with an "or", which is why a Full Regression runs without a filter
-rather than with both tags. A filter also leaves out any test without its tag
-and doesn't say so, so `checkSuite(t)` ([`lib/suites.js`](lib/suites.js)),
-in every file's `afterEach`, fails a test that isn't tagged with exactly one
-suite. Test tags are experimental in Node 24, which prints a warning to say
-so.
+The smoke test runs only the tests tagged `smoke-test`, with Node's
+`--experimental-test-tag-filter=smoke-test`. A Full Regression runs every
+test without a filter; the `full-regression` tag is there so each test says
+which suites it's in. A filter leaves out any test without its tag and
+doesn't say so, so `checkSuite(t)` ([`lib/suites.js`](lib/suites.js)), in
+every file's `afterEach`, fails any test that isn't tagged `full-regression`,
+which catches one someone forgot to tag. Tags for narrower suites
+(`permissions`, say) can go alongside the others.
+
+Test tags are experimental in Node 24. The `test:e2e` scripts run Node with
+`--disable-warning=ExperimentalWarning`, so it doesn't warn about that on
+every run; other warnings, deprecations included, still show.
 
 ## Organization
 
@@ -227,7 +230,7 @@ The files follow [the manual test cases](../../../documentation/testing/test-cas
 one file for each entity and action, so
 `documentation/testing/test-cases/Post/update.md` is automated in
 `suites/Post/update.spec.js`. In a file, an `it` for each case, named as the
-case is and tagged with its suite, and a `describe` for each of the case
+case is and tagged with its suites, and a `describe` for each of the case
 file's subsections (Post Drafts, say) that has cases in it.
 
 Some cases are only partly automated. "(text only)" at the end of a test's
@@ -235,9 +238,10 @@ name means it runs the text steps of a case that also attaches an image, a
 video or a link. Where an image case and a link case have the same text
 steps, one test covers both, and a comment above it names the cases.
 
-When you automate a case, tag its test with the suite of the section the
-case is in, and mark it in its case file: `(covered: e2e)`, or
-`(partially covered: e2e)` if part of it still needs testing by hand.
+When you automate a case, tag its test `full-regression`, and `smoke-test`
+as well if the case is in its file's Smoke Test section, and mark it in its
+case file: `(covered: e2e)`, or `(partially covered: e2e)` if part of it
+still needs testing by hand.
 
 ### What's covered
 
