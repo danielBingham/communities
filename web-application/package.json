@@ -1,6 +1,6 @@
 {
   "name": "@communities/web-application",
-  "version": "0.24.1",
+  "version": "0.24.2-rc.1",
   "description": "The web application for Communities.  Non-profit social media.",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
