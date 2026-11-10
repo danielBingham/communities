@@ -34,10 +34,12 @@ const WelcomeSplash = function() {
         logger.error(error)
     }
 
+    // The site header goes outside <main>, as in the other layouts, so it's
+    // the page's banner landmark; <main> holds the page's own content.
     return (
-        <main id="welcome" className="welcome-splash">
+        <div id="welcome" className="welcome-splash">
             <Header transparent />
-            <div className="welcome-splash__body">
+            <main className="welcome-splash__body">
                 <div className="welcome-splash__intro">
                     <div className="welcome-splash__intro-right">
                         <div className="welcome-splash__intro-heading">
@@ -81,8 +83,8 @@ const WelcomeSplash = function() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     )
 }
 

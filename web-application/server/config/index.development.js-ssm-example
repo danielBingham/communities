@@ -54,7 +54,15 @@ module.exports = {
     },
     redis: {
         host: 'aws-ssm-parameter:/redis/host',
-        port: 'aws-ssm-parameter:/redis/port'
+        port: 'aws-ssm-parameter:/redis/port',
+        // TLS to Redis: 'verify-full' checks the server's certificate and
+        // host name against Node's own certificate authorities; 'disable'
+        // connects without TLS. AUTH: 'token' sends password, the
+        // ElastiCache AUTH token, and needs 'verify-full'; 'none' sends no
+        // password. See packages/backend/lib/redis-connection.js.
+        tls: 'aws-ssm-parameter:/redis/tls',
+        auth: 'aws-ssm-parameter:/redis/auth',
+        password: 'aws-ssm-parameter:/redis/password'
     },
     session: {
         cookieName: 'aws-ssm-parameter:/session/cookie-name',

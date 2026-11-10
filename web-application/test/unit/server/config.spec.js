@@ -6,10 +6,11 @@
  * need it too; these tests fail until they have it. The exceptions are the
  * email, storage and notifications blocks, where the environment example uses
  * the log, filesystem and log drivers; the web application's `test` block,
- * which production must never have; and `database.certificateAuthorities`,
- * which only `database.ssl: 'verify-full'` uses, so the environment example,
- * which connects without TLS, leaves it out. Covers the web application and
- * the worker.
+ * which production must never have; `database.certificateAuthorities`, which
+ * only `database.ssl: 'verify-full'` uses; and `redis.password`, which only
+ * `redis.auth: 'token'` uses. The environment example connects to the local
+ * database without TLS and to the local Redis without AUTH, so it leaves
+ * those two out. Covers the web application and the worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -40,9 +41,10 @@ const flatten = function(definition, prefix = '') {
 // The integration test fixtures' secret: staging and development only.
 const testBlock = (key) => key.startsWith('test.')
 
-// The database's certificate authorities: only used with verify-full, which
-// the environment example (no TLS to the local database) doesn't use.
-const verifyFullOnly = (key) => key === 'database.certificateAuthorities'
+// Values only one mode uses, which the environment example doesn't: the
+// database's certificate authorities, for verify-full (no TLS to the local
+// database), and Redis's AUTH token, for 'token' (no AUTH to the local Redis).
+const unusedLocally = (key) => key === 'database.certificateAuthorities' || key === 'redis.password'
 const withoutTestBlock = (definition) => Object.fromEntries(
     Object.entries(definition).filter(([key]) => ! testBlock(key)))
 
@@ -132,11 +134,11 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         // the example uses the log, filesystem and log drivers.
         const driverBlock = (key) => key.startsWith('email.') || key.startsWith('storage.') || key.startsWith('notifications.')
         const outsideDriverBlocks = (definition) => Object.keys(definition)
-            .filter((key) => ! driverBlock(key) && ! testBlock(key) && ! verifyFullOnly(key)).sort()
+            .filter((key) => ! driverBlock(key) && ! testBlock(key) && ! unusedLocally(key)).sort()
         expect(outsideDriverBlocks(envExample)).toEqual(outsideDriverBlocks(production))
 
         for (const [key, value] of Object.entries(production)) {
-            if ( key === 'environment' || driverBlock(key) || verifyFullOnly(key) ) {
+            if ( key === 'environment' || driverBlock(key) || unusedLocally(key) ) {
                 continue
             }
             const expected = value.startsWith('aws-ssm-parameter:')

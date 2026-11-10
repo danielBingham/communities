@@ -68,8 +68,17 @@ module.exports = class Events {
 
         await this.subscriber.subscribe('communities:events', (message, channel) =>  {
             const event = JSON.parse(message)
-            this.handleEvent(event) 
+            this.handleEvent(event)
         })
+    }
+
+    /**
+     * Stop listening for other instances' events, and close the subscriber's
+     * connection. Core.shutdown() closes the publishing connection, which
+     * Events shares with the rest of the core.
+     */
+    async shutdown() {
+        await this.subscriber.close()
     }
 
     /**

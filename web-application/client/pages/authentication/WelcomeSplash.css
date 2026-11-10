@@ -1,4 +1,4 @@
-main.welcome-splash {
+div.welcome-splash {
     position: absolute;
     top: 0;
     left: 0;
@@ -6,7 +6,7 @@ main.welcome-splash {
     width: 100vw;
     background-color: white;
 }
-main.welcome-splash header {
+div.welcome-splash header {
     position: absolute;
     top: 0;
     left: 0;

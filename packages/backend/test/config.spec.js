@@ -286,6 +286,17 @@ describe('Config', function() {
             expect(problems({ ...valid(), notifications: undefined })).toEqual([])
         })
 
+        it('Should check redis.tls and redis.auth (see lib/redis-connection.js)', function() {
+            const redis = (settings) => ({ ...valid(), redis: { ...valid().redis, ...settings } })
+
+            expect(problems(redis({ tls: 'disable', auth: 'none', password: 'unused' }))).toEqual([])
+            expect(problems(redis({ host: 'master.cache.example', tls: 'verify-full', auth: 'token',
+                password: 'a1b2c3d4e5f60718293a4b5c6d7e8f90' }))).toEqual([])
+            expect(problems(redis({ auth: 'token', password: 'a1b2c3d4e5f60718293a4b5c6d7e8f90' }))).toEqual([
+                `redis.auth is 'token', so redis.tls has to be 'verify-full': the token mustn't be sent without TLS.`
+            ])
+        })
+
         it('Should require the database and redis settings', function() {
             const config = valid()
             delete config.database.password
