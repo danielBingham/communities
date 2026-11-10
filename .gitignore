@@ -18,6 +18,8 @@ web-application/tmp/*
 worker/security/*
 worker/tmp
 worker/tmp/*
+# Screenshots and traces of the end-to-end tests that failed in the last run.
+web-application/test/e2e/results/
 # Uploaded files kept by the filesystem storage driver.
 local-data/
 *.tfstate

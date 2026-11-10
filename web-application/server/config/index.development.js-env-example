@@ -53,7 +53,12 @@ module.exports = {
     },
     redis: {
         host: 'env:COMMUNITIES_REDIS_HOST',
-        port: 'env:COMMUNITIES_REDIS_PORT'
+        port: 'env:COMMUNITIES_REDIS_PORT',
+        // TLS and AUTH to Redis: 'disable' and 'none' for the local Redis.
+        // To try 'token', add password too (see
+        // packages/backend/lib/redis-connection.js).
+        tls: 'env:COMMUNITIES_REDIS_TLS',
+        auth: 'env:COMMUNITIES_REDIS_AUTH'
     },
     session: {
         cookieName: 'env:COMMUNITIES_SESSION_COOKIE_NAME',

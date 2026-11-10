@@ -20,12 +20,12 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, login, logout, loginAs } = require('../../../lib/authentication')
-const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
-const { getUser } = require('../../../lib/users')
-const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../lib/relationships')
+const { initialize, login, logout, loginAs } = require('../../../../lib/authentication')
+const { fetchEndpoint } = require('../../../../lib/fetchEndpoint')
+const { getUser } = require('../../../../lib/users')
+const { makeFriends, sendFriendRequest, blockUser, deleteRelationship } = require('../../../../lib/relationships')
 
-const { getFixture } = require('../../../lib/fixtures')
+const { getFixture } = require('../../../../lib/fixtures')
 
 // ============================================================================
 // Approach

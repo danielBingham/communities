@@ -20,10 +20,10 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { initialize, login, logout } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
+const { initialize, login, logout } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
 
-const { getFixture } = require('../../lib/fixtures')
+const { getFixture } = require('../../../lib/fixtures')
 
 describe('DELETE /authentication', function() {
     it('Should log out an authenticated user', async function() {

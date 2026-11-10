@@ -21,8 +21,8 @@ const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 const crypto = require('node:crypto')
 
-const { initialize, logout, loginAs } = require('../../lib/authentication')
-const { fetchEndpoint } = require('../../lib/fetchEndpoint')
+const { initialize, logout, loginAs } = require('../../../lib/authentication')
+const { fetchEndpoint } = require('../../../lib/fetchEndpoint')
 const {
     createGroup,
     createSubgroup,
@@ -33,8 +33,8 @@ const {
     addConfirmedMember,
     setGroupMemberStatus,
     setGroupMemberRole
-} = require('../../lib/groups')
-const { isFeatureEnabled } = require('../../lib/system')
+} = require('../../../lib/groups')
+const { isFeatureEnabled } = require('../../../lib/system')
 
 const SUBGROUPS_FEATURE = 'issue-165-subgroups'
 let subgroupsEnabled = false

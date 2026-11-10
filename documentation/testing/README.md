@@ -246,6 +246,20 @@ to be defined quickly and succinctly.
 If tests have additional coverage in our automated tests suites, they are
 marked as such parenthetically, eg. `(covered: e2e, integration)`.
 
+If only part of a case is automated, it's marked `(partially covered: e2e)`,
+and the rest still needs running by hand. For example, the end-to-end tests
+run the text steps of some cases that also attach an image or a link, and
+leave the attachment steps for manual testing.
+
+The integration tests live in `web-application/test/integration` and the
+end-to-end tests in `web-application/test/e2e`, organized like these case
+files: `test-cases/Post/update.md` is automated in
+`web-application/test/e2e/suites/Post/update.spec.js`. Each end-to-end test is
+tagged with the suites it's in: every one `full-regression`, and those for a
+case in the Smoke Test section `smoke-test` as well. So the automated Smoke
+Test can be run on its own (`npm run test:e2e:smoke-test`), and a Full
+Regression runs them all (`npm run test:e2e`).
+
 #### Example Test Case Definitions
 
 Here is an example (truncated) test file giving an idea of how it is organized.

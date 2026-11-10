@@ -20,8 +20,8 @@
 const { describe, it, before, after } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { logout, loginAs } = require('../../lib/authentication')
-const { getNewsList, createNews, cleanupNews } = require('../../lib/news')
+const { logout, loginAs } = require('../../../lib/authentication')
+const { getNewsList, createNews, cleanupNews } = require('../../../lib/news')
 
 // ============================================================================
 // GET /news drives NewsController.getNewsList(): it's public, and returns one

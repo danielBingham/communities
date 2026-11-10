@@ -20,15 +20,15 @@
 const { describe, it, before, after, afterEach } = require('node:test')
 const assert = require('node:assert/strict')
 
-const { logout, loginAs } = require('../../lib/authentication')
-const { getPost, createPost, deleteAllPostsForUser } = require('../../lib/posts')
-const { addComment, getPostComments } = require('../../lib/postComments')
-const { blockUser, clearRelationship } = require('../../lib/relationships')
-const { isFeatureEnabled } = require('../../lib/system')
+const { logout, loginAs } = require('../../../lib/authentication')
+const { getPost, createPost, deleteAllPostsForUser } = require('../../../lib/posts')
+const { addComment, getPostComments } = require('../../../lib/postComments')
+const { blockUser, clearRelationship } = require('../../../lib/relationships')
+const { isFeatureEnabled } = require('../../../lib/system')
 const {
     COMMENT_REACTIONS_FEATURE,
     addCommentReaction
-} = require('../../lib/commentReactions')
+} = require('../../../lib/commentReactions')
 
 // CommentReactions are sent to the client as `commentReactions` relations of
 // the PostComments they are on, by both GET /post/:id and

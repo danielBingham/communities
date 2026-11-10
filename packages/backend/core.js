@@ -24,8 +24,21 @@ const { createClient } = require('redis')
 const Events = require('./events')
 const Logger = require('./logger')
 const { sslMode, sslOptions, describeCertificateAuthorities } = require('./lib/database-tls')
+const { nodeRedisOptions, bullRedisOptions, describeRedisConnection } = require('./lib/redis-connection')
 const { createEmailDriver } = require('./services/email')
 const { createStorage } = require('./services/storage')
+
+/**
+ * The Bull queues, one for each kind of job. Each worker Deployment processes
+ * one of them (see worker/index.js); the web application adds jobs to them.
+ */
+const QUEUES = [
+    'process-video',
+    'resize-image',
+    'send-notifications',
+    'add-mutuals-for-relationship',
+    'remove-mutuals-for-relationship'
+]
 
 /***
  * A wrapper around our core dependencies that will be used by most of our
@@ -58,8 +71,14 @@ module.exports = class Core {
         this.redis = null
 
         /**
-         * An instance of of a bull queue that we'll use to queue up long
-         * running jobs for pickup by the workers.
+         * An instance of Events, which publishes events to the other
+         * instances through Redis and listens for theirs.
+         */
+        this.events = null
+
+        /**
+         * The bull queues, by name (see QUEUES), that we'll use to queue up
+         * long running jobs for pickup by the workers.
          */
         this.queues = {}
 
@@ -138,6 +157,48 @@ module.exports = class Core {
     }
 
     /**
+     * Create the node-redis client the configuration names. Not connected
+     * yet: call connect(). Its duplicate()s connect the same way.
+     *
+     * Left to itself, node-redis retries a failed connection forever, and
+     * connect() never returns: an app given the wrong token, or a server
+     * whose certificate doesn't verify, would hang as it starts, logging the
+     * error over and over. So until `isStarted()` says the app has started, a
+     * failed connection isn't retried, connect() rejects with the error, and
+     * the app stops; Kubernetes restarts it. Once it's started, node-redis's
+     * own backoff reconnects through failovers and maintenance.
+     *
+     * @param {Object} redis The configuration's `redis` block: host, port
+     * and, optionally, tls, auth and password (see lib/redis-connection.js).
+     * @param {function} [isStarted] Whether the app has started. By default,
+     * it always has: failed connections are retried.
+     *
+     * @return {RedisClient}
+     */
+    static createRedisClient(redis, isStarted = () => true) {
+        const options = nodeRedisOptions(redis)
+        return createClient({
+            ...options,
+            socket: {
+                ...options.socket,
+                reconnectStrategy: (retries) => isStarted() ? Core.redisBackoff(retries) : false
+            }
+        })
+    }
+
+    /**
+     * node-redis's default reconnect delay: exponential, from 50 ms up to 2
+     * seconds, plus up to 200 ms of jitter.
+     *
+     * @param {number} retries How many times it's retried so far.
+     *
+     * @return {number} Milliseconds to wait before the next attempt.
+     */
+    static redisBackoff(retries) {
+        return Math.min(Math.pow(2, retries) * 50, 2000) + Math.floor(Math.random() * 200)
+    }
+
+    /**
      * Check the database answers, and log whether the connection is
      * encrypted, before the app starts taking work. A configuration that
      * can't connect, such as a server certificate that doesn't verify, stops
@@ -181,20 +242,27 @@ module.exports = class Core {
         /**********************************************************************
          * Bull Queue Initialization
          **********************************************************************/
-        this.logger.info(`Connecting to redis ${this.config.redis.host}:${this.config.redis.port}.`)
+        // See lib/redis-connection.js. A connection that fails as the app
+        // starts, such as a certificate that doesn't verify or a token the
+        // server doesn't accept, stops the app rather than leaving it hanging
+        // (see createRedisClient()).
+        const redisConnection = describeRedisConnection(this.config.redis)
+        this.logger.info(`Connecting to redis ${this.config.redis.host}:${this.config.redis.port} (${redisConnection}).`)
 
-        this.redis = createClient({ url: `redis://${this.config.redis.host}:${this.config.redis.port}` })
+        let redisStarted = false
+        this.redis = Core.createRedisClient(this.config.redis, () => redisStarted)
         this.redis.on('error', err => this.logger.error(`Redis connection error: `, err))
         await this.redis.connect()
 
         this.events = new Events(this.redis, this.logger)
         await this.events.initialize()
+        redisStarted = true
+        this.logger.info(`Connected to redis (${redisConnection}).`)
 
-        this.queues['process-video'] = new BullQueue('process-video', { redis: this.config.redis })
-        this.queues['resize-image'] = new BullQueue('resize-image', { redis: this.config.redis })
-        this.queues['send-notifications'] = new BullQueue('send-notifications', { redis: this.config.redis })
-        this.queues['add-mutuals-for-relationship'] = new BullQueue('add-mutuals-for-relationship', { redis: this.config.redis })
-        this.queues['remove-mutuals-for-relationship'] = new BullQueue('remove-mutuals-for-relationship', { redis: this.config.redis })
+        const redis = bullRedisOptions(this.config.redis)
+        for (const name of QUEUES) {
+            this.queues[name] = new BullQueue(name, { redis })
+        }
 
         /**********************************************************************
          * Email Driver Initialization
@@ -229,19 +297,45 @@ module.exports = class Core {
         this.logger.info('Beginning shutdown of core dependencies...')
         this.shutdownInProgress = true
 
+        // The queues go first. Closing a queue a worker is processing waits
+        // for the jobs it's running to finish, and they need Redis and the
+        // database to do it.
+        this.logger.info('Closing the redis queues.')
+        const queues = Object.entries(this.queues)
+        const closed = await Promise.allSettled(queues.map(([ , queue ]) => queue.close()))
+        closed.forEach((result, index) => {
+            if ( result.status === 'rejected' ) {
+                this.logger.error(`Couldn't close the '${queues[index][0]}' queue: ${result.reason?.message}`)
+            }
+        })
+        this.queues = {}
+        this.logger.info('Redis queues closed.')
+
+        this.logger.info('Closing the redis connections.')
+        await this.closeQuietly('the events subscriber', () => this.events?.shutdown())
+        await this.closeQuietly('the redis client', () => this.redis?.close())
+        this.events = null
+        this.redis = null
+        this.logger.info('Redis connections closed.')
+
         this.logger.info('Closing the connection pool.')
         await this.database.end()
         this.database = null
         this.logger.info('Connection pool closed.')
+    }
 
-        this.logger.info('Closing the redis queue connection.')
-
-        await this.queues['process-video'].close()
-        await this.queues['resize-image'].close()
-        await this.queues['send-notifications'].close()
-
-        this.queues = {}
-
-        this.logger.info('Redis queue closed.')
+    /**
+     * Close something during shutdown, logging rather than throwing if it
+     * fails, so the rest still gets closed.
+     *
+     * @param {string} name What's being closed, for the log.
+     * @param {function} close Closes it; may return a promise.
+     */
+    async closeQuietly(name, close) {
+        try {
+            await close()
+        } catch (error) {
+            this.logger.error(`Couldn't close ${name}: ${error?.message}`)
+        }
     }
 }
