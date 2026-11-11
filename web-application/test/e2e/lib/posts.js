@@ -22,14 +22,19 @@
  * Posts in the browser: the post form, finding posts on a page, and what a
  * post's controls do (its menu, reactions, comments, sharing).
  *
- * The get...() functions return a Locator (or, for getPermalink(), a value
+ * The get...() functions return a Locator (or, where they say so, a value
  * read from the page) and do nothing to the page; the rest are actions.
+ *
+ * Images, videos and link previews, in the form and in posts, are in
+ * media.js.
  *
  * For creating posts as a test's starting point, without the UI, use
  * test/lib/posts.js.
  ******************************************************************************/
 
 const crypto = require('node:crypto')
+
+const { eventually } = require('./wait')
 
 const RUN = crypto.randomBytes(3).toString('hex')
 let written = 0
@@ -57,6 +62,26 @@ const waitForPostList = async function(page) {
     await page.getByText(/^(0 posts|\d+ to \d+ of \d+ Posts)$/).waitFor()
 }
 
+/**
+ * Get the button that opens a post list's sort menu. Its name is the sort
+ * it's showing: 'Sort: Newest', 'Sort: Most Activity' or 'Sort: Recent
+ * Activity'.
+ */
+const getSortButton = function(page) {
+    return page.getByRole('button', { name: /^Sort: / })
+}
+
+/**
+ * Sort the post list on the page by 'Newest', 'Most Activity' or 'Recent
+ * Activity', and wait for the button to say so. The list reloads after,
+ * on its own time: check its order with eventually().
+ */
+const chooseSort = async function(page, sort) {
+    await getSortButton(page).click()
+    await page.getByRole('menuitem', { name: sort, exact: true }).click()
+    await page.getByRole('button', { name: `Sort: ${sort}`, exact: true }).waitFor()
+}
+
 // A post, as a list or a permalink page shows it. Posts aren't the only
 // articles on a page (comments and the profile card beside a permalink are
 // too), so it's found by its class as well as its role. A post that's shared
@@ -82,6 +107,14 @@ const waitForPermalinkPage = async function(page) {
  */
 const getPostById = function(scope, id) {
     return scope.locator(`${POST}[id="${id}"]`)
+}
+
+/**
+ * Get the ids of the posts in `scope` (a page, or part of one), in the order
+ * they're shown. A value, read from the page.
+ */
+const getPostIds = async function(scope) {
+    return await scope.locator(POST).evaluateAll((shown) => shown.map((post) => post.id))
 }
 
 /**
@@ -117,11 +150,44 @@ const getSharedPost = function(post) {
 
 /**
  * Get where `post` lives: the link on its timestamp, which is what a user
- * copies to share it. A path, like '/test-1a2b3c4d-user1/<post id>'.
+ * copies to share it. A path, like '/test-1a2b3c4d-user1/<post id>'. A
+ * value, read from the page.
  */
 const getPermalink = async function(post) {
     const id = await post.getAttribute('id')
     return await post.locator(`a[href$="/${id}"]`).first().getAttribute('href')
+}
+
+/**
+ * Get who `post` is for, as it says under its author's name: 'Friends' or
+ * 'Public'. Found by class: it's plain text with an icon.
+ */
+const getPostVisibility = function(post) {
+    return post.locator(':scope > .post__header .post__visibility .text')
+}
+
+/**
+ * Get the type a site admin's announcement or info post shows under its
+ * author's name: 'Announcement' or 'Info'. Feed posts don't show one. Found
+ * by class, like getPostVisibility().
+ */
+const getPostType = function(post) {
+    return post.locator(':scope > .post__header .post__type')
+}
+
+/**
+ * Get the link that shows the rest of a post longer than 1,000 characters.
+ */
+const getShowMoreLink = function(post) {
+    return post.getByRole('link', { name: 'Show More.', exact: true })
+}
+
+/**
+ * Get `post`'s "Share" button, which only public posts (and shares of them)
+ * have.
+ */
+const getShareButton = function(post) {
+    return post.getByRole('button', { name: 'Share post' })
 }
 
 /**
@@ -154,6 +220,81 @@ const getPostFormTextbox = function(page) {
 }
 
 /**
+ * Get who the post in the form is for, as the form shows it: 'Friends' or
+ * 'Public'. Normally that's the visibility menu's button, but announcement
+ * and info posts are public with no choice, and show it as plain text, so
+ * it's found by class.
+ */
+const getFormVisibility = function(page) {
+    return page.locator('.post-form .post-visibility-control')
+}
+
+/**
+ * Get the post a post in the form shares, as the form shows it.
+ */
+const getSharedPostInForm = function(page) {
+    return page.locator(`.post-form ${SHARED_POST}`)
+}
+
+/**
+ * Get the button that opens the post form's visibility menu. It shows who the
+ * post is for: 'Friends' or 'Public'.
+ *
+ * Its accessible name is broken ('Post visibility: [object Object]'), so it's
+ * found by the start of it.
+ */
+const getVisibilityButton = function(page) {
+    return page.getByRole('button', { name: /^Post visibility:/ })
+}
+
+/**
+ * Choose who the post in the form is for: 'Friends' or 'Public'.
+ */
+const chooseVisibility = async function(page, visibility) {
+    await getVisibilityButton(page).click()
+    await page.getByRole('menuitem', { name: visibility, exact: true }).click()
+    await eventually(async () => {
+        const shown = (await getVisibilityButton(page).innerText()).trim()
+        if ( shown !== visibility ) {
+            throw new Error(`The post form's visibility is '${shown}', not '${visibility}'.`)
+        }
+    })
+}
+
+/**
+ * Get the button that opens the post form's post type menu, which only site
+ * admins have. It shows the post's type: 'Feed', 'Info' or 'Announcement'.
+ *
+ * Its accessible name is broken like the visibility button's ('Post
+ * type:[object Object]').
+ */
+const getPostTypeButton = function(page) {
+    return page.getByRole('button', { name: /^Post type:/ })
+}
+
+/**
+ * Choose the type of the post in the form: 'Feed', 'Info' or 'Announcement'.
+ */
+const choosePostType = async function(page, type) {
+    await getPostTypeButton(page).click()
+    await page.getByRole('menuitem', { name: type, exact: true }).click()
+    await eventually(async () => {
+        const shown = (await getPostTypeButton(page).innerText()).trim()
+        if ( shown !== type ) {
+            throw new Error(`The post form's type is '${shown}', not '${type}'.`)
+        }
+    })
+}
+
+/**
+ * Get the confirmation the post form asks for before it discards a post or
+ * an edit with changes in it.
+ */
+const getDiscardDialog = function(page) {
+    return page.getByRole('alertdialog').filter({ hasText: /Are you sure you want to discard your (post|edits)\?/ })
+}
+
+/**
  * Open the post form from the feed's create post link.
  */
 const openPostForm = async function(page) {
@@ -177,8 +318,30 @@ const submitPost = async function(page, origin = '/') {
  */
 const discardPostForm = async function(page) {
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
-    await page.getByRole('alertdialog').getByRole('button', { name: /^Discard (Post|Edits)$/ }).click()
+    await getDiscardDialog(page).getByRole('button', { name: /^Discard (Post|Edits)$/ }).click()
     await page.waitForURL((url) => url.pathname !== '/create')
+}
+
+/**
+ * Cancel the post form, and go back to the page it was opened from, without
+ * minding whether it asks first: if it asks whether to discard the changes,
+ * discard them. For the changes the form doesn't notice: it asks before
+ * discarding an edit that changes a post's text, but not one that only
+ * swaps an image for another, since it only compares how many there are.
+ * Where the form should ask, use discardPostForm(), which expects it to.
+ */
+const cancelPostForm = async function(page) {
+    const dialog = getDiscardDialog(page)
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await eventually(async () => {
+        if ( new URL(page.url()).pathname === '/create' && ! await dialog.isVisible() ) {
+            throw new Error(`The post form neither closed nor asked whether to discard it.`)
+        }
+    })
+    if ( new URL(page.url()).pathname === '/create' ) {
+        await dialog.getByRole('button', { name: /^Discard (Post|Edits)$/ }).click()
+        await page.waitForURL((url) => url.pathname !== '/create')
+    }
 }
 
 // ============================================================================
@@ -186,10 +349,25 @@ const discardPostForm = async function(page) {
 // ============================================================================
 
 /**
- * Choose `action` ('Edit', 'Delete', ...) from the post's menu.
+ * Get the items in `post`'s menu ('Copy Link', 'Edit', ...), once it's open.
+ */
+const getPostMenuItems = function(post) {
+    return post.getByRole('menuitem')
+}
+
+/**
+ * Open `post`'s menu.
+ */
+const openPostMenu = async function(post) {
+    await post.getByRole('button', { name: 'More options' }).click()
+    await getPostMenuItems(post).first().waitFor()
+}
+
+/**
+ * Choose `action` ('Edit', 'Delete', 'Copy Link', ...) from the post's menu.
  */
 const choosePostAction = async function(post, action) {
-    await post.getByRole('button', { name: 'More options' }).click()
+    await openPostMenu(post)
     await post.getByRole('menuitem', { name: action, exact: true }).click()
 }
 
@@ -255,20 +433,37 @@ module.exports = {
     uniqueText: uniqueText,
 
     waitForPostList: waitForPostList,
+    getSortButton: getSortButton,
+    chooseSort: chooseSort,
     waitForPermalinkPage: waitForPermalinkPage,
     getPostById: getPostById,
+    getPostIds: getPostIds,
     getPostByText: getPostByText,
     getPostContent: getPostContent,
     getSharedPost: getSharedPost,
     getPermalink: getPermalink,
+    getPostVisibility: getPostVisibility,
+    getPostType: getPostType,
+    getShowMoreLink: getShowMoreLink,
+    getShareButton: getShareButton,
     getPostNotFoundError: getPostNotFoundError,
 
     getCreatePostLink: getCreatePostLink,
     getPostFormTextbox: getPostFormTextbox,
+    getFormVisibility: getFormVisibility,
+    getSharedPostInForm: getSharedPostInForm,
+    getVisibilityButton: getVisibilityButton,
+    chooseVisibility: chooseVisibility,
+    getPostTypeButton: getPostTypeButton,
+    choosePostType: choosePostType,
+    getDiscardDialog: getDiscardDialog,
     openPostForm: openPostForm,
     submitPost: submitPost,
     discardPostForm: discardPostForm,
+    cancelPostForm: cancelPostForm,
 
+    getPostMenuItems: getPostMenuItems,
+    openPostMenu: openPostMenu,
     choosePostAction: choosePostAction,
     editPost: editPost,
     saveEdit: saveEdit,

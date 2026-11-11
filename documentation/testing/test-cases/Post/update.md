@@ -5,6 +5,9 @@ Test cases related to editing posts.
 Editing posts made to a group is covered separately in
 [Update GroupPost](documentation/testing/test-cases/GroupPost/update.md).
 
+The links and sample media are the ones [Create Post](documentation/testing/test-cases/Post/create.md)
+uses.
+
 ### Smoke Test
 
 #### Pre-requisites
@@ -14,88 +17,11 @@ Editing posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can edit the text of my post. (partially covered: e2e)
+- [ ] As a user, I can edit the text of my post. (covered: e2e)
     - As User1:
         - Create a post with text and an image.
         - Edit the post and change the text.  Save the edit.
             - **Confirm post updated appropriately.**
-
-### Manual Regression
-
-#### Pre-requisites
-
-- [ ] User1 has been created.
-- [ ] User2 has been created and is friends with User1.
-- [ ] Sample images and links are available to attach.
-
-#### Post Editing
-
-- [ ] As a user, I can edit a post with an image. (partially covered: e2e)
-    - As User1:
-        - Create a post with text and an image.
-        - Edit the post and change the image.  Save the edit.
-            - **Confirm the post updated appropriately.**
-        - Edit the post and change the text. Cancel the edit.
-            - **Confirm the post was not updated.**
-        - Edit the post and change the image.  Cancel the edit.
-            - **Confirm the post was not updated.**
-
-- [ ] As a user, I can edit a post with a link. (partially covered: e2e)
-    - As User1:
-        - Create a post with text and a link.
-        - Edit the post and change the text.  Save the edit.
-            - **Confirm post updated appropriately.**
-        - Edit the post and change the link.  Save the edit.
-            - **Confirm the post updated appropriately.**
-        - Edit the post and change the text. Cancel the edit.
-            - **Confirm the post was not updated.**
-        - Edit the post and change the link.  Cancel the edit.
-            - **Confirm the post was not updated.**
-
-- [ ] As a user, edits to a post I made propagate to shares of that post. (partially covered: e2e)
-    - As User1:
-        - Create a public post with text and a link.
-    - As User2:
-        - Share User1's post.
-    - As User1:
-        - Edit the shared post, change the text and the link, and save the edit.
-    - As User2:
-        - View the share.
-            - **Confirm the share updated appropriately.**
-
-#### Post Edit Drafts
-
-- [ ] As a user, my edit draft of a post with an image is saved across reloads. (partially covered: e2e)
-    - As User1:
-        - Edit a post with an image - change text and image.
-        - Navigate away from the home feed and back to feed.
-            - **Confirm draft remains.**
-        - Close the Communities browser window. Reopen and reload.
-            - **Confirm draft remains.**
-        - Post the draft.
-            - **Confirm draft posts correctly.**
-
-- [ ] As a user, my edit draft of a post with an image is cleared when I log out. (partially covered: e2e)
-    - As User1:
-        - Edit a post with an image - change text and image.
-        - Log out. Log back in.
-            - **Confirm draft is gone.**
-
-- [ ] As a user, my edit draft of a post with a link is saved across reloads. (partially covered: e2e)
-    - As User1:
-        - Edit a post with a link - change text and link.
-        - Navigate away from the home feed and back to feed.
-            - **Confirm draft remains.**
-        - Close the Communities browser window. Reopen and reload.
-            - **Confirm draft remains.**
-        - Post the draft.
-            - **Confirm draft posts correctly.**
-
-- [ ] As a user, my edit draft of a post with a link is cleared when I log out. (partially covered: e2e)
-    - As User1:
-        - Edit a post with a link - change text and link.
-        - Log out. Log back in.
-            - **Confirm draft is gone.**
 
 ### Full Regression
 
@@ -106,6 +32,93 @@ Editing posts made to a group is covered separately in
 - [ ] User3 has been created and is **not** friends with User1.
 - [ ] User4 has been created and has been blocked by User1.
 - [ ] A site moderator has been created.
+- [ ] Sample images and links are available to attach.
+
+#### Post Editing
+
+- [ ] As a user, I can edit a post with an image. (covered: e2e)
+    - As User1:
+        - Create a post with text and an image.
+        - Edit the post and change the image.  Save the edit.
+            - **Confirm the post updated appropriately.**
+        - Edit the post and change the text. Cancel the edit.
+            - **Confirm the post was not updated.**
+        - Edit the post and change the image.  Cancel the edit.
+            - **Confirm the post was not updated.**
+
+- [ ] As a user, I can edit a post with a link. (covered: e2e)
+    - As User1:
+        - Create a post with text and a link.
+        - Edit the post and change the text.  Save the edit.
+            - **Confirm post updated appropriately.**
+        - Edit the post and change the link: change it in the text, and click
+          the "X" on the old link's preview.  Save the edit.
+            - **Confirm the post updated appropriately.**
+        - Edit the post and change the text. Cancel the edit.
+            - **Confirm the post was not updated.**
+        - Edit the post and change the link.  Cancel the edit.
+            - **Confirm the post was not updated.**
+
+- [ ] As a user, I can change who can see my post. (covered: e2e)
+    - As User1:
+        - Create a private post.
+        - Edit the post, choose "Public" from the visibility menu, and save the edit.
+            - **Confirm the post shows as "Public".**
+    - As User3:
+        - Go to User1's profile.
+            - **Confirm the post shows.**
+
+- [ ] As a user, edits to a post I made propagate to shares of that post. (covered: e2e)
+    - As User1:
+        - Create a public post with text and a link.
+    - As User2:
+        - Share User1's post.
+    - As User1:
+        - Edit the shared post, change the text and the link, and save the edit.
+    - As User2:
+        - View the share.
+            - **Confirm the share updated appropriately.**
+
+- [ ] As a user, I can only edit my own posts. (covered: e2e)
+    - As User2:
+        - Open the menu on one of User1's posts.
+            - **Confirm it doesn't offer "Edit".**
+        - Open the menu on one of your own posts.
+            - **Confirm it offers "Edit".**
+
+#### Post Edit Drafts
+
+- [ ] As a user, my edit draft of a post with an image is saved across reloads. (covered: e2e)
+    - As User1:
+        - Edit a post with an image - change text and image.
+        - Navigate away from the home feed and back to feed.
+            - **Confirm draft remains.**
+        - Close the Communities browser window. Reopen and reload.
+            - **Confirm draft remains.**
+        - Post the draft.
+            - **Confirm draft posts correctly.**
+
+- [ ] As a user, my edit draft of a post with an image is cleared when I log out. (covered: e2e)
+    - As User1:
+        - Edit a post with an image - change text and image.
+        - Log out. Log back in.
+            - **Confirm draft is gone.**
+
+- [ ] As a user, my edit draft of a post with a link is saved across reloads. (covered: e2e)
+    - As User1:
+        - Edit a post with a link - change text and link.
+        - Navigate away from the home feed and back to feed.
+            - **Confirm draft remains.**
+        - Close the Communities browser window. Reopen and reload.
+            - **Confirm draft remains.**
+        - Post the draft.
+            - **Confirm draft posts correctly.**
+
+- [ ] As a user, my edit draft of a post with a link is cleared when I log out. (covered: e2e)
+    - As User1:
+        - Edit a post with a link - change text and link.
+        - Log out. Log back in.
+            - **Confirm draft is gone.**
 
 #### Permissions
 

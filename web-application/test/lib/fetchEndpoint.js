@@ -46,6 +46,12 @@ const fetchEndpoint = async function(method, endpoint, options) {
             fetchOptions.headers['Content-Type'] = 'application/json'
         }
 
+        // A multipart form (FormData), for uploads (see files.js). fetch()
+        // sets its Content-Type, with the boundary between the parts.
+        if ( 'form' in options && options.form ) {
+            fetchOptions.body = options.form
+        }
+
         // Any others the request needs, such as setup.js's test secret.
         if ( 'headers' in options && options.headers ) {
             Object.assign(fetchOptions.headers, options.headers)
