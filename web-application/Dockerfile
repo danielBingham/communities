@@ -9,7 +9,10 @@ FROM node:24.22.1
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
-RUN apt-get update && apt-get install -y zip unzip
+# openssl makes the self-signed certificate the server serves HTTPS with in
+# staging and production (server/certificate.js). The base image has it
+# already; it's named here because the server can't start without it.
+RUN apt-get update && apt-get install -y zip unzip openssl
 
 WORKDIR /opt/communities
 
@@ -51,6 +54,8 @@ RUN npm run build
 RUN ln -s /opt/communities/web-application /src
 WORKDIR /src
 
-EXPOSE 8080
+# HTTPS. TRANSITIONAL (feat-7-tls-everywhere): plain HTTP on 8080 as well,
+# until the load balancer has moved to HTTPS.
+EXPOSE 8443 8080
 
 ENTRYPOINT [ "npm", "start" ]

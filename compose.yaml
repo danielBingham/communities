@@ -117,7 +117,7 @@ services:
 
   # ---------------------------------------------------------------------------
   # Web application — built from web-application/Dockerfile (production image),
-  # run with nodemon (API/WS on 8080) + webpack dev server (client on 3000).
+  # run with nodemon (API/WS on 8443) + webpack dev server (client on 3000).
   # Watches ./server, ./client and ../packages/{backend,shared,session}.
   # ---------------------------------------------------------------------------
   web-application:
@@ -140,10 +140,10 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       COMMUNITIES_LOG_LEVEL: ${COMMUNITIES_LOG_LEVEL:-debug}
-      PORT: "8080"
+      PORT: "8443"
       CHOKIDAR_USEPOLLING: "true"
     ports:
-      - "8080:8080"        # Express API + WebSocket (HTTPS in dev)
+      - "8443:8443"        # Express API + WebSocket (HTTPS)
       - "3000:3000"        # webpack dev server (what the browser loads)
     # Override the production ENTRYPOINT. Mirrors `npm run dev` but binds the
     # dev server to 0.0.0.0 so it's reachable from the host, and uses npx so
@@ -163,7 +163,7 @@ services:
       - ./web-application/webpack.config.js:/src/webpack.config.js
       - ./web-application/babel.config.js:/src/babel.config.js
       - ./web-application/nodemon.json:/src/nodemon.json
-      # Self-signed HTTPS certs the dev server + Express need in development.
+      # The self-signed HTTPS certificate the dev server and Express serve.
       - ./web-application/security:/src/security
       # --- shared workspace packages (see worker note above) ---
       - ./packages:/opt/communities/packages
