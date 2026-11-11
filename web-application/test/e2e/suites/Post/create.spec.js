@@ -117,13 +117,15 @@ describe('Create Post', function() {
     }
 
     // The ids of the Files a post's gallery shows, in order, read by paging
-    // through it.
+    // through it. Each image is loaded before it's read, and the gallery is
+    // left on the last.
     const getGalleryFileIds = async function(post) {
         await media.getGalleryPosition(post).waitFor()
         const total = Number((await media.getGalleryPosition(post).innerText()).split(' / ')[1])
         const ids = []
         for (let index = 1; index <= total; index++) {
             await eventually(async () => assert.equal(await media.getGalleryPosition(post).innerText(), `${index} / ${total}`))
+            await media.waitForMedia(media.getShownMedia(post))
             ids.push(await media.getFileId(media.getShownMedia(post)))
             if ( index < total ) {
                 await media.getNextItemButton(post).click()
@@ -292,7 +294,7 @@ describe('Create Post', function() {
         assert.equal(await post.count(), 1, `Expected the post on the feed.`)
         assert.equal(await posts.getPostContent(post).innerText(), text)
         const shown = media.getShownMedia(post)
-        await shown.waitFor({ state: 'attached' })
+        await media.waitForMedia(shown)
         assert.equal(await media.getFileId(shown), id)
 
         await media.playVideo(post)
@@ -514,7 +516,7 @@ describe('Create Post', function() {
             assert.equal(await post.count(), 1, `Expected the post on the feed.`)
             assert.equal(await posts.getPostContent(post).innerText(), draft)
             const shown = media.getShownMedia(post)
-            await shown.waitFor()
+            await media.waitForMedia(shown)
             assert.equal(await media.getFileId(shown), ids[0])
             assert.equal(await posts.getCreatePostLink(page).innerText(), 'Write a new post to your feed...')
         })
@@ -687,10 +689,9 @@ describe('Create Post', function() {
                 const post = posts.getPostByText(page, text)
                 assert.equal(await post.count(), 1, `Expected the ${image.name} post on the feed.`)
                 const shown = media.getShownMedia(post)
-                await shown.waitFor()
+                await media.waitForMedia(shown)
                 assert.equal(await media.getFileId(shown), id)
-                await eventually(async () => assert.equal((await media.getMediaSize(shown)).width, PROCESSED_WIDTH,
-                    `Expected the ${image.name} to show.`))
+                assert.equal((await media.getMediaSize(shown)).width, PROCESSED_WIDTH)
             }
         })
 
@@ -752,7 +753,7 @@ describe('Create Post', function() {
             const post = posts.getPostByText(page, text)
             assert.equal(await post.count(), 1, `Expected the post on the feed.`)
             const shown = media.getShownMedia(post)
-            await shown.waitFor()
+            await media.waitForMedia(shown)
             assert.equal(await media.getFileId(shown), kept)
             assert.equal(await media.getGallery(post).count(), 0)
         })
@@ -777,7 +778,7 @@ describe('Create Post', function() {
                 const post = posts.getPostByText(page, text)
                 assert.equal(await post.count(), 1, `Expected the ${video.name} post on the feed.`)
                 const shown = media.getShownMedia(post)
-                await shown.waitFor({ state: 'attached' })
+                await media.waitForMedia(shown)
                 assert.equal(await media.getFileId(shown), id)
 
                 await media.playVideo(post)

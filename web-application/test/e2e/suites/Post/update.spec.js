@@ -129,7 +129,7 @@ describe('Update Post', function() {
         assert.equal(await post.count(), 1, `Expected the post on the page.`)
         assert.equal(await posts.getPostContent(post).innerText(), text)
         const shown = media.getShownMedia(post)
-        await shown.waitFor()
+        await media.waitForMedia(shown)
         assert.equal(await media.getFileId(shown), imageId)
     }
 

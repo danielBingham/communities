@@ -254,6 +254,7 @@ describe('Read Post', function() {
         // numbered from 1, and the buttons either side.
         const assertShowing = async function(index, { hasPrevious, hasNext }) {
             await eventually(async () => assert.equal(await position.innerText(), `${index} / 3`))
+            await media.waitForMedia(media.getShownMedia(post))
             assert.equal(await media.getFileId(media.getShownMedia(post)), images[index - 1].id)
             assert.equal(await previous.count(), hasPrevious ? 1 : 0)
             assert.equal(await next.count(), hasNext ? 1 : 0)

@@ -181,9 +181,12 @@ assert.equal(await page.getByText(original.content).count(), 0)
   you're about to check: `waitForPostList()` for a feed or a profile,
   `waitForPermalinkPage()` for a post's page, `page.waitForURL()` after a
   navigation, or `locator.waitFor()` on something that loads separately (the
-  post inside a share, the list of mention suggestions, a post's image or
-  link preview). `waitForLinkPreview()` waits for the post form's preview,
-  which the server makes.
+  post inside a share, the list of mention suggestions, a post's link
+  preview). `waitForLinkPreview()` waits for the post form's preview, which
+  the server makes. A post's image or video loads after the post does, from
+  wherever files are stored, which on S3 takes a moment longer than on
+  disk: `waitForMedia()` waits for it to load before a test checks which
+  file it is or its size.
 - **Asserting.** Then compare what the page shows to exactly what you expect:
   `assert.equal(await locator.innerText(), expected)` for text,
   `inputValue()` for a form field, `getAttribute()` for a link. To assert
@@ -202,9 +205,11 @@ assert.equal(await page.getByText(original.content).count(), 0)
 - **Actions wait for themselves.** Helpers that act (`submitPost()`,
   `saveEdit()`, `deletePost()`, `react()`, `attachMedia()`) wait for their
   action to finish (the navigation, the post going, the image processed and
-  shown), so the next step doesn't start halfway through. `chooseFiles()`
-  is the exception: it only picks the files, for the tests of files that
-  should be refused or fail. That's not the test's check: after one, the test still asserts
+  shown), so the next step doesn't start halfway through. If what they're
+  waiting for fails instead (an upload the server refuses), they fail with
+  what the page says rather than waiting out the timeout. `chooseFiles()` is
+  the exception: it only picks the files, for the tests of files that should
+  be refused or fail. That's not the test's check: after one, the test still asserts
   the outcome.
 
 ### Find what you check by what doesn't change

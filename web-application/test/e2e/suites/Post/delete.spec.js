@@ -108,7 +108,7 @@ describe('Delete Post', function() {
         assert.equal(await posts.getPostContent(view).innerText(), post.content)
         if ( post.files.length > 0 ) {
             const shown = media.getShownMedia(view)
-            await shown.waitFor()
+            await media.waitForMedia(shown)
             assert.equal(await media.getFileId(shown), post.files[0])
         }
         if ( post.linkPreviewId ) {

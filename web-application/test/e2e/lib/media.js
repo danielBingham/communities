@@ -133,9 +133,21 @@ const chooseFiles = async function(page, button, files) {
  * Wait for the file named `name`, attached to the post form, to be uploaded,
  * processed and shown, which can take minutes for a video. Once its image
  * or video has loaded, it shows the button to remove it.
+ *
+ * If uploading or processing a file fails instead, the form says so, and
+ * this throws with what it said, rather than waiting out the timeout. A
+ * failed upload names the file; failed processing doesn't, so that fails
+ * the wait for every file attached with it.
  */
 const waitForDraftFile = async function(page, name) {
-    await getRemoveFileButton(getDraftFile(page, name)).waitFor({ timeout: config.MEDIA_TIMEOUT })
+    const shown = getRemoveFileButton(getDraftFile(page, name))
+    const failed = page.getByRole('alert').filter({ hasText: `'${name}' failed to upload.` })
+        .or(page.getByRole('alert').filter({ hasText: 'failed to process.' }))
+
+    await shown.or(failed).first().waitFor({ timeout: config.MEDIA_TIMEOUT })
+    if ( ! await shown.isVisible() ) {
+        throw new Error(`Attaching ${name} failed. The post form says: "${await failed.first().innerText()}"`)
+    }
 }
 
 /**
@@ -148,8 +160,13 @@ const waitForDraftFile = async function(page, name) {
 const attachMedia = async function(page, media) {
     const button = media[0].kind === 'video' ? getAddVideoButton(page) : getAddImageButton(page)
     await chooseFiles(page, button, media.map((file) => file.path))
-    for (const file of media) {
-        await waitForDraftFile(page, file.name)
+
+    // Wait for them all at once: the form only shows that a file failed for
+    // 5 seconds, so waiting for each in turn could miss it.
+    const results = await Promise.allSettled(media.map((file) => waitForDraftFile(page, file.name)))
+    const failure = results.find((result) => result.status === 'rejected')
+    if ( failure ) {
+        throw failure.reason
     }
 }
 
@@ -237,6 +254,26 @@ const getShownMedia = function(post) {
     // An image's .file is the <img>; a video's is around the <video>.
     const shown = post.locator(':scope > .post-gallery > .file:not(.post-gallery__preload)')
     return shown.and(post.getByRole('img')).or(shown.locator('video'))
+}
+
+/**
+ * Wait for an image or a video (from getShownMedia(), or getMediaIn() in the
+ * post form) to load: an image's content, or a video's size and length.
+ * A post's media load after the post does: the browser asks the API for a
+ * link to each file, and then loads it from where files are stored, which
+ * on S3 takes a moment. Wait for this before checking which file is shown
+ * (getFileId()) or its size (getMediaSize()).
+ */
+const waitForMedia = async function(media) {
+    await media.waitFor({ state: 'attached' })
+    await eventually(async () => {
+        const loaded = await media.evaluate((element) => element.tagName === 'VIDEO'
+            ? element.readyState >= HTMLMediaElement.HAVE_METADATA && element.videoWidth > 0
+            : element.complete && element.naturalWidth > 0)
+        if ( ! loaded ) {
+            throw new Error(`The post's image or video hasn't loaded.`)
+        }
+    })
 }
 
 /**
@@ -365,6 +402,7 @@ module.exports = {
     getNextItemButton: getNextItemButton,
     getPreviousItemButton: getPreviousItemButton,
     getShownMedia: getShownMedia,
+    waitForMedia: waitForMedia,
     getFileId: getFileId,
 
     getPlayVideoButton: getPlayVideoButton,
