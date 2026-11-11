@@ -1,6 +1,6 @@
 {
   "name": "@communities/worker",
-  "version": "0.24.3",
+  "version": "0.24.4-rc.1",
   "private": true,
   "main": "index.js",
   "repository": {},
