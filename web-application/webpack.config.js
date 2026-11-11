@@ -80,13 +80,13 @@ module.exports = {
         proxy: [
             {
                 context: ["/health", api],
-                target: "https://localhost:8080",
+                target: "https://localhost:8443",
                 changeOrigin: true,
                 secure: false
             },
             {
                 context: [ "/socket" ],
-                target: "https://localhost:8080",
+                target: "https://localhost:8443",
                 secure: false,
                 changeOrigin: true,
                 ws: true
@@ -108,7 +108,7 @@ module.exports = {
                         && ! pathname.startsWith(api) && ! pathname.startsWith('/socket') && pathname !== '/health'
                         && ! /\.[^/]*$/.test(pathname)
                 },
-                target: "https://localhost:8080",
+                target: "https://localhost:8443",
                 changeOrigin: true,
                 secure: false
             }
