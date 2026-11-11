@@ -86,6 +86,11 @@ to the following places in your run directory:
 For migrations, test only the code directly affected by the migration, before
 and after.
 
+Some case files have no Manual Regression section, because their cases are
+automated (so far, Post's: see [the case files](#test-cases-manual-test-case-definitions)).
+From those, run the Smoke Test cases, and the Full Regression cases that
+aren't marked as covered.
+
 #### Full Regression
 
 A full regression test involves running every single test case on every single
@@ -175,6 +180,15 @@ suite builds on its predecessor.  So a true Full Regression test requires
 running all the tests in Smoke Test, all the tests in Manual Regression, and
 all the tests in Full Regression.
 
+Once a case file's cases are automated, it has just two sections, **Smoke
+Test** and **Full Regression**: with nothing left that only a person can run,
+there's no Manual Regression to set apart from the rest. So far that's Post's
+case files (`test-cases/Post/`). Their Full Regression has every case that
+isn't in the Smoke Test, most covered by the end-to-end tests and the rest by
+the integration tests, apart from a few, unmarked, that are still run by hand
+(the YouTube cases, which depend on YouTube). The other case files will follow
+as their cases are automated, until there are only the two suites.
+
 - **Smoke Test**: These are the core interface and security tests covering the
     most heavily used and critical parts of the app.  The full Smoke Test suite
     is designed to be completed in a day or less of testing and to cover the
@@ -247,9 +261,7 @@ If tests have additional coverage in our automated tests suites, they are
 marked as such parenthetically, eg. `(covered: e2e, integration)`.
 
 If only part of a case is automated, it's marked `(partially covered: e2e)`,
-and the rest still needs running by hand. For example, the end-to-end tests
-run the text steps of some cases that also attach an image or a link, and
-leave the attachment steps for manual testing.
+and the rest still needs running by hand.
 
 The integration tests live in `web-application/test/integration` and the
 end-to-end tests in `web-application/test/e2e`, organized like these case

@@ -31,6 +31,9 @@
  *   E2E_HEADED      'true' to watch the browser instead of running headless.
  *   E2E_SLOW_MO     Milliseconds to pause between browser actions.
  *   E2E_TIMEOUT     Milliseconds to wait for the page before failing.
+ *   E2E_MEDIA_TIMEOUT
+ *                   Milliseconds to wait for an image or a video to be
+ *                   uploaded and processed.
  *   E2E_TRACE       'off' to skip recording Playwright traces.
  *
  * This is required before anything that loads ../../lib/fetchEndpoint.js
@@ -93,6 +96,10 @@ module.exports = {
     // How long an action or a wait may take before the test fails. Staging
     // is further away, so it gets longer.
     TIMEOUT: number('E2E_TIMEOUT', IS_LOCAL ? 15000 : 30000),
+
+    // How long an attached image or video may take to upload and process.
+    // The test video takes about 40 seconds to process locally.
+    MEDIA_TIMEOUT: number('E2E_MEDIA_TIMEOUT', IS_LOCAL ? 180000 : 300000),
 
     TRACE: process.env.E2E_TRACE !== 'off',
 

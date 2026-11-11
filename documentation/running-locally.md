@@ -468,5 +468,9 @@ npm run test:e2e
 ```
 
 They create and delete their users the same way the integration tests do.
-See [the end-to-end test README](../web-application/test/e2e/README.md) for
+They attach images and videos, which the worker processes, and before they
+start, they check that the server can tell the browser when it has: that
+`COMMUNITIES_WS_HOST` in your `.env` ends in `/socket`, as in
+`.env.local.example`. See
+[the end-to-end test README](../web-application/test/e2e/README.md) for
 watching them run, debugging failures and running against staging.

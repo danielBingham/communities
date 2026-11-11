@@ -84,6 +84,11 @@ to the following places in your run directory:
 For migrations, test only the code directly affected by the migration, before
 and after.
 
+Some case files have no Manual Regression section, because their cases are
+automated (so far, Post's: see [the case files](README.md#test-cases-manual-test-case-definitions)).
+From those, run the Smoke Test cases, and the Full Regression cases that
+aren't marked as covered.
+
 ### Full Regression
 
 A full regression test involves running every single test case on every single
