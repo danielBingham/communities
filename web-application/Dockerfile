@@ -54,8 +54,7 @@ RUN npm run build
 RUN ln -s /opt/communities/web-application /src
 WORKDIR /src
 
-# HTTPS. TRANSITIONAL (feat-7-tls-everywhere): plain HTTP on 8080 as well,
-# until the load balancer has moved to HTTPS.
-EXPOSE 8443 8080
+# HTTPS only (server/certificate.js).
+EXPOSE 8443
 
 ENTRYPOINT [ "npm", "start" ]

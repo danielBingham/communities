@@ -19,7 +19,6 @@
  ******************************************************************************/
 
 const https = require('https')
-const http = require('http')
 
 const { loadCertificate } = require('./certificate')
 
@@ -82,32 +81,6 @@ const createHTTPServer = function(core, app, certificateDirectory = './security'
     return server
 }
 
-/******************************************************************************
- * TRANSITIONAL (feat-7-tls-everywhere). Plain HTTP on 8080 as well as HTTPS,
- * the way the server has always served staging and production, so the load
- * balancer and Kubernetes' probes can move to HTTPS without dropping
- * requests. The infrastructure repository's runbooks/feat-7-tls-everywhere
- * moves them. Its last step is the release that removes this.
- ******************************************************************************/
-
-const PLAIN_HTTP_PORT = 8080
-
-/**
- * @param {Core} core
- * @param {function} app  The request handler: the Express app.
- *
- * @return {http.Server} Not yet listening.
- */
-const createPlainHTTPServer = function(core, app) {
-    core.logger.info(`Initializing the plain HTTP server (until feat-7-tls-everywhere is done)...`)
-    const server = http.createServer(app)
-    reportListening(core, server, 'Plain HTTP server')
-
-    return server
-}
-
 module.exports = {
-    createHTTPServer: createHTTPServer,
-    createPlainHTTPServer: createPlainHTTPServer,
-    PLAIN_HTTP_PORT: PLAIN_HTTP_PORT
+    createHTTPServer: createHTTPServer
 }

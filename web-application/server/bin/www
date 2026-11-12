@@ -5,7 +5,7 @@ console.log('Beginning server bootstrapping...')
 const { createCore } = require('../core')
 const { createSessionParser } = require('../session')
 const { createExpressApp } = require('../app')
-const { createHTTPServer, createPlainHTTPServer, PLAIN_HTTP_PORT } = require('../httpServer')
+const { createHTTPServer } = require('../httpServer')
 const { createWebSocketServer } = require('../wsServer')
 const { createEventHandlers } = require('../events')
 
@@ -35,23 +35,14 @@ createCore('web-application').then(function(core) {
   const webSocketServer = createWebSocketServer(core, sessionParser, server)
   const eventHandlers = createEventHandlers(core)
 
-  // TRANSITIONAL (feat-7-tls-everywhere): plain HTTP too, with its own
-  // WebSocket handling, until the load balancer has moved to HTTPS. See
-  // createPlainHTTPServer().
-  const plainServer = createPlainHTTPServer(core, app)
-  createWebSocketServer(core, sessionParser, plainServer)
-
   /**
    * Handle server shutdown
    */
   const shutdownServer = function() {
     core.logger.info('Attempting a graceful shutdown...')
-    // Close the servers so we stop taking new connections before we close
+    // Close the server so we stop taking new connections before we close
     // down the resources needed to process those connections.
-    const closed = [ server, plainServer ].map(
-      (toClose) => new Promise((resolve) => toClose.close(() => resolve()))
-    )
-    Promise.all(closed).then(async function() {
+    server.close(async function() {
       // Now close down the resources needed to process the http connections.
       await core.shutdown()
 
@@ -77,5 +68,4 @@ createCore('web-application').then(function(core) {
     version: ${process.env.npm_package_version}
   `)
   server.listen(port);
-  plainServer.listen(PLAIN_HTTP_PORT);
 })
