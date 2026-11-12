@@ -5,6 +5,9 @@ Test cases related to deleting posts.
 Deleting posts made to a group is covered separately in
 [Delete GroupPost](documentation/testing/test-cases/GroupPost/delete.md).
 
+The links and sample media are the ones [Create Post](documentation/testing/test-cases/Post/create.md)
+uses.
+
 ### Smoke Test
 
 #### Pre-requisites
@@ -15,7 +18,7 @@ Deleting posts made to a group is covered separately in
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with an image. (partially covered: e2e)
+- [ ] As a user, I can delete a private post with an image. (covered: e2e)
     - As User1:
         - Create a private post with an image.
     - As User2:
@@ -28,17 +31,20 @@ Deleting posts made to a group is covered separately in
         - Attempt to view the post.
             - **Confirm it's gone.**
 
-### Manual Regression
+### Full Regression
 
 #### Pre-requisites
 
-- [ ] User1 has been created.
+- [ ] User1 has been created and has made a PUBLIC and a PRIVATE feed post.
 - [ ] User2 has been created and is friends with User1.
+- [ ] User3 has been created and is **not** friends with User1.
+- [ ] User4 has been created and has been blocked by User1.
+- [ ] A site moderator has been created.
 - [ ] Sample images and links are available to attach.
 
 #### Cases
 
-- [ ] As a user, I can delete a private post with a link. (partially covered: e2e)
+- [ ] As a user, I can delete a private post with a link. (covered: e2e)
     - As User1:
         - Create a private post with a link.
     - As User2:
@@ -51,7 +57,7 @@ Deleting posts made to a group is covered separately in
         - Attempt to view the post.
             - **Confirm it's gone.**
 
-- [ ] As a user, I can delete a public post with an image that has been shared. (partially covered: e2e)
+- [ ] As a user, I can delete a public post with an image that has been shared. (covered: e2e)
     - As User1:
         - Create a public post with an image.
     - As User2:
@@ -64,9 +70,9 @@ Deleting posts made to a group is covered separately in
     - As User2:
         - Attempt to view the post.
             - **Confirm it's gone.**
-            - **Confirm the share is also gone.**
+            - **Confirm the share no longer shows it.**
 
-- [ ] As a user, I can delete a public post with a link that has been shared. (partially covered: e2e)
+- [ ] As a user, I can delete a public post with a link that has been shared. (covered: e2e)
     - As User1:
         - Create a public post with a link.
     - As User2:
@@ -79,17 +85,21 @@ Deleting posts made to a group is covered separately in
     - As User2:
         - Attempt to view the post.
             - **Confirm it's gone.**
-            - **Confirm the share is also gone.**
+            - **Confirm the share no longer shows it.**
 
-### Full Regression
+- [ ] As a user, I'm asked to confirm before a post is deleted. (covered: e2e)
+    - As User1:
+        - Choose "Delete" from one of your posts' menus.
+            - **Confirm you're asked whether you're sure.**
+        - Click "Cancel".
+            - **Confirm the post is still there, after a reload too.**
 
-#### Pre-requisites
-
-- [ ] User1 has been created and has made a PUBLIC and a PRIVATE feed post.
-- [ ] User2 has been created and is friends with User1.
-- [ ] User3 has been created and is **not** friends with User1.
-- [ ] User4 has been created and has been blocked by User1.
-- [ ] A site moderator has been created.
+- [ ] As a user, I can only delete my own posts. (covered: e2e)
+    - As User2:
+        - Open the menu on one of User1's posts.
+            - **Confirm it doesn't offer "Delete".**
+        - Open the menu on one of your own posts.
+            - **Confirm it offers "Delete".**
 
 #### Basics
 

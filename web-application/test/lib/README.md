@@ -15,9 +15,13 @@ production.
 | [`production.js`](production.js) | Refuses to let the tests touch production. |
 | [`authentication.js`](authentication.js) | `loginAs(key)`, `logout(session)` and the like, through the API. |
 | `posts.js`, `groups.js`, `relationships.js`, ... | Setting up and cleaning up through the API: creating posts, groups and friendships, deleting them. |
+| [`files.js`](files.js) | `uploadMedia(session, userId, key)`: uploads an image or video and waits for it to be processed, for a post to attach. |
+| [`linkPreviews.js`](linkPreviews.js) | The links the tests post (`NEWS_LINKS`), and `createLinkPreview()`, for a post with a link. |
+| [`fixtures/media.js`](fixtures/media.js) | The images and video in [`fixtures/assets`](fixtures/assets/README.md), and corrupted copies of them. |
 
 The end-to-end tests use the API helpers to set up what a case starts from
-(a post to edit, a friendship), and then act in the browser.
+(a post to edit, with its image or link, a friendship), and then act in the
+browser.
 
 ## The fixture users
 

@@ -398,7 +398,7 @@ Then, from the repository root:
    `.env`.
 
 4. Create the HTTPS certificate the web application serves
-   `https://localhost:3000` with:
+   `https://localhost:3000` and `https://localhost:8443` with:
 
    ```
    mkdir -p web-application/security
@@ -412,6 +412,11 @@ Then, from the repository root:
    certificates, or run them with
    `NODE_EXTRA_CA_CERTS=$PWD/web-application/security/cert.pem npm run test:integration`
    (or `test:e2e`).
+
+   The web application only serves HTTPS. Without a certificate in
+   `web-application/security`, it makes a new self-signed one each time it
+   starts, which is what it does in staging and production, but your
+   browser would never trust it and the webpack dev server wouldn't start.
 
 5. Create the folders the apps process uploads in:
 
@@ -429,7 +434,7 @@ Then, from the repository root:
 
    That's webpack's dev server, which serves the client's bundles and passes
    API and page requests on to the web application's Express server on
-   `https://localhost:8080`. Express sends every page as the `index.html`
+   `https://localhost:8443`. Express sends every page as the `index.html`
    webpack builds, with the page's title and link preview tags rendered into
    it (view the source of a News post to see them), so the dev server writes
    its builds to `web-application/public/dist`.
@@ -468,5 +473,9 @@ npm run test:e2e
 ```
 
 They create and delete their users the same way the integration tests do.
-See [the end-to-end test README](../web-application/test/e2e/README.md) for
+They attach images and videos, which the worker processes, and before they
+start, they check that the server can tell the browser when it has: that
+`COMMUNITIES_WS_HOST` in your `.env` ends in `/socket`, as in
+`.env.local.example`. See
+[the end-to-end test README](../web-application/test/e2e/README.md) for
 watching them run, debugging failures and running against staging.

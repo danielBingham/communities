@@ -19,14 +19,27 @@ npx playwright install chromium
 system libraries it needs.) Install it again whenever the `playwright`
 version in `package.json` changes; the run tells you if it's missing.
 
-Then, with the environment running (including the worker, which sends
-notifications), from the repository root, run either suite (see
-[Suites](#suites)):
+Then, with the environment running (including the worker, which processes
+images and videos and sends notifications), from the repository root, run
+either suite (see [Suites](#suites)):
 
 ```
-npm run test:e2e:smoke-test    # the Smoke Test, on https://localhost:3000
-npm run test:e2e               # a Full Regression: every test
+npm run test:e2e:smoke-test    # the Smoke Test, on https://localhost:3000: about 2 minutes
+npm run test:e2e               # a Full Regression, every test: about 10 minutes
 ```
+
+Before it starts, a run checks that the server can do what the tests need,
+and stops, saying what to fix, if it can't:
+
+- **The WebSocket host ends in `/socket`.** The post form learns that an
+  attached image or video has been processed over the app's WebSocket, which
+  the server only takes at `/socket`. Locally, that's
+  `COMMUNITIES_WS_HOST=wss://localhost:3000/socket` in your `.env`, as in
+  `.env.local.example`; a `.env` copied from an older example has
+  `wss://localhost:3000`, and needs `/socket` added (and the web
+  application restarting).
+- **Video uploads are enabled.** The post form only offers "Add Video" with
+  the `video-uploads` feature enabled, which it is in a new local database.
 
 To run one file, from `web-application`:
 
@@ -61,7 +74,9 @@ COMMUNITIES_TEST_SECRET="$(aws ssm get-parameter --region us-east-1 --name /stag
 or `npm run test:e2e:smoke-test:staging` for the Smoke Test.
 
 The tests post as their fixture users on staging, and delete what they post
-when they're done.
+when they're done. Their links are to production's News page (see
+[Media and links](#media-and-links)), which staging's server fetches to make
+their previews.
 
 ### Options
 
@@ -75,6 +90,7 @@ Set these in the environment:
 | `E2E_SLOW_MO=500` | Pause this many milliseconds between browser actions, to follow along. |
 | `E2E_BROWSER` | `chromium` (the default), `firefox` or `webkit`. Install the one you pick. So far the suite has only been run in Chromium. |
 | `E2E_TIMEOUT` | Milliseconds to wait for the page before failing: 15000 locally, 30000 on staging. |
+| `E2E_MEDIA_TIMEOUT` | Milliseconds to wait for an attached image or video to be uploaded and processed: 180000 locally, 300000 on staging. The test video takes about 40 seconds locally. |
 | `E2E_TRACE=off` | Don't record traces (see below). |
 
 ## When a test fails
@@ -93,8 +109,9 @@ Each run clears the last run's results; git ignores the folder.
 ## How the tests work
 
 - **Fixtures and setup.** [`setup.js`](setup.js) checks where the tests are
-  pointed and that the browser is installed, then runs the shared setup
-  ([`../lib/setup.js`](../lib/setup.js)) that creates the fixture users.
+  pointed, that the browser is installed and that the server is ready for
+  them, then runs the shared setup ([`../lib/setup.js`](../lib/setup.js))
+  that creates the fixture users.
 - **Windows.** Each test file starts one browser. A test opens a window for
   each user it acts as with `openAs(key)` ([`lib/browser.js`](lib/browser.js)),
   each with its own cookies and local storage, so two users can be open at
@@ -109,6 +126,31 @@ Each run clears the last run's results; git ignores the folder.
 - **Staying off production.** The run refuses a `BASE_URL` or `API_ROOT` on
   production, and every window aborts any request the page makes to it
   ([`../lib/production.js`](../lib/production.js)).
+
+### Media and links
+
+- **Images and videos** are the files in
+  [`../lib/fixtures/assets`](../lib/fixtures/assets/README.md), which
+  `getMedia(key)` ([`../lib/fixtures/media.js`](../lib/fixtures/media.js))
+  names: three `.jpg` photos, a `.png`, a large `.mp4` and a short `.mov`.
+  `getCorruptedMedia(key)` makes a corrupted copy of one in memory, for the
+  cases where processing should fail. A test attaches them the way a person
+  does, through the file chooser that "Add Image" or "Add Video" opens
+  (`attachMedia()` in [`lib/media.js`](lib/media.js)), and waits for the
+  worker to process them; a post that starts a test with an image gets it
+  through the API (`uploadMedia()`, [`../lib/files.js`](../lib/files.js)).
+  Processing scales images and videos down to 650 pixels wide, which is how
+  the tests tell what's shown has been processed.
+- **Links** are to two posts on the Communities News page (`NEWS_LINKS`,
+  [`../lib/linkPreviews.js`](../lib/linkPreviews.js)): any link in a post
+  makes the server fetch the page for its preview, and these are our own,
+  and reliably have one. The server keeps the preview it makes for a URL, so
+  each environment fetches them once. They're on production, which the
+  windows won't load: a preview's image, which is production's, doesn't show
+  in the tests, and a test that follows a link checks the new tab asked for
+  it rather than what it shows.
+- **YouTube** links aren't tested: they'd depend on YouTube. Those cases are
+  run by hand.
 
 ## Writing tests
 
@@ -139,7 +181,12 @@ assert.equal(await page.getByText(original.content).count(), 0)
   you're about to check: `waitForPostList()` for a feed or a profile,
   `waitForPermalinkPage()` for a post's page, `page.waitForURL()` after a
   navigation, or `locator.waitFor()` on something that loads separately (the
-  post inside a share, the list of mention suggestions).
+  post inside a share, the list of mention suggestions, a post's link
+  preview). `waitForLinkPreview()` waits for the post form's preview, which
+  the server makes. A post's image or video loads after the post does, from
+  wherever files are stored, which on S3 takes a moment longer than on
+  disk: `waitForMedia()` waits for it to load before a test checks which
+  file it is or its size.
 - **Asserting.** Then compare what the page shows to exactly what you expect:
   `assert.equal(await locator.innerText(), expected)` for text,
   `inputValue()` for a form field, `getAttribute()` for a link. To assert
@@ -156,9 +203,13 @@ assert.equal(await page.getByText(original.content).count(), 0)
 - **Every outcome the case confirms.** Each "Confirm..." in the case file is
   an assertion in the test.
 - **Actions wait for themselves.** Helpers that act (`submitPost()`,
-  `saveEdit()`, `deletePost()`, `react()`) wait for their action to finish
-  (the navigation, the post going), so the next step doesn't start halfway
-  through. That's not the test's check: after one, the test still asserts
+  `saveEdit()`, `deletePost()`, `react()`, `attachMedia()`) wait for their
+  action to finish (the navigation, the post going, the image processed and
+  shown), so the next step doesn't start halfway through. If what they're
+  waiting for fails instead (an upload the server refuses), they fail with
+  what the page says rather than waiting out the timeout. `chooseFiles()` is
+  the exception: it only picks the files, for the tests of files that should
+  be refused or fail. That's not the test's check: after one, the test still asserts
   the outcome.
 
 ### Find what you check by what doesn't change
@@ -186,11 +237,16 @@ named `get...()`, like Playwright's own `getByRole()`: `getPostById()` and
 
 ### Set up through the API, act in the browser
 
-What a case starts from (a post to edit, a friendship) is set up through the
-API with the shared helpers in [`../lib`](../lib) and cleaned up in the
-file's `after`. The steps of the case itself happen in the browser. Each test
-posts text from `uniqueText()`, unique to the run, since staging has
-everyone else's posts too.
+What a case starts from (a post to edit, with its image or link, a
+friendship) is set up through the API with the shared helpers in
+[`../lib`](../lib) and cleaned up in the file's `after`. The steps of the
+case itself happen in the browser. Each test posts text from `uniqueText()`,
+unique to the run, since staging has everyone else's posts too.
+
+A fixture's browser session keeps the user's settings from when it logged
+in. A test that changes them through the API first (to show announcements,
+say) opens its windows with `openAs(key, { fresh: true })`, and puts the
+settings back when it's done.
 
 ## Suites
 
@@ -233,11 +289,6 @@ one file for each entity and action, so
 case is and tagged with its suites, and a `describe` for each of the case
 file's subsections (Post Drafts, say) that has cases in it.
 
-Some cases are only partly automated. "(text only)" at the end of a test's
-name means it runs the text steps of a case that also attaches an image, a
-video or a link. Where an image case and a link case have the same text
-steps, one test covers both, and a comment above it names the cases.
-
 When you automate a case, tag its test `full-regression`, and `smoke-test`
 as well if the case is in its file's Smoke Test section, and mark it in its
 case file: `(covered: e2e)`, or `(partially covered: e2e)` if part of it
@@ -245,16 +296,14 @@ still needs testing by hand.
 
 ### What's covered
 
-So far, the Post cases that only need text:
+Every Post case that the integration tests don't cover, except the two
+YouTube cases (see [Media and links](#media-and-links)):
 
 | Case file | Tests |
 | --------- | ----- |
-| `Post/create.md` | Making a post, mentioning friends, long strings, drafts (text only), mention notifications |
-| `Post/read.md` | The Smoke Test's visibility cases, permalinks to posts you can't see |
-| `Post/update.md` | Editing text, saving and cancelling edits (text only), edits reaching shares (text only), edit drafts (text only) |
-| `Post/delete.md` | Deleting private posts, and public posts that have been shared (text only) |
+| `Post/create.md` | Making a post; link previews; images, and reordering, removing and refusing them; videos, and refusing them; supported formats and corrupted files; mentions; long strings and links; drafts, with media and links; discarding; making a post public; announcements and info posts; the 10,000 character limit; sharing |
+| `Post/read.md` | Who sees which posts; permalinks to posts you can't see; copying a post's link; long posts; paging through a gallery; sorting the feed |
+| `Post/update.md` | Editing text, images, links and who sees a post; saving and cancelling; edits reaching shares; edit drafts, with images and links; only editing your own posts |
+| `Post/delete.md` | Deleting posts with images and links, and ones that have been shared; confirming; only deleting your own posts |
 
-Not yet: cases that attach images or videos, and cases with links (link
-previews, YouTube embeds, link highlighting, link drafts). Any link typed into
-a post makes the server scrape the site it points to, so those cases depend
-on third-party sites.
+The other entities' cases are still run by hand.

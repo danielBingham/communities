@@ -19,6 +19,7 @@ execute the test cases within.
 ## [Authentication](documentation/testing/test-cases/Authentication/authentication.md)
 
 ## [Create Post](documentation/testing/test-cases/Post/create.md)
+## [Read Post](documentation/testing/test-cases/Post/read.md)
 ## [Update Post](documentation/testing/test-cases/Post/update.md)
 ## [Delete Post](documentation/testing/test-cases/Post/delete.md)
 
