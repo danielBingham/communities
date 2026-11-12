@@ -1,6 +1,6 @@
 {
   "name": "communities",
-  "version": "0.24.4-rc.1",
+  "version": "0.24.5-rc.1",
   "description": "Root package for Communities",
   "author": "Daniel Bingham",
   "license": "GPL-3.0",
