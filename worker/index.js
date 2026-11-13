@@ -44,12 +44,11 @@ async function initialize() {
 
     const environmentName = process.env.COMMUNITIES_ENVIRONMENT_NAME
     const region = process.env.AWS_REGION
-    const credentials = {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    }
 
-    const configLoader = new Config(environmentName, region, credentials)
+    // Reads Parameter Store with the access keys in AWS_ACCESS_KEY_ID and
+    // AWS_SECRET_ACCESS_KEY, or else the pod's EKS Pod Identity
+    // (Config.awsCredentials()).
+    const configLoader = new Config(environmentName, region)
     const config = await configLoader.loadConfig(configDefinition)
     configLoader.validateConfig(config)
 

@@ -2,6 +2,8 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
+const { SSMClient } = require('@aws-sdk/client-ssm')
+
 const Config = require('../config')
 const { ConfigError } = Config
 
@@ -100,7 +102,7 @@ describe('Config', function() {
     describe('loadConfig()', function() {
 
         it('Should load env: values from the environment and keep everything else as written, without AWS', async function() {
-            const config = new Config(undefined, undefined, undefined, { env: environment })
+            const config = new Config(undefined, undefined, { env: environment })
 
             const result = await config.loadConfig({
                 host: 'env:COMMUNITIES_HOST',
@@ -138,7 +140,7 @@ describe('Config', function() {
 
         it('Should load aws-ssm-parameter: values from under the environment name', async function() {
             const client = ssmClient(parameterStore)
-            const config = new Config('staging', 'us-east-1', {}, { env: {}, client: client })
+            const config = new Config('staging', 'us-east-1', { env: {}, client: client })
 
             const result = await config.loadConfig({
                 host: 'aws-ssm-parameter:/host',
@@ -160,7 +162,7 @@ describe('Config', function() {
         it('Should take each value only from the source its definition names', async function() {
             const client = ssmClient(parameterStore)
             // Both variables are set, but only one value is declared env:.
-            const config = new Config('staging', 'us-east-1', {}, { env: environment, client: client })
+            const config = new Config('staging', 'us-east-1', { env: environment, client: client })
 
             const result = await config.loadConfig({
                 database: {
@@ -174,7 +176,7 @@ describe('Config', function() {
         })
 
         it('Should report how many values came from each source', async function() {
-            const config = new Config('staging', 'us-east-1', {}, { env: environment, client: ssmClient(parameterStore) })
+            const config = new Config('staging', 'us-east-1', { env: environment, client: ssmClient(parameterStore) })
 
             await config.loadConfig({
                 host: 'aws-ssm-parameter:/host',
@@ -190,7 +192,7 @@ describe('Config', function() {
         })
 
         it('Should report every missing value at once, in definition order, with its key and source', async function() {
-            const config = new Config('staging', 'us-east-1', {}, {
+            const config = new Config('staging', 'us-east-1', {
                 env: { ...environment, COMMUNITIES_DATABASE_PASSWORD: '' },
                 client: ssmClient(parameterStore)
             })
@@ -220,7 +222,7 @@ describe('Config', function() {
 
         it('Should not ask Parameter Store without COMMUNITIES_ENVIRONMENT_NAME, and say why the values are missing', async function() {
             const client = ssmClient(parameterStore)
-            const config = new Config(undefined, 'us-east-1', {}, { env: {}, client: client })
+            const config = new Config(undefined, 'us-east-1', { env: {}, client: client })
 
             const error = await config.loadConfig({
                 environmentName: 'env:COMMUNITIES_ENVIRONMENT_NAME',
@@ -238,9 +240,112 @@ describe('Config', function() {
 
         it('Should rethrow errors other than a missing parameter', async function() {
             const client = { send: jest.fn(async () => { throw new Error('Access denied') }) }
-            const config = new Config('staging', 'us-east-1', {}, { env: {}, client: client })
+            const config = new Config('staging', 'us-east-1', { env: {}, client: client })
 
             await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).rejects.toThrow('Access denied')
+        })
+
+        describe('its Parameter Store client', function() {
+            const keys = { AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE', AWS_SECRET_ACCESS_KEY: 'example-secret' }
+            const podIdentity = {
+                AWS_CONTAINER_CREDENTIALS_FULL_URI: 'http://169.254.170.23/v1/credentials',
+                AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE: '/var/run/secrets/pods.eks.amazonaws.com/serviceaccount/eks-pod-identity-token'
+            }
+
+            beforeEach(function() {
+                jest.spyOn(SSMClient.prototype, 'send').mockImplementation(async function(command) {
+                    return { Parameter: { Name: command.input.Name, Value: 'from-ssm' } }
+                })
+            })
+
+            it('Should be made with the access keys, and say so', async function() {
+                const config = new Config('staging', 'us-east-1', { env: keys })
+
+                await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).resolves.toEqual({ host: 'from-ssm' })
+
+                expect(config.client).toBeInstanceOf(SSMClient)
+                await expect(config.client.config.credentials()).resolves.toMatchObject({
+                    accessKeyId: 'AKIAEXAMPLE',
+                    secretAccessKey: 'example-secret'
+                })
+                expect(console.log).toHaveBeenCalledWith(
+                    'Reading Parameter Store with the access keys in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.')
+            })
+
+            it('Should be made with EKS Pod Identity in a pod that has it, and say so', async function() {
+                const config = new Config('staging', 'us-east-1', { env: podIdentity })
+
+                await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).resolves.toEqual({ host: 'from-ssm' })
+
+                expect(config.client).toBeInstanceOf(SSMClient)
+                expect(console.log).toHaveBeenCalledWith('Reading Parameter Store with EKS Pod Identity.')
+            })
+
+            it('Should stop with a ConfigError, before asking AWS, when there are no credentials', async function() {
+                const config = new Config('staging', 'us-east-1', { env: { AWS_PROFILE: 'developer' } })
+
+                await expect(config.loadConfig({ host: 'aws-ssm-parameter:/host' })).rejects.toThrow(ConfigError)
+                expect(config.client).toBe(null)
+                expect(SSMClient.prototype.send).not.toHaveBeenCalled()
+            })
+
+            it('Should not be made for a definition with no aws-ssm-parameter: values', async function() {
+                const config = new Config('staging', 'us-east-1', { env: environment })
+
+                await config.loadConfig({ host: 'env:COMMUNITIES_HOST' })
+
+                expect(config.client).toBe(null)
+            })
+        })
+    })
+
+    describe('awsCredentials()', function() {
+        const podIdentity = {
+            AWS_CONTAINER_CREDENTIALS_FULL_URI: 'http://169.254.170.23/v1/credentials',
+            AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE: '/var/run/secrets/pods.eks.amazonaws.com/serviceaccount/eks-pod-identity-token'
+        }
+
+        it('Should use the access keys when both are set', function() {
+            expect(Config.awsCredentials({ AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE', AWS_SECRET_ACCESS_KEY: 'example-secret' })).toEqual({
+                source: 'the access keys in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY',
+                credentials: { accessKeyId: 'AKIAEXAMPLE', secretAccessKey: 'example-secret' }
+            })
+        })
+
+        it('Should leave Pod Identity to the SDK when the pod has it and there are no keys', function() {
+            expect(Config.awsCredentials(podIdentity)).toEqual({ source: 'EKS Pod Identity', credentials: undefined })
+        })
+
+        it('Should prefer the keys when a pod has both, so taking the keys away moves it to Pod Identity', function() {
+            const { credentials } = Config.awsCredentials({
+                ...podIdentity, AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE', AWS_SECRET_ACCESS_KEY: 'example-secret'
+            })
+
+            expect(credentials).toEqual({ accessKeyId: 'AKIAEXAMPLE', secretAccessKey: 'example-secret' })
+        })
+
+        it('Should treat empty keys as unset, as compose.yaml passes them', function() {
+            expect(Config.awsCredentials({ ...podIdentity, AWS_ACCESS_KEY_ID: '', AWS_SECRET_ACCESS_KEY: '' }).source)
+                .toBe('EKS Pod Identity')
+            expect(() => Config.awsCredentials({ AWS_ACCESS_KEY_ID: '', AWS_SECRET_ACCESS_KEY: '' })).toThrow(ConfigError)
+        })
+
+        it('Should refuse only one of the keys', function() {
+            for (const env of [ { AWS_ACCESS_KEY_ID: 'AKIAEXAMPLE' }, { ...podIdentity, AWS_SECRET_ACCESS_KEY: 'example-secret' } ]) {
+                expect(() => Config.awsCredentials(env)).toThrow(/Only one of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY is set/)
+            }
+        })
+
+        it('Should never fall back on a profile, a login or the instance\'s role', function() {
+            for (const env of [
+                {},
+                { AWS_PROFILE: 'developer' },
+                { AWS_WEB_IDENTITY_TOKEN_FILE: '/token', AWS_ROLE_ARN: 'arn:aws:iam::123456789012:role/example' },
+                { AWS_CONTAINER_CREDENTIALS_FULL_URI: podIdentity.AWS_CONTAINER_CREDENTIALS_FULL_URI },
+                { AWS_CONTAINER_CREDENTIALS_RELATIVE_URI: '/v2/credentials/example' }
+            ]) {
+                expect(() => Config.awsCredentials(env)).toThrow(/There are no AWS credentials to read Parameter Store with/)
+            }
         })
     })
 
@@ -409,7 +514,7 @@ describe('Config', function() {
 
     describe('loadEnvironmentVariable()', function() {
         it('Should treat an unset or empty variable as missing', function() {
-            const config = new Config(undefined, undefined, undefined, { env: { SET: 'value', EMPTY: '' } })
+            const config = new Config(undefined, undefined, { env: { SET: 'value', EMPTY: '' } })
 
             expect(config.loadEnvironmentVariable('SET')).toBe('value')
             expect(config.loadEnvironmentVariable('EMPTY')).toBe(undefined)
