@@ -25,9 +25,14 @@ read only the file you need.
 | [backend/](backend/README.md) | The shared backend package: `Core`, DAOs, services, validation, permissions, events, migrations, drivers. |
 | [shared/](shared/README.md) | Code the client and server share: schemas, validation, permission rules, helpers. |
 | [worker/](worker/README.md) | The worker and its jobs. |
+| [client/](client/README.md) | The React and Redux client: structure, routing, state, requests, hooks, components, styling. |
+| [mobile/](mobile/README.md) | The iOS and Android apps: Capacitor, native features, live updates. |
 | [database/](database/README.md) | The data model, schema conventions, initialization and the helper image. |
 | [testing/](testing/README.md) | Unit, integration, end-to-end and manual tests: running and writing them. |
 | [api/](api/README.md) | The API reference (being rewritten). |
+
+And [releases.md](releases.md): how a change gets to production, and what
+your change needs for a release.
 
 ## Find It by Task
 
@@ -48,6 +53,13 @@ read only the file you need.
 | Check what a user may do | [backend/permissions.md](backend/permissions.md), [shared/permissions.md](shared/permissions.md) |
 | Put code behind a feature flag, or migrate data | [backend/feature-flags-and-migrations.md](backend/feature-flags-and-migrations.md) |
 | Find the table for something | [database/data-model.md](database/data-model.md) |
+| Get data into a component | [client/hooks.md](client/hooks.md) |
+| Call the API from the client | [client/requests.md](client/requests.md), [client/state.md](client/state.md) |
+| Add a route or page | [client/routing-and-layouts.md](client/routing-and-layouts.md) |
+| Write a component or its CSS | [client/components.md](client/components.md), [client/styling.md](client/styling.md) |
+| Use a native feature in the apps | [mobile/native-features.md](mobile/native-features.md) |
+| Know whether a change reaches the apps without a store release | [mobile/live-updates.md](mobile/live-updates.md) |
+| Know what a change needs for a release | [releases.md](releases.md) |
 | Name something | [standards/naming.md](standards/naming.md) |
 | Add a dependency | [standards/dependencies.md](standards/dependencies.md) |
 | Open a pull request | [standards/git-workflow.md](standards/git-workflow.md), [standards/definition-of-done.md](standards/definition-of-done.md) |
@@ -72,6 +84,12 @@ read only the file you need.
 | `packages/backend/config.js`, any `config/` directory | [architecture/configuration.md](architecture/configuration.md) |
 | `packages/backend/events.js`, `web-application/server/wsServer.js` | [architecture/real-time-events.md](architecture/real-time-events.md) |
 | `packages/shared/` | [shared/README.md](shared/README.md) |
+| `web-application/client/` | [client/README.md](client/README.md) |
+| `web-application/client/state/` | [client/state.md](client/state.md) |
+| `web-application/client/lib/hooks/` | [client/hooks.md](client/hooks.md) |
+| `web-application/client/components/` | [client/components.md](client/components.md) |
+| `web-application/webpack.config.js` | [client/build.md](client/build.md) |
+| `capacitor.config.js`, `ios/`, `android/` | [mobile/README.md](mobile/README.md) |
 | `worker/` | [worker/README.md](worker/README.md) |
 | `database/` | [database/README.md](database/README.md) |
 | `package.json`, `package-lock.json` | [standards/dependencies.md](standards/dependencies.md) |
