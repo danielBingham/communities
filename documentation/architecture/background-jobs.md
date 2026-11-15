@@ -33,8 +33,9 @@ What each job does is in [Jobs](../worker/jobs.md).
    works one queue, named on its command line (`node index.js resize-image`),
    with the concurrency set in `worker/index.js`. Locally, one worker works
    every queue.
-3. **The job reports progress** with `job.progress()`, and finishes by
-   returning a result or throwing.
+3. **The job reports progress** with `job.progress({ step, stepDescription,
+   progress })`, and finishes by calling `done()`, or `done(error)` if it
+   failed.
 4. **`JobEvents` in each web instance** listens to the queues' global
    events (`active`, `progress`, `completed`, `failed`) and publishes a
    `Job:update` event to the user who added the job.

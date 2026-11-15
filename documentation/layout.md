@@ -6,21 +6,22 @@ What's where in the repository, and how the pieces depend on each other.
 
 The repository is a single npm workspace. The root `package.json` lists
 five workspace packages, and one root `package-lock.json` pins every
-dependency for all of them. The internal `@communities/*` packages are
-linked from source and never published.
+dependency for all of them. They're all named `@communities/*`, linked
+from source, and never published. npm commands name a package by its
+directory: `npm test -w packages/backend`.
 
 | Package | Directory | What it is |
 | ------- | --------- | ---------- |
 | `@communities/shared` | `packages/shared` | Code that runs in both the browser and Node: schemas, cleaning and validation, shared permissions, helpers. |
 | `@communities/backend` | `packages/backend` | Server-side code the web application and worker share: `Core`, DAOs, services, events, migrations, drivers. |
 | `@communities/session` | `packages/session` | Our fork of `express-session`, adding header-based sessions for the mobile apps. |
-| `worker` | `worker` | The background job processor. |
-| `web-application` | `web-application` | The Express API server and the React client it serves. |
+| `@communities/worker` | `worker` | The background job processor. |
+| `@communities/web-application` | `web-application` | The Express API server and the React client it serves. |
 
 | Package | Depends on |
 | ------- | ---------- |
-| `web-application` | `@communities/backend`, `@communities/session`, `@communities/shared` (the client uses it too) |
-| `worker` | `@communities/backend`, `@communities/shared` |
+| `@communities/web-application` | `@communities/backend`, `@communities/session`, `@communities/shared` (the client uses it too) |
+| `@communities/worker` | `@communities/backend`, `@communities/shared` |
 | `@communities/backend` | `@communities/shared` |
 | `@communities/shared`, `@communities/session` | No internal packages. |
 

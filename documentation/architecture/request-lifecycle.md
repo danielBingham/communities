@@ -73,4 +73,4 @@ Component ──► entity hook ──► useRequest ──► thunk ──► m
 | A bug | 500: `server-error`, with the details only in the server's log. |
 
 The request's state in `useRequest` carries the error's `type` and its list
-of problems (`error.all`), which forms use to show messages beside fields.
+of problems (`error.all`), whose messages components show to the user.
