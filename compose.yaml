@@ -12,7 +12,7 @@
 #
 #  Redis image is run from a default image, but the postgres image must be
 #  built separately following instructions found in the
-#  `documentation/running-locally.md`.
+#  `documentation/getting-started/running-with-docker.md`.
 # =============================================================================
 
 name: communities
@@ -21,7 +21,7 @@ services:
 
   # ---------------------------------------------------------------------------
   # Postgres — pre-built image (database/Dockerfile). Instructions for building
-  # can be found in `documentation/running-locally.md`
+  # can be found in `documentation/getting-started/running-with-docker.md`
   # ---------------------------------------------------------------------------
   postgres:
     image: communities-sql
@@ -181,7 +181,7 @@ services:
 # and communities_redis-data in `docker volume ls`). They're kept across
 # `docker compose down`, rebuilds and `up -V`; `docker compose down -v` deletes
 # them. To keep either in a folder of your own instead, see "Keeping the Data in
-# a Folder" in documentation/running-locally.md.
+# a Folder" in documentation/getting-started/local-data.md.
 # -----------------------------------------------------------------------------
 volumes:
   postgres-data:

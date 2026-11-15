@@ -15,9 +15,10 @@ const { Config } = require('@communities/backend')
 
 if ( process.env.NODE_ENV == 'development' ) {
     // Load `.env` from this app's folder, then from the repository root, which
-    // is where documentation/running-locally.md puts it. Earlier files win, and
-    // variables already set in the environment win over both. Only the values
-    // the configuration file declares with `env:` are read from it.
+    // is where documentation/getting-started/configuring-your-environment.md
+    // puts it. Earlier files win, and variables already set in the
+    // environment win over both. Only the values the configuration file
+    // declares with `env:` are read from it.
     require('dotenv').config({
         path: [ '.env', require('path').join(__dirname, '..', '..', '..', '.env') ]
     })

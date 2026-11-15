@@ -25,9 +25,9 @@
  * certificate comes from:
  *
  *   Development   The self-signed certificate you create in ./security
- *                 (documentation/running-locally.md). The webpack dev server
- *                 serves the same one, so you trust it once, for your
- *                 browser and the tests.
+ *                 (documentation/getting-started/running-without-docker.md).
+ *                 The webpack dev server serves the same one, so you trust
+ *                 it once, for your browser and the tests.
  *   Staging and   Nothing is in ./security (the image doesn't include it),
  *   production    so the server makes a new self-signed certificate each
  *                 time it starts.
@@ -57,7 +57,8 @@ const GENERATED_CERTIFICATE_SUBJECT = '/CN=communities-web-application'
 
 /**
  * Make a new self-signed certificate, with openssl, the same way
- * documentation/running-locally.md has you make the development one.
+ * documentation/getting-started/running-without-docker.md has you make the
+ * development one.
  *
  * openssl writes the key and certificate to a private scratch folder, which
  * is deleted before this returns. On Linux the folder is in /dev/shm, which

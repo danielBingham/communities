@@ -20,7 +20,7 @@
 
 /******************************************************************************
  * The suites the end-to-end tests are organized into, which follow the
- * manual test suites (documentation/testing/README.md). Like those, they
+ * manual test suites (documentation/testing/strategy.md). Like those, they
  * nest: a Full Regression includes the Smoke Test.
  *
  *   full-regression   Every test.
