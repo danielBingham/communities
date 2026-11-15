@@ -75,8 +75,9 @@ flag stays in its `-ing` status: the database needs fixing by hand.
 
 The steps aren't wrapped in a transaction, so write each statement to be
 safe to repeat (`CREATE TABLE IF NOT EXISTS`, `DROP INDEX IF EXISTS`).
-`Feat268CommentReactionsMigration.js` is a small, recent example;
-`ExampleMigration.js` is a template.
+`Feat268CommentReactionsMigration.js` is a small, recent example to
+follow. `ExampleMigration.js` predates `BaseMigration` and doesn't extend
+it, so don't copy it.
 
 ## `schema.sql`
 

@@ -28,8 +28,10 @@ read only the file you need.
 | [client/](client/README.md) | The React and Redux client: structure, routing, state, requests, hooks, components, styling. |
 | [mobile/](mobile/README.md) | The iOS and Android apps: Capacitor, native features, live updates. |
 | [database/](database/README.md) | The data model, schema conventions, initialization and the helper image. |
+| [domain/](domain/README.md) | Each feature end to end: accounts, authentication, relationships, posts, comments, groups, moderation, notifications, files, link previews, News, administration. |
+| [how-to/](how-to/README.md) | Step-by-step recipes: add an entity, an endpoint, a migration, a feature flag, a job, a notification, an event, a page, a configuration value. |
 | [testing/](testing/README.md) | Unit, integration, end-to-end and manual tests: running and writing them. |
-| [api/](api/README.md) | The API reference (being rewritten). |
+| [api/](api/README.md) | The API reference (to be rewritten). |
 
 And [releases.md](releases.md): how a change gets to production, and what
 your change needs for a release.
@@ -42,6 +44,8 @@ your change needs for a release.
 | Configure my local environment | [getting-started/configuring-your-environment.md](getting-started/configuring-your-environment.md) |
 | Find an email the app "sent" locally | [getting-started/local-services.md](getting-started/local-services.md) |
 | Make myself an admin locally | [getting-started/your-first-account.md](getting-started/your-first-account.md) |
+| Understand how a feature works | [domain/README.md](domain/README.md) |
+| Build something new | [how-to/README.md](how-to/README.md), starting with [how-to/add-an-entity.md](how-to/add-an-entity.md) for anything stored |
 | Understand how a request flows end to end | [architecture/request-lifecycle.md](architecture/request-lifecycle.md) |
 | Find out where a setting comes from | [architecture/configuration.md](architecture/configuration.md) |
 | Push something to clients as it happens | [architecture/real-time-events.md](architecture/real-time-events.md) |
@@ -51,7 +55,7 @@ your change needs for a release.
 | Query the database | [backend/daos.md](backend/daos.md) |
 | Validate input | [shared/schema.md](shared/schema.md), [backend/validation.md](backend/validation.md) |
 | Check what a user may do | [backend/permissions.md](backend/permissions.md), [shared/permissions.md](shared/permissions.md) |
-| Put code behind a feature flag, or migrate data | [backend/feature-flags-and-migrations.md](backend/feature-flags-and-migrations.md) |
+| Put code behind a feature flag, or migrate data | [how-to/add-a-feature-flag.md](how-to/add-a-feature-flag.md), [how-to/add-a-database-migration.md](how-to/add-a-database-migration.md) |
 | Find the table for something | [database/data-model.md](database/data-model.md) |
 | Get data into a component | [client/hooks.md](client/hooks.md) |
 | Call the API from the client | [client/requests.md](client/requests.md), [client/state.md](client/state.md) |
@@ -81,6 +85,7 @@ your change needs for a release.
 | `packages/backend/services/permission/` | [backend/permissions.md](backend/permissions.md) |
 | `packages/backend/services/validation/` | [backend/validation.md](backend/validation.md) |
 | `packages/backend/migrations/` | [backend/feature-flags-and-migrations.md](backend/feature-flags-and-migrations.md) |
+| `packages/backend/services/notification/` | [domain/notifications.md](domain/notifications.md) |
 | `packages/backend/config.js`, any `config/` directory | [architecture/configuration.md](architecture/configuration.md) |
 | `packages/backend/events.js`, `web-application/server/wsServer.js` | [architecture/real-time-events.md](architecture/real-time-events.md) |
 | `packages/shared/` | [shared/README.md](shared/README.md) |
@@ -91,6 +96,7 @@ your change needs for a release.
 | `web-application/webpack.config.js` | [client/build.md](client/build.md) |
 | `capacitor.config.js`, `ios/`, `android/` | [mobile/README.md](mobile/README.md) |
 | `worker/` | [worker/README.md](worker/README.md) |
+| `worker/jobs/` | [worker/jobs.md](worker/jobs.md) |
 | `database/` | [database/README.md](database/README.md) |
 | `package.json`, `package-lock.json` | [standards/dependencies.md](standards/dependencies.md) |
 | `web-application/test/` | [testing/README.md](testing/README.md) |

@@ -65,6 +65,7 @@ A flagged entity points at its moderation row (`posts.site_moderation_id`,
 | `roles`, `user_roles`, `permissions` | An earlier permission design. Only `PermissionDAO` refers to them, and nothing uses it. |
 | `tokens_hash_migration` | A backup the MFA migration keeps of token data. |
 | `users.permissions`, `users.invitations` | Marked deprecated; `site_role` replaced `permissions`. |
+| `groups.entrance_questions`, `group_members.entrance_answers` | Defined, not used yet. |
 
 Leave them alone unless you're removing them deliberately, with a
 migration.
