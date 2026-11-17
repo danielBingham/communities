@@ -350,9 +350,14 @@ module.exports = class FileController {
     }
 
     /**
-     * GET /file/:id/src
+     * GET /file/:id/source
      *
-     * Get the raw file source for display.
+     * Get a signed link to the file, or one of its variants, for display.
+     *
+     * Responds with `sources`, the link by variant, and `sourceLifetimes`,
+     * how many seconds each link lasts from now. Links can last as little as
+     * an hour (see S3Storage.getSignedLink()), so the client replaces them
+     * (web-application/client/state/File).
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -405,8 +410,8 @@ module.exports = class FileController {
                 `Failed to find File(${id}) at path '${path}'.`)
         }
 
-        const url = await this.storage.getSignedUrl(path)
-        if ( url === null ) {
+        const link = await this.storage.getSignedLink(path)
+        if ( link === null ) {
             throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}) at path '${path}'.`,
                 `Failed to file that file.`)
@@ -417,7 +422,10 @@ module.exports = class FileController {
         response.status(200).json({
             entity: file,
             sources: {
-                [variant]: url
+                [variant]: link.url
+            },
+            sourceLifetimes: {
+                [variant]: link.lifetime
             },
             relations: relations
         })
@@ -426,7 +434,9 @@ module.exports = class FileController {
     /**
      * GET /file/:id
      *
-     * Get a file.
+     * Get a file, with signed links to it and the variant asked for in
+     * `sources`, and how long each lasts in `sourceLifetimes`, as
+     * getFileSource() does.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -464,13 +474,15 @@ module.exports = class FileController {
         }
 
         const sources = {}
+        const sourceLifetimes = {}
 
         // Files that haven't had their file uploaded yet will not have a
         // filepath.
         if ( file.filepath !== undefined && file.filepath !== null ) {
-            const signedUrl = await this.storage.getSignedUrl(file.filepath)
-            if ( signedUrl !== null ) {
-                sources['full'] = signedUrl
+            const link = await this.storage.getSignedLink(file.filepath)
+            if ( link !== null ) {
+                sources['full'] = link.url
+                sourceLifetimes['full'] = link.lifetime
             }
         }
 
@@ -479,7 +491,11 @@ module.exports = class FileController {
             const path = this.fileService.getPath(file, variant)
 
             if ( path !== null && path !== undefined ) {
-                sources[variant] = await this.storage.getSignedUrl(path)
+                const link = await this.storage.getSignedLink(path)
+                sources[variant] = link?.url ?? null
+                if ( link !== null ) {
+                    sourceLifetimes[variant] = link.lifetime
+                }
             } else {
                 request.logger.error(`Path for variant '${variant}' is null.`)
             }
@@ -490,6 +506,7 @@ module.exports = class FileController {
         response.status(200).json({
             entity: file,
             sources: sources,
+            sourceLifetimes: sourceLifetimes,
             relations: relations
         })
     }
@@ -598,15 +615,16 @@ module.exports = class FileController {
                 `Something went wrong on the backend.`)
         }
 
-        const url = await this.storage.getSignedUrl(file.filepath)
+        const link = await this.storage.getSignedLink(file.filepath)
 
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(200).json({
             entity: entity,
             sources: {
-                ['full']: url
+                ['full']: link?.url ?? null
             },
+            sourceLifetimes: link !== null ? { ['full']: link.lifetime } : {},
             relations: relations
         })
     }

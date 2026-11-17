@@ -24,6 +24,22 @@ const { S3 } = require('@aws-sdk/client-s3')
 const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
+const { chooseAWSCredentials } = require('../../lib/aws-credentials')
+const { linkLifetimeSetting } = require('./links')
+
+/**
+ * The least time a link signed with expiring credentials should have left.
+ * Before signing, S3Storage asks for new credentials when its own have less
+ * than this (plus LINK_EXPIRY_MARGIN_SECONDS) left. See getSignedLink().
+ */
+const MIN_CREDENTIAL_LIFETIME_SECONDS = 60*60
+
+/**
+ * How long before its credentials expire a link signed with them is made to
+ * expire, so the link says it expires no later than it really stops working.
+ */
+const LINK_EXPIRY_MARGIN_SECONDS = 60
+
 
 /**
  * Keeps files in an S3 bucket.
@@ -34,11 +50,33 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
  *       driver: 's3',
  *       s3: {
  *           bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
- *           bucket: 'aws-ssm-parameter:/storage/s3/bucket',
- *           access_id: 'aws-ssm-parameter:/storage/s3/access-id',
- *           access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+ *           bucket: 'aws-ssm-parameter:/storage/s3/bucket'
  *       }
  *   }
+ *
+ * It reaches S3 with the same AWS credentials the app reads Parameter Store
+ * with (chooseAWSCredentials() in lib/aws-credentials.js): the access keys
+ * in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY locally, the pod's EKS Pod
+ * Identity on staging and production. So each environment uses one identity
+ * for both.
+ *
+ * A block can have keys of its own instead, which override those when both
+ * are set:
+ *
+ *   access_id         The access key ID.
+ *   access_key        The secret access key.
+ *
+ * An S3-compatible server's key goes here. Staging's and production's
+ * configurations also have them, from `/<env>/storage/s3/access-id` and
+ * `access-key`, until runbooks/feat-15-no-access-keys-for-s3 (in the
+ * infrastructure repository) moves each to its pods' role.
+ *
+ * Optionally:
+ *
+ *   link_lifetime     How many seconds signed links last, at most. Defaults
+ *                     to 7 days, S3's limit (see links.js). Links signed with
+ *                     Pod Identity's credentials last only as long as those
+ *                     do, from 1 to 6 hours (see getSignedLink()).
  *
  * For an S3-compatible server instead of AWS, also set:
  *
@@ -49,6 +87,12 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
  *                     differs from `endpoint` (e.g. `endpoint` is a container
  *                     hostname). Signed links are made with it.
  *   region            (Optional) Defaults to 'us-east-1'.
+ *
+ * The permissions it needs are the ones the S3 policies in the
+ * infrastructure repository's terraform/aws/shared/iam give
+ * (`s3-<environment>-access`): GetObject, PutObject, DeleteObject and
+ * ListBucket. A release that makes another kind of S3 call needs it added to
+ * those first.
  */
 module.exports = class S3Storage {
 
@@ -57,14 +101,22 @@ module.exports = class S3Storage {
      *
      * @param {Object} settings The `storage.s3` block.
      *
-     * @throws {Error} When a required setting is missing.
+     * @throws {Error} When a required setting is missing, only one of the
+     * keys is set, or `link_lifetime` isn't valid.
      */
     static validateConfig(settings) {
-        for (const key of [ 'bucket_url', 'bucket', 'access_id', 'access_key' ]) {
+        for (const key of [ 'bucket_url', 'bucket' ]) {
             if ( ! settings?.[key] ) {
                 throw new Error(`The s3 storage driver needs storage.s3.${key} in the configuration.`)
             }
         }
+
+        if ( Boolean(settings.access_id) !== Boolean(settings.access_key) ) {
+            throw new Error(`The s3 storage driver needs both storage.s3.access_id and storage.s3.access_key, `
+                + `or neither to use the same AWS credentials as Parameter Store.`)
+        }
+
+        linkLifetimeSetting(settings.link_lifetime, 'storage.s3')
     }
 
     /**
@@ -72,13 +124,33 @@ module.exports = class S3Storage {
      * @param {Object} settings The `storage.s3` block.
      * @param {Object} [client] An S3 client to use instead of constructing
      * one.
+     * @param {Object} [env]    The environment the credentials are chosen
+     * from. Defaults to `process.env`.
+     *
+     * @throws {ConfigError} When there are no keys and no Pod Identity (see
+     * chooseAWSCredentials()).
      */
-    constructor(core, settings, client) {
+    constructor(core, settings, client, env) {
         S3Storage.validateConfig(settings, core.config?.environment)
 
         this.core = core
         this.bucket = settings.bucket
         this.region = settings.region || 'us-east-1'
+        this.linkLifetime = linkLifetimeSetting(settings.link_lifetime, 'storage.s3')
+
+        // The block's own keys when it has them (see above), otherwise the
+        // ones Parameter Store is read with.
+        const { source, credentials } = settings.access_id && settings.access_key
+            ? {
+                source: 'the access keys in storage.s3.access_id and storage.s3.access_key',
+                credentials: { accessKeyId: settings.access_id, secretAccessKey: settings.access_key }
+            }
+            : chooseAWSCredentials(env ?? process.env, 'use S3')
+        core.logger.info(`Using S3 with ${source}.`)
+
+        // A refresh of the signing client's credentials in progress, so links
+        // signed at the same time share it (see signingCredentials()).
+        this.credentialRefresh = null
 
         // If client is defined, just use that client.
         if ( client ) {
@@ -88,10 +160,7 @@ module.exports = class S3Storage {
         else {
             const clientConfig = {
                 region: this.region,
-                credentials: {
-                    accessKeyId: settings.access_id,
-                    secretAccessKey: settings.access_key
-                }
+                credentials: credentials
             }
 
             // If endpoint is set, it means we're using an S3 compatible API.
@@ -109,10 +178,7 @@ module.exports = class S3Storage {
         if ( 'public_endpoint' in settings && settings.public_endpoint ) {
             const signingClientConfig = {
                 region: this.region,
-                credentials: {
-                    accessKeyId: settings.access_id,
-                    secretAccessKey: settings.access_key
-                },
+                credentials: credentials,
                 endpoint: settings.public_endpoint,
                 forcePathStyle: true // An undocumented API that prevents the client from adding the bucket to the origin.
             }
@@ -248,19 +314,100 @@ module.exports = class S3Storage {
         await once(stream, 'finish')
     }
 
-    async getSignedUrl(path) {
+    /**
+     * A signed link to the file, and how long it lasts.
+     *
+     * A link lasts `link_lifetime` (7 days unless set), unless the
+     * credentials it's signed with expire sooner: S3 stops accepting a link
+     * when its credentials expire, whatever the link says. Access keys don't
+     * expire. Pod Identity's credentials last 6 hours, and the agent on the
+     * node renews them every 3 hours, but the SDK keeps using a set until 5
+     * minutes before it expires. So before signing, the credentials are
+     * renewed when they have less than an hour left (signingCredentials()),
+     * and each link is made to expire a minute before them: from 1 to 6
+     * hours.
+     *
+     * @param {string} path The file's key.
+     *
+     * @return {Promise<Object|null>} `{ url, lifetime }`: the link, and how
+     * many seconds it lasts from now. Null when it couldn't be signed, which
+     * is logged.
+     */
+    async getSignedLink(path) {
         try {
+            let lifetime = this.linkLifetime
+
+            const credentials = await this.signingCredentials()
+            if ( credentials?.expiration instanceof Date ) {
+                const left = Math.floor((credentials.expiration.getTime() - Date.now()) / 1000)
+                lifetime = Math.max(1, Math.min(lifetime, left - LINK_EXPIRY_MARGIN_SECONDS))
+            }
+
             const params = {
                 Bucket: this.bucket,
                 Key: path
             }
 
             const command = new GetObjectCommand(params)
-            return await getSignedUrl(this.signingClient, command, { expiresIn: 60*60*24*7 })
+            const url = await getSignedUrl(this.signingClient, command, { expiresIn: lifetime })
+            return { url: url, lifetime: lifetime }
         } catch (error) {
             this.core.logger.error(`Failed to getSignedUrl for '${path}': `, error)
             return null
         }
+    }
+
+    /**
+     * A signed link to the file, without how long it lasts. For a redirect,
+     * which the browser follows straight away.
+     *
+     * @return {Promise<string|null>} The link, or null when it couldn't be
+     * signed.
+     */
+    async getSignedUrl(path) {
+        return (await this.getSignedLink(path))?.url ?? null
+    }
+
+    /**
+     * The credentials links are signed with: the signing client's, renewed
+     * first when they expire within MIN_CREDENTIAL_LIFETIME_SECONDS (plus the
+     * margin each link keeps). Renewing asks the Pod Identity agent again,
+     * which hands out credentials it renewed within the last 3 hours, so with
+     * 3 to 6 hours left. Links signed while a renewal is under way wait for
+     * it rather than starting their own.
+     *
+     * @return {Promise<Object|undefined>} The credentials, or undefined when
+     * the client can't say (a client given to the constructor).
+     */
+    async signingCredentials() {
+        const provider = this.signingClient?.config?.credentials
+        if ( typeof provider !== 'function' ) {
+            return undefined
+        }
+
+        const credentials = await provider()
+        if ( ! ( credentials?.expiration instanceof Date ) ) {
+            return credentials
+        }
+
+        const needed = (MIN_CREDENTIAL_LIFETIME_SECONDS + LINK_EXPIRY_MARGIN_SECONDS) * 1000
+        if ( credentials.expiration.getTime() - Date.now() >= needed ) {
+            return credentials
+        }
+
+        if ( this.credentialRefresh === null ) {
+            this.credentialRefresh = Promise.resolve(provider({ forceRefresh: true }))
+                .finally(() => { this.credentialRefresh = null })
+        }
+        const renewed = await this.credentialRefresh
+
+        if ( renewed?.expiration instanceof Date && renewed.expiration.getTime() - Date.now() < needed ) {
+            this.core.logger.warn(`S3's credentials expire at ${renewed.expiration.toISOString()}, even after `
+                + `asking for new ones, so links signed with them last less than an hour. `
+                + `Check the EKS Pod Identity agent on this node.`)
+        }
+
+        return renewed
     }
 
 

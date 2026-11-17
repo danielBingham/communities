@@ -119,13 +119,15 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 The keys are an access key for your local environment's own IAM user (such
-as `local-<username>`), which can read only `/local/<username>/*`. The apps
-read Parameter Store with these keys and nothing else: without them they stop
-and say so, rather than using an AWS profile or login from `~/.aws`. So a
-local app has its environment's permissions, never yours, and you don't need
-to be signed in to AWS to run it. On staging and production the apps have no
-keys; they read Parameter Store with their pods' EKS Pod Identity
-(`Config.awsCredentials()` in `packages/backend/config.js`).
+as `local-<username>`), which can read only `/local/<username>/*` and use
+the development bucket, `communities-development-storage`. The apps read
+Parameter Store and reach S3 with these keys and nothing else: without them
+they stop and say so, rather than using an AWS profile or login from
+`~/.aws`. So a local app has its environment's permissions, never yours, and
+you don't need to be signed in to AWS to run it. On staging and production
+the apps have no keys; they use their pods' EKS Pod Identity for both. Either
+way, an environment reaches AWS as one identity (`chooseAWSCredentials()` in
+`packages/backend/lib/aws-credentials.js`).
 
 Create every parameter the apps need under `/local/<username>`; you can copy
 them from another `/local` path. To take a single value from somewhere else,
@@ -165,16 +167,20 @@ storage: {
     driver: 's3',
     s3: {
         bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
-        bucket: 'aws-ssm-parameter:/storage/s3/bucket',
-        access_id: 'aws-ssm-parameter:/storage/s3/access-id',
-        access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+        bucket: 'aws-ssm-parameter:/storage/s3/bucket'
     }
 }
 ```
 
 - `s3` keeps files in an S3 bucket, and browsers load them from signed S3
   links. Production and staging use it, and so does the Parameter Store
-  example.
+  example. It reaches the bucket with the same AWS credentials as Parameter
+  Store: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` locally, the pod's
+  EKS Pod Identity on staging and production. A block can have keys of its
+  own instead, `access_id` and `access_key` (both or neither), which
+  override those: for an S3-compatible server, below. (Staging's and
+  production's have them too, until feat-15 moves them to their pods'
+  roles.)
 - `filesystem` keeps each file under `directory` and signs links to the web
   application's `/api/0.0.0/storage/` route with `secret`. The
   environment-variable example uses it with `directory:
@@ -182,6 +188,16 @@ storage: {
   folder, so both apps use `local-data/storage` at the repository root, which
   Docker Compose mounts into both containers. It can only be used in
   development.
+
+Signed links run out. With access keys, and with the `filesystem` driver,
+they last 7 days; with Pod Identity, from 1 to 6 hours, since a link lasts
+only as long as the credentials it's signed with. The API says how long each
+link lasts, and the client asks for a new one shortly before it runs out,
+and again if one fails to load. To watch that happen locally, give either
+driver's block `link_lifetime: 60` (seconds; the most is 7 days): open a page
+with images and a video, play the video, pause it, and come back after a
+couple of minutes. Images shown again get new links first; the paused video
+gets one when you play it, and carries on from where it was.
 
 The `s3` driver also works with an S3-compatible server such as
 [Garage](https://garagehq.deuxfleurs.fr/) or
@@ -191,7 +207,9 @@ against the S3 code path. Add `endpoint` (the server's S3 API, for example
 `us-east-1`. If the apps reach the server at a different address than your
 browser does (a container hostname, say), set `public_endpoint` to the one
 your browser uses; signed links are made with it. Buckets on a custom
-endpoint are addressed by path.
+endpoint are addressed by path. Give the block the server's key as
+`access_id` and `access_key`, which the driver uses instead of your AWS
+credentials, so it works beside the Parameter Store example too.
 
 Two assets the web application serves come from storage too:
 `assets/intro-video.mp4` (the welcome notice's video) and

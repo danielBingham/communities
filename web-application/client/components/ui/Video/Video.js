@@ -62,8 +62,17 @@ const describeUrl = function(url) {
  *   start playback programmatically.
  *
  * Without `playOverlay`, this renders a plain native <video>.
+ *
+ * With `playOverlay`, the caller can also pass `mediaKey`, naming the video
+ * apart from its link (File passes the file and variant). A new `src` with
+ * the same `mediaKey` is a new link to the same video, given after the old
+ * one ran out (a signed link that expired): rather than start over, we keep
+ * the video showing, and once the new link loads, go back to where the
+ * video was when it failed, and play on if it was playing.  `onPosterError`
+ * tells the caller the poster failed to load, so it can ask for a new link
+ * to it too.
  */
-const Video = function({ className, src, preload, poster, playOverlay, altText, ref, onLoad, onError }) {
+const Video = function({ className, src, mediaKey, preload, poster, playOverlay, altText, ref, onLoad, onError, onPosterError }) {
 
     // Whether the user has pressed play on the current `src`.
     const [isActivated, setIsActivated] = useState(false)
@@ -83,13 +92,32 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
     // Changing the src resets the <video> to its unplayed, unloaded state, so
     // start over: bring the overlay back and wait for the new metadata.  This
     // happens when a PostGallery reuses this component to move between videos.
-    const [previousSrc, setPreviousSrc] = useState(src)
-    if ( src !== previousSrc ) {
-        setPreviousSrc(src)
-        setIsActivated(false)
-        setVideoMetadata(null)
+    //
+    // A new link to the same video (the same `mediaKey`) is different: keep
+    // the video showing, with the shape we already know, and let
+    // onLoadedMetadata() take it back to where it was.
+    const [previous, setPrevious] = useState({ src: src, mediaKey: mediaKey })
+    if ( src !== previous.src || mediaKey !== previous.mediaKey ) {
+        const sameVideo = mediaKey !== undefined && mediaKey !== null && mediaKey === previous.mediaKey
+        setPrevious({ src: src, mediaKey: mediaKey })
         setFailedSrc(null)
+        if ( sameVideo ) {
+            setVideoMetadata(videoMetadata !== null ? { ...videoMetadata, src: src } : null)
+        } else {
+            setIsActivated(false)
+            setVideoMetadata(null)
+        }
     }
+
+    // Where the video was, and whether it was playing, when its link failed:
+    // `{ mediaKey, time, play }`. Picked up when a new link to the same video
+    // loads.
+    const resume = useRef(null)
+
+    // Whether it's playing, from its play and pause events. A failure can
+    // pause it just before the error arrives, so a pause within the last
+    // second still counts as playing.
+    const playback = useRef({ playing: false, pausedAt: 0 })
 
     // We need our own handle on the <video> to play it, while still passing
     // the element through to any ref the caller gave us.
@@ -128,22 +156,62 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
         setLoadedPoster({ url: poster, width: image.naturalWidth, height: image.naturalHeight })
     }
 
-    const onPosterError = function() {
+    const onPosterImageError = function() {
         logger.warn(`Video :: Failed to load poster image: ${describeUrl(poster)}`)
         setFailedPoster(poster)
+
+        if ( onPosterError !== undefined && onPosterError !== null ) {
+            onPosterError()
+        }
     }
 
     const onLoadedMetadata = function(event) {
         const element = event.currentTarget
         setVideoMetadata({ src: src, width: element.videoWidth, height: element.videoHeight })
 
+        // A new link to a video whose old link failed: go back to where it
+        // was.
+        const position = resume.current
+        resume.current = null
+        if ( position !== null && position.mediaKey === mediaKey ) {
+            try {
+                if ( position.time > 0 ) {
+                    element.currentTime = position.time
+                }
+                if ( position.play ) {
+                    element.play()?.catch((error) => {
+                        logger.warn(`Video :: Failed to resume playback: ${error?.name} - ${error?.message}`)
+                    })
+                }
+            } catch (error) {
+                logger.warn(`Video :: Failed to resume playback: ${error?.name} - ${error?.message}`)
+            }
+        }
+
         if ( onLoad !== undefined && onLoad !== null ) {
             onLoad(event)
         }
     }
 
+    const onVideoPlay = function() {
+        playback.current = { playing: true, pausedAt: 0 }
+    }
+
+    const onVideoPause = function() {
+        playback.current = { playing: false, pausedAt: Date.now() }
+    }
+
     const onVideoError = function(event) {
         setFailedSrc(src)
+
+        if ( mediaKey !== undefined && mediaKey !== null ) {
+            const element = event.currentTarget
+            resume.current = {
+                mediaKey: mediaKey,
+                time: element?.currentTime ?? 0,
+                play: playback.current.playing || Date.now() - playback.current.pausedAt < 1000
+            }
+        }
 
         if ( onError !== undefined && onError !== null ) {
             onError(event)
@@ -257,6 +325,8 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                 src={src}
                 onLoadedMetadata={onLoadedMetadata}
                 onError={onVideoError}
+                onPlay={onVideoPlay}
+                onPause={onVideoPause}
                 controls
                 playsInline
                 crossOrigin="anonymous"
@@ -279,7 +349,7 @@ const Video = function({ className, src, preload, poster, playOverlay, altText, 
                             alt=""
                             draggable={false}
                             onLoad={onPosterLoad}
-                            onError={onPosterError}
+                            onError={onPosterImageError}
                         />
                     }
                     { ! showSpinner && <span className="video__poster__play" aria-hidden="true"><PlayIcon /></span> }
