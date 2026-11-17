@@ -189,11 +189,12 @@ storage: {
   Docker Compose mounts into both containers. It can only be used in
   development.
 
-Signed links run out. With access keys, and with the `filesystem` driver,
-they last 7 days; with Pod Identity, from 1 to 6 hours, since a link lasts
-only as long as the credentials it's signed with. The API says how long each
-link lasts, and the client asks for a new one shortly before it runs out,
-and again if one fails to load. To watch that happen locally, give either
+Signed links run out: after 7 days, or `link_lifetime` when it's set. With
+Pod Identity, on staging and production, a link can stop working sooner,
+since it lasts only as long as the credentials it's signed with (anywhere
+from a few minutes to 6 hours). The API says how long each link is signed
+for; the client asks for a new one shortly before then, and again if one
+fails to load. To watch that happen locally, give either
 driver's block `link_lifetime: 60` (seconds; the most is 7 days): open a page
 with images and a video, play the video, pause it, and come back after a
 couple of minutes. Images shown again get new links first; the paused video

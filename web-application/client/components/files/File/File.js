@@ -33,11 +33,14 @@ import Spinner from '/components/Spinner'
 import './File.css'
 
 /**
- * A file's links run out (on staging and production, from 1 to 6 hours after
- * they're made). useFileSource replaces a link that's due before it's shown,
- * but one can still run out while it's shown: a video that loads more as it
- * plays or seeks, or an image the browser loads again. So when a file fails
- * to load, we ask for a new link and try again, once a minute at most: a new
+ * A file's links run out: when the lifetime the API gives them is up, or, on
+ * staging and production, when the credentials they're signed with expire,
+ * which can be anywhere from a few minutes to 6 hours after they're made.
+ * useFileSource replaces a link that's due by its lifetime before it's
+ * shown, but one can still run out while it's shown (a video that loads more
+ * as it plays or seeks, an image the browser loads again), or stop working
+ * before it's due, with its credentials. So when a file fails to load, we
+ * ask for a new link and try again, once a minute at most: a new
  * link that fails straight away means the file itself is the problem, and we
  * give up as before (`onError`, and the fallback).
  */

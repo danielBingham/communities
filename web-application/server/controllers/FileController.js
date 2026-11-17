@@ -355,9 +355,11 @@ module.exports = class FileController {
      * Get a signed link to the file, or one of its variants, for display.
      *
      * Responds with `sources`, the link by variant, and `sourceLifetimes`,
-     * how many seconds each link lasts from now. Links can last as little as
-     * an hour (see S3Storage.getSignedLink()), so the client replaces them
-     * (web-application/client/state/File).
+     * how many seconds each link is signed for. The client replaces a link
+     * shortly before then, and when it fails to load: one signed with Pod
+     * Identity's credentials stops working sooner if they expire first (see
+     * S3Storage.getSignedLink()). See web-application/client/state/File and
+     * components/files/File.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -435,7 +437,7 @@ module.exports = class FileController {
      * GET /file/:id
      *
      * Get a file, with signed links to it and the variant asked for in
-     * `sources`, and how long each lasts in `sourceLifetimes`, as
+     * `sources`, and how long each is signed for in `sourceLifetimes`, as
      * getFileSource() does.
      *
      * @param {Object} request  Standard Express request object.

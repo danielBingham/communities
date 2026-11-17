@@ -27,19 +27,6 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 const { chooseAWSCredentials } = require('../../lib/aws-credentials')
 const { linkLifetimeSetting } = require('./links')
 
-/**
- * The least time a link signed with expiring credentials should have left.
- * Before signing, S3Storage asks for new credentials when its own have less
- * than this (plus LINK_EXPIRY_MARGIN_SECONDS) left. See getSignedLink().
- */
-const MIN_CREDENTIAL_LIFETIME_SECONDS = 60*60
-
-/**
- * How long before its credentials expire a link signed with them is made to
- * expire, so the link says it expires no later than it really stops working.
- */
-const LINK_EXPIRY_MARGIN_SECONDS = 60
-
 
 /**
  * Keeps files in an S3 bucket.
@@ -73,10 +60,10 @@ const LINK_EXPIRY_MARGIN_SECONDS = 60
  *
  * Optionally:
  *
- *   link_lifetime     How many seconds signed links last, at most. Defaults
- *                     to 7 days, S3's limit (see links.js). Links signed with
- *                     Pod Identity's credentials last only as long as those
- *                     do, from 1 to 6 hours (see getSignedLink()).
+ *   link_lifetime     How many seconds signed links last. Defaults to 7
+ *                     days, S3's limit (see links.js). A link signed with Pod
+ *                     Identity's credentials stops working sooner if they
+ *                     expire first (see getSignedLink()).
  *
  * For an S3-compatible server instead of AWS, also set:
  *
@@ -147,10 +134,6 @@ module.exports = class S3Storage {
             }
             : chooseAWSCredentials(env ?? process.env, 'use S3')
         core.logger.info(`Using S3 with ${source}.`)
-
-        // A refresh of the signing client's credentials in progress, so links
-        // signed at the same time share it (see signingCredentials()).
-        this.credentialRefresh = null
 
         // If client is defined, just use that client.
         if ( client ) {
@@ -315,33 +298,27 @@ module.exports = class S3Storage {
     }
 
     /**
-     * A signed link to the file, and how long it lasts.
+     * A signed link to the file, and how long it's signed for.
      *
-     * A link lasts `link_lifetime` (7 days unless set), unless the
-     * credentials it's signed with expire sooner: S3 stops accepting a link
-     * when its credentials expire, whatever the link says. Access keys don't
-     * expire. Pod Identity's credentials last 6 hours, and the agent on the
-     * node renews them every 3 hours, but the SDK keeps using a set until 5
-     * minutes before it expires. So before signing, the credentials are
-     * renewed when they have less than an hour left (signingCredentials()),
-     * and each link is made to expire a minute before them: from 1 to 6
-     * hours.
+     * A link is signed for `link_lifetime` (7 days unless set). But S3 stops
+     * accepting a link when the credentials it's signed with expire,
+     * whatever the link says. Access keys don't expire. Pod Identity's
+     * credentials last 6 hours, and the SDK keeps using a set until 5
+     * minutes before it expires, so a link signed with them can stop working
+     * anywhere from a few minutes to 6 hours after it's made. We leave that
+     * to the client, which asks for a new link when one fails to load
+     * (components/files/File in web-application/client), rather than
+     * reaching into the SDK for the credentials and their expiry.
      *
      * @param {string} path The file's key.
      *
      * @return {Promise<Object|null>} `{ url, lifetime }`: the link, and how
-     * many seconds it lasts from now. Null when it couldn't be signed, which
+     * many seconds it's signed for. Null when it couldn't be signed, which
      * is logged.
      */
     async getSignedLink(path) {
         try {
-            let lifetime = this.linkLifetime
-
-            const credentials = await this.signingCredentials()
-            if ( credentials?.expiration instanceof Date ) {
-                const left = Math.floor((credentials.expiration.getTime() - Date.now()) / 1000)
-                lifetime = Math.max(1, Math.min(lifetime, left - LINK_EXPIRY_MARGIN_SECONDS))
-            }
+            const lifetime = this.linkLifetime
 
             const params = {
                 Bucket: this.bucket,
@@ -367,49 +344,6 @@ module.exports = class S3Storage {
     async getSignedUrl(path) {
         return (await this.getSignedLink(path))?.url ?? null
     }
-
-    /**
-     * The credentials links are signed with: the signing client's, renewed
-     * first when they expire within MIN_CREDENTIAL_LIFETIME_SECONDS (plus the
-     * margin each link keeps). Renewing asks the Pod Identity agent again,
-     * which hands out credentials it renewed within the last 3 hours, so with
-     * 3 to 6 hours left. Links signed while a renewal is under way wait for
-     * it rather than starting their own.
-     *
-     * @return {Promise<Object|undefined>} The credentials, or undefined when
-     * the client can't say (a client given to the constructor).
-     */
-    async signingCredentials() {
-        const provider = this.signingClient?.config?.credentials
-        if ( typeof provider !== 'function' ) {
-            return undefined
-        }
-
-        const credentials = await provider()
-        if ( ! ( credentials?.expiration instanceof Date ) ) {
-            return credentials
-        }
-
-        const needed = (MIN_CREDENTIAL_LIFETIME_SECONDS + LINK_EXPIRY_MARGIN_SECONDS) * 1000
-        if ( credentials.expiration.getTime() - Date.now() >= needed ) {
-            return credentials
-        }
-
-        if ( this.credentialRefresh === null ) {
-            this.credentialRefresh = Promise.resolve(provider({ forceRefresh: true }))
-                .finally(() => { this.credentialRefresh = null })
-        }
-        const renewed = await this.credentialRefresh
-
-        if ( renewed?.expiration instanceof Date && renewed.expiration.getTime() - Date.now() < needed ) {
-            this.core.logger.warn(`S3's credentials expire at ${renewed.expiration.toISOString()}, even after `
-                + `asking for new ones, so links signed with them last less than an hour. `
-                + `Check the EKS Pod Identity agent on this node.`)
-        }
-
-        return renewed
-    }
-
 
     async removeFile(path) {
         const params = {

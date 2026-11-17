@@ -55,9 +55,9 @@ const hasVariant = function(file, variant) {
  * A signed link to a file, or one of its variants, fetching it if it's
  * missing.
  *
- * Links run out (on staging and production, from 1 to 6 hours after they're
- * made), and the File slice keeps when to replace each
- * (/state/File/sourceRefresh.js). A link that's due when a component first
+ * Links run out, and the File slice keeps when to replace each, by the
+ * lifetime the API gives it (/state/File/sourceRefresh.js). A link that's
+ * due when a component first
  * shows it is fetched again first, so the component waits for the new one
  * rather than showing one that has run out: the common case of a file shown
  * again after a while (scrolling back, navigating back, a tab coming back).
@@ -65,7 +65,9 @@ const hasVariant = function(file, variant) {
  * That's decided once per link, not on every render. A link that runs out
  * while it's shown stays: the browser has already loaded it. If it has to
  * load it again and can't (a video seeking, say), File asks for a new one
- * with `refresh`.
+ * with `refresh`. So it does for a link that stops working before it's due,
+ * which on staging and production happens when the credentials it's signed
+ * with expire.
  *
  * @param {string} fileId
  * @param {string} variant  'full' or a width.

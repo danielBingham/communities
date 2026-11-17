@@ -171,17 +171,13 @@ describe('Storage', function() {
         })
 
         describe('with expiring credentials, as Pod Identity\'s are', function() {
-            // Credentials that expire `minutes` from now, one set per call,
-            // numbered, as the Pod Identity agent hands them out.
-            const agent = function(...minutes) {
-                const provider = jest.fn(async function() {
-                    const n = provider.mock.calls.length
-                    return {
-                        accessKeyId: `ASIA${n}`, secretAccessKey: 'secret', sessionToken: `token-${n}`,
-                        expiration: new Date(Date.now() + minutes[Math.min(n, minutes.length) - 1] * 60*1000)
-                    }
-                })
-                return provider
+            // Credentials that expire `minutes` from now, as the Pod Identity
+            // agent hands them out.
+            const agent = function(minutes) {
+                return jest.fn(async () => ({
+                    accessKeyId: 'ASIA1', secretAccessKey: 'secret', sessionToken: 'token-1',
+                    expiration: new Date(Date.now() + minutes * 60*1000)
+                }))
             }
 
             // A Pod Identity S3Storage whose signing client gets its
@@ -195,76 +191,26 @@ describe('Storage', function() {
 
             const lifetimeOf = (link) => parseInt(new URL(link.url).searchParams.get('X-Amz-Expires'), 10)
 
-            it('Should end each link a minute before its credentials, and say so', async function() {
-                const storage = storageWith(agent(5*60))
+            it('Should sign links for link_lifetime, and say so, however soon the credentials expire', async function() {
+                for ( const minutes of [ 5*60, 20 ] ) {
+                    const provider = agent(minutes)
+                    const storage = storageWith(provider)
+                    jest.spyOn(storage.core.logger, 'warn')
 
-                const link = await storage.getSignedLink('files/a.jpeg')
-                expect(link.lifetime).toBeGreaterThan(5*60*60 - 60 - 5)
-                expect(link.lifetime).toBeLessThanOrEqual(5*60*60 - 60)
-                expect(lifetimeOf(link)).toBe(link.lifetime)
-                expect(new URL(link.url).searchParams.get('X-Amz-Security-Token')).toBe('token-1')
+                    const link = await storage.getSignedLink('files/a.jpeg')
+                    expect(link.lifetime).toBe(60*60*24*7)
+                    expect(lifetimeOf(link)).toBe(60*60*24*7)
+                    expect(new URL(link.url).searchParams.get('X-Amz-Security-Token')).toBe('token-1')
+
+                    // The credentials are the SDK's business: a link that
+                    // stops working when they expire is the client's to
+                    // replace (File in web-application/client).
+                    expect(provider.mock.calls.some(([ options ]) => options?.forceRefresh)).toBe(false)
+                    expect(storage.core.logger.warn).not.toHaveBeenCalled()
+                }
             })
 
-            it('Should renew credentials with less than an hour left before signing, so links last an hour at least', async function() {
-                const provider = agent(30, 4*60)
-                const storage = storageWith(provider)
-
-                const link = await storage.getSignedLink('files/a.jpeg')
-                expect(provider).toHaveBeenCalledTimes(2)
-                expect(provider.mock.calls[1][0]).toMatchObject({ forceRefresh: true })
-                expect(new URL(link.url).searchParams.get('X-Amz-Security-Token')).toBe('token-2')
-                expect(link.lifetime).toBeGreaterThan(4*60*60 - 60 - 5)
-
-                // The renewed credentials are kept.
-                await storage.getSignedLink('files/b.jpeg')
-                expect(provider).toHaveBeenCalledTimes(2)
-            })
-
-            it('Should keep credentials with an hour and a minute or more left', async function() {
-                const provider = agent(62, 4*60)
-                const storage = storageWith(provider)
-
-                const link = await storage.getSignedLink('files/a.jpeg')
-                expect(provider).toHaveBeenCalledTimes(1)
-                expect(link.lifetime).toBeGreaterThanOrEqual(60*60)
-            })
-
-            it('Should renew once for links signed at the same time', async function() {
-                let release = null
-                const gate = new Promise((resolve) => { release = resolve })
-                const provider = jest.fn(async function(options) {
-                    if ( options?.forceRefresh ) {
-                        await gate
-                        return { accessKeyId: 'ASIANEW', secretAccessKey: 's', sessionToken: 'new', expiration: new Date(Date.now() + 4*60*60*1000) }
-                    }
-                    return { accessKeyId: 'ASIAOLD', secretAccessKey: 's', sessionToken: 'old', expiration: new Date(Date.now() + 10*60*1000) }
-                })
-                const storage = storageWith(provider)
-                // Stand in for the client's cache, which would otherwise
-                // answer the later calls without asking the provider.
-                storage.signingClient = { config: { credentials: provider } }
-
-                const signing = Promise.all([ storage.signingCredentials(), storage.signingCredentials(), storage.signingCredentials() ])
-                await new Promise((resolve) => setImmediate(resolve))
-                release()
-                const all = await signing
-
-                expect(all.map((c) => c.accessKeyId)).toEqual([ 'ASIANEW', 'ASIANEW', 'ASIANEW' ])
-                expect(provider.mock.calls.filter(([ options ]) => options?.forceRefresh)).toHaveLength(1)
-                expect(storage.credentialRefresh).toBe(null)
-            })
-
-            it('Should still sign, and warn, when renewed credentials are short too', async function() {
-                const storage = storageWith(agent(20, 20))
-                jest.spyOn(storage.core.logger, 'warn')
-
-                const link = await storage.getSignedLink('files/a.jpeg')
-                expect(link.lifetime).toBeGreaterThan(19*60 - 5)
-                expect(link.lifetime).toBeLessThanOrEqual(19*60)
-                expect(storage.core.logger.warn).toHaveBeenCalledWith(expect.stringMatching(/links signed with them last less than an hour/))
-            })
-
-            it('Should keep to link_lifetime when it is shorter', async function() {
+            it('Should sign links for link_lifetime when it is set', async function() {
                 const link = await storageWith(agent(5*60), { link_lifetime: 120 }).getSignedLink('files/a.jpeg')
                 expect(link.lifetime).toBe(120)
                 expect(lifetimeOf(link)).toBe(120)

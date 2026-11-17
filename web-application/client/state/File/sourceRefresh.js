@@ -21,10 +21,13 @@
 /******************************************************************************
  * When to replace a file's signed link.
  *
- * The API returns each link in `sources` with how many seconds it lasts in
- * `sourceLifetimes`. On staging and production a link lasts from 1 to 6
- * hours (S3Storage.getSignedLink() in packages/backend), and the app keeps
- * links for as long as the page is open, so they need replacing.
+ * The API returns each link in `sources` with how many seconds it's signed
+ * for in `sourceLifetimes` (the storage block's `link_lifetime`, 7 days
+ * unless set), and the app keeps links for as long as the page is open, so
+ * they need replacing. On staging and production a link can also stop
+ * working sooner, when the credentials it's signed with expire
+ * (S3Storage.getSignedLink() in packages/backend); File replaces those when
+ * they fail to load.
  *
  * Each link gets a refresh time, kept in the File slice's
  * `sourceRefreshTimes`: a little before it runs out. A link past its refresh
