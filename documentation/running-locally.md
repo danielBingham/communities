@@ -118,6 +118,15 @@ AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
 
+The keys are an access key for your local environment's own IAM user (such
+as `local-<username>`), which can read only `/local/<username>/*`. The apps
+read Parameter Store with these keys and nothing else: without them they stop
+and say so, rather than using an AWS profile or login from `~/.aws`. So a
+local app has its environment's permissions, never yours, and you don't need
+to be signed in to AWS to run it. On staging and production the apps have no
+keys; they read Parameter Store with their pods' EKS Pod Identity
+(`Config.awsCredentials()` in `packages/backend/config.js`).
+
 Create every parameter the apps need under `/local/<username>`; you can copy
 them from another `/local` path. To take a single value from somewhere else,
 change its source in your `index.development.js`, for example

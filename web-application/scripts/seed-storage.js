@@ -46,10 +46,7 @@ const seed = async function() {
         throw new Error(`Placeholder assets can't be seeded with the production configuration.`)
     }
 
-    const loader = new Config(process.env.COMMUNITIES_ENVIRONMENT_NAME, process.env.AWS_REGION, {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    })
+    const loader = new Config(process.env.COMMUNITIES_ENVIRONMENT_NAME, process.env.AWS_REGION)
     const config = await loader.loadConfig({
         environment: definition.environment,
         host: definition.host,

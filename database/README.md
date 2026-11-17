@@ -56,9 +56,12 @@ the container's command. It never touches `local-database.sql` or
 Both commands read their settings from Parameter Store under
 `/$COMMUNITIES_ENVIRONMENT_NAME`, the same parameters the web application
 reads: `database/host`, `database/port`, `database/root-user`,
-`database/root-password` and `database/password`. The Job passes the same
-AWS keys and environment name the web application uses, so whatever reads
-the app's configuration has to be able to read the root credentials too.
+`database/root-password` and `database/password`. The AWS CLI reads them
+with the credentials the container has: access keys in `AWS_ACCESS_KEY_ID`
+and `AWS_SECRET_ACCESS_KEY`, or the pod's EKS Pod Identity. Those have to be
+able to read the root credentials, which the web application's and workers'
+don't need; the infrastructure repository's
+`documentation/architecture/access.md` says which identity the Job runs as.
 
 The Release workflow builds and pushes the image to ECR as
 `communities/database-helper`, tagged with the release version alongside
