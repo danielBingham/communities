@@ -350,9 +350,14 @@ module.exports = class FileController {
     }
 
     /**
-     * GET /file/:id/src
+     * GET /file/:id/source
      *
-     * Get the raw file source for display.
+     * Get a signed link to the file, or one of its variants, for display.
+     *
+     * Responds with `sources`, the link by variant. Links run out, and one
+     * signed with Pod Identity's credentials can't say when (see
+     * S3Storage.getSignedUrl()), so the client asks for a new one when one
+     * fails to load (web-application/client/components/files/File).
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -426,7 +431,8 @@ module.exports = class FileController {
     /**
      * GET /file/:id
      *
-     * Get a file.
+     * Get a file, with signed links to it and the variant asked for in
+     * `sources`, as getFileSource() gives them.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.

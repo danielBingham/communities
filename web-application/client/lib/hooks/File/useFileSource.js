@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -50,6 +50,21 @@ const hasVariant = function(file, variant) {
     }
 }
 
+/**
+ * A signed link to a file, or one of its variants, fetching it if it's
+ * missing.
+ *
+ * Links run out, and the API can't say when (on staging and production a
+ * link stops working when the credentials it's signed with expire). So File
+ * asks for a new one with `refresh` when one fails to load.
+ *
+ * @param {string} fileId
+ * @param {string} variant  'full' or a width.
+ *
+ * @return {Array} `[url, request, refresh]`: the link (undefined while it's
+ * first being fetched, null when there isn't one), the latest request for
+ * it, and a function that fetches a new one.
+ */
 export const useFileSource = function(fileId, variant) {
 
     const file = useSelector((state) => fileId && fileId in state.File.dictionary ? state.File.dictionary[fileId] : null)
@@ -67,7 +82,7 @@ export const useFileSource = function(fileId, variant) {
         // If the fileId isn't in sources already, then we need to query for
         // it.
         if ( ! (fileId in state.File.sources) ) {
-            return undefined 
+            return undefined
         }
 
         // If it's set to `null`, then the file doesn't exist.
@@ -88,17 +103,17 @@ export const useFileSource = function(fileId, variant) {
 
         // Otherwise, return the variant link.
         return state.File.sources[fileId][variant]
-    })  
+    })
 
     const [request, makeRequest, resetRequest ] = useRequest()
 
     const refresh = function() {
         makeRequest(getFileSource(fileId, variant))
-    }  
+    }
 
     useEffect(() => {
-        if ( fileId !== null && fileId !== undefined && url === undefined 
-            && (request?.state !== 'pending' && request?.state !== 'failed')  
+        if ( fileId !== null && fileId !== undefined && url === undefined
+            && (request?.state !== 'pending' && request?.state !== 'failed')
         ) {
             makeRequest(getFileSource(fileId, variant))
         }

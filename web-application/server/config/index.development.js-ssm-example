@@ -78,14 +78,14 @@ module.exports = {
     },
     // Storage: `driver` selects where uploaded files are kept, and the block
     // with the same name configures that driver (see
-    // packages/backend/services/storage).
+    // packages/backend/services/storage). The s3 driver reaches the bucket
+    // with the same keys Parameter Store is read with: your local user's,
+    // in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
     storage: {
         driver: 's3',
         s3: {
             bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
-            bucket: 'aws-ssm-parameter:/storage/s3/bucket',
-            access_id: 'aws-ssm-parameter:/storage/s3/access-id',
-            access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+            bucket: 'aws-ssm-parameter:/storage/s3/bucket'
         }
     },
     // Email: `driver` selects how email is sent, and the block with the same

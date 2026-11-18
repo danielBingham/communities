@@ -27,6 +27,8 @@ const { FilesystemStorage, S3Storage } = require('./services/storage')
 const { AndroidPushDriver, IOSPushDriver, LogPushDriver } = require('./services/push')
 const { checkSSLConfig } = require('./lib/database-tls')
 const { checkRedisConfig } = require('./lib/redis-connection')
+const { chooseAWSCredentials } = require('./lib/aws-credentials')
+const ConfigError = require('./errors/ConfigError')
 
 /**
  * The environments a configuration definition file can exist for, selected by
@@ -69,24 +71,6 @@ const DRIVERS = {
     email: { postmark: PostmarkEmailDriver, log: LogEmailDriver },
     storage: { s3: S3Storage, filesystem: FilesystemStorage },
     notifications: { ios: IOSPushDriver, android: AndroidPushDriver, log: LogPushDriver }
-}
-
-/**
- * Thrown when the configuration can't be loaded (no definition file for the
- * environment, or values that couldn't be found) or isn't valid.
- */
-class ConfigError extends Error {
-    constructor(message, missing) {
-        super(message)
-        this.name = 'ConfigError'
-
-        /**
-         * The values that couldn't be found, as `{ key, source }`: the
-         * configuration key (e.g. `database.host`) and where it should have
-         * come from (e.g. `env:COMMUNITIES_DATABASE_HOST`).
-         */
-        this.missing = missing ?? []
-    }
 }
 
 /**
@@ -257,25 +241,12 @@ module.exports = class Config {
     }
 
     /**
-     * The AWS credentials to read Parameter Store with, chosen from the
-     * environment. There are only two kinds:
-     *
-     * - Access keys, when AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are
-     *   both set. Local environments use these: the keys of an IAM user made
-     *   for the environment, so the app runs with that user's permissions
-     *   rather than the developer's.
-     * - EKS Pod Identity, when AWS_CONTAINER_CREDENTIALS_FULL_URI and
-     *   AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE are set. EKS sets them in a
-     *   pod whose ServiceAccount has a Pod Identity association, which is how
-     *   staging and production run. The SDK's container credential provider
-     *   then gets the role's credentials from the Pod Identity agent, and
-     *   refreshes them.
-     *
-     * Keys win when a pod has both, so a pod moves to Pod Identity when its
-     * keys are taken away. Anything else is refused rather than left to the
-     * SDK's default chain, which would go on to a profile or login in
-     * ~/.aws, or to the instance's role: the app never runs as whoever
-     * happens to be signed in to AWS.
+     * The AWS credentials to read Parameter Store with: the access keys in
+     * AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY when both are set (local
+     * environments), otherwise EKS Pod Identity when the pod has it (staging
+     * and production), and nothing else. S3Storage uses the same ones unless
+     * its block has keys of its own; see chooseAWSCredentials() in
+     * lib/aws-credentials.js.
      *
      * @param {Object} env  The environment, e.g. `process.env`.
      *
@@ -287,29 +258,7 @@ module.exports = class Config {
      * neither keys nor Pod Identity.
      */
     static awsCredentials(env) {
-        const accessKeyId = env.AWS_ACCESS_KEY_ID || undefined
-        const secretAccessKey = env.AWS_SECRET_ACCESS_KEY || undefined
-
-        if ( accessKeyId && secretAccessKey ) {
-            return {
-                source: 'the access keys in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY',
-                credentials: { accessKeyId: accessKeyId, secretAccessKey: secretAccessKey }
-            }
-        }
-
-        if ( accessKeyId || secretAccessKey ) {
-            throw new ConfigError(`Only one of AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY is set. `
-                + `Set both to read Parameter Store with access keys, or neither in a pod with EKS Pod Identity.`)
-        }
-
-        if ( env.AWS_CONTAINER_CREDENTIALS_FULL_URI && env.AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE ) {
-            return { source: 'EKS Pod Identity', credentials: undefined }
-        }
-
-        throw new ConfigError(`There are no AWS credentials to read Parameter Store with. Set `
-            + `AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to an access key for the environment's IAM user, `
-            + `or run in a pod whose ServiceAccount has an EKS Pod Identity association. `
-            + `AWS profiles and logins aren't used.`)
+        return chooseAWSCredentials(env, 'read Parameter Store')
     }
 
     /**

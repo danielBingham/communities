@@ -23,8 +23,7 @@ const { createReadStream, createWriteStream } = require('node:fs')
 const path = require('node:path')
 const { pipeline } = require('node:stream/promises')
 
-// Signed links last as long as S3's: 7 days.
-const SIGNED_URL_LIFETIME_SECONDS = 60*60*24*7
+const { linkLifetimeSetting } = require('./links')
 
 /**
  * Keeps files in a folder on disk, for local development.
@@ -45,8 +44,11 @@ const SIGNED_URL_LIFETIME_SECONDS = 60*60*24*7
  *
  * Browsers load files the way they load them from S3, through signed links:
  * getSignedUrl() returns a link to FilesystemStorage.ROUTE on the app's host,
- * signed with `secret` and good for 7 days, and the web application serves
- * that route (see web-application/server/storage.js).
+ * signed with `secret`, and the web application serves that route (see
+ * web-application/server/storage.js). Links last 7 days, or `link_lifetime`
+ * seconds if it's set (see links.js): set it to 60 to watch the client
+ * replace links that have run out, as it must for S3's on staging and
+ * production.
  */
 module.exports = class FilesystemStorage {
 
@@ -62,8 +64,8 @@ module.exports = class FilesystemStorage {
      * @param {Object} settings The `storage.filesystem` block.
      * @param {string} environment  The configuration's `environment`.
      *
-     * @throws {Error} When the environment isn't development, or a required
-     * setting is missing.
+     * @throws {Error} When the environment isn't development, a required
+     * setting is missing, or `link_lifetime` isn't valid.
      */
     static validateConfig(settings, environment) {
         if ( environment !== 'development' ) {
@@ -75,6 +77,8 @@ module.exports = class FilesystemStorage {
                 throw new Error(`The filesystem storage driver needs storage.filesystem.${key} in the configuration.`)
             }
         }
+
+        linkLifetimeSetting(settings.link_lifetime, 'storage.filesystem')
     }
 
     /**
@@ -89,6 +93,7 @@ module.exports = class FilesystemStorage {
         this.directory = path.resolve(settings.directory)
         this.secret = settings.secret
         this.host = core.config.host
+        this.linkLifetime = linkLifetimeSetting(settings.link_lifetime, 'storage.filesystem')
 
         /**
          * Recorded as `files.location` for each file stored here.
@@ -181,10 +186,12 @@ module.exports = class FilesystemStorage {
     }
 
     /**
-     * A link to the file that's good for 7 days.
+     * A signed link to the file, for `link_lifetime`: 7 days unless it's set.
+     *
+     * @return {Promise<string>} The link.
      */
     async getSignedUrl(key) {
-        const expires = Math.floor(Date.now() / 1000) + SIGNED_URL_LIFETIME_SECONDS
+        const expires = Math.floor(Date.now() / 1000) + this.linkLifetime
         const encodedKey = key.split('/').map(encodeURIComponent).join('/')
 
         const url = new URL(`${FilesystemStorage.ROUTE}/${encodedKey}`, this.host)
