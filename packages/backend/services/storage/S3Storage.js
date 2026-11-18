@@ -130,7 +130,7 @@ module.exports = class S3Storage {
         let source = undefined
         let credentials = undefined
         if ( settings.access_id && settings.access_key ) {
-            source = 'the access keys in storage.s3.access_id and storage.s3.access_key',
+            source = 'the access keys in storage.s3.access_id and storage.s3.access_key'
             credentials = { accessKeyId: settings.access_id, secretAccessKey: settings.access_key }
         } else {
             const chosenCredentials = chooseAWSCredentials(env ?? process.env, 'use S3')
