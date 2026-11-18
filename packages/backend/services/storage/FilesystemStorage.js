@@ -47,7 +47,7 @@ const { linkLifetimeSetting } = require('./links')
  * signed with `secret`, and the web application serves that route (see
  * web-application/server/storage.js). Links last 7 days, or `link_lifetime`
  * seconds if it's set (see links.js): set it to 60 to watch the client
- * replace links that run out, as it must for S3's on staging and
+ * replace links that have run out, as it must for S3's on staging and
  * production.
  */
 module.exports = class FilesystemStorage {
@@ -186,26 +186,18 @@ module.exports = class FilesystemStorage {
     }
 
     /**
-     * A signed link to the file, and how long it lasts: `link_lifetime`, 7
-     * days unless it's set.
+     * A signed link to the file, for `link_lifetime`: 7 days unless it's set.
      *
-     * @return {Promise<Object>} `{ url, lifetime }`, the lifetime in seconds.
+     * @return {Promise<string>} The link.
      */
-    async getSignedLink(key) {
+    async getSignedUrl(key) {
         const expires = Math.floor(Date.now() / 1000) + this.linkLifetime
         const encodedKey = key.split('/').map(encodeURIComponent).join('/')
 
         const url = new URL(`${FilesystemStorage.ROUTE}/${encodedKey}`, this.host)
         url.searchParams.set('expires', expires)
         url.searchParams.set('signature', this.sign(key, expires))
-        return { url: url.href, lifetime: this.linkLifetime }
-    }
-
-    /**
-     * A signed link to the file, without how long it lasts.
-     */
-    async getSignedUrl(key) {
-        return (await this.getSignedLink(key)).url
+        return url.href
     }
 
     /**

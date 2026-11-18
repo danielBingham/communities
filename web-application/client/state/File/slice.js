@@ -62,34 +62,9 @@ const initialState = {
      */
     queries: {},
 
-    /**
-     * Signed links to each file, by file id, then variant ('full' or a
-     * width). A file that couldn't be found is null; a variant that couldn't
-     * be, null within it.
-     */
     sources: {},
 
-    /**
-     * When to replace each link in `sources`, in milliseconds, with the same
-     * keys. A link without one is kept. See ./sourceRefresh.js.
-     */
-    sourceRefreshTimes: {},
-
     requests: {}
-}
-
-/**
- * Record a link's refresh time, or forget it when there isn't one.
- */
-const setRefreshTime = function(state, fileId, variant, time) {
-    if ( typeof time === 'number' ) {
-        if ( ! ( fileId in state.sourceRefreshTimes ) ) {
-            state.sourceRefreshTimes[fileId] = {}
-        }
-        state.sourceRefreshTimes[fileId][variant] = time
-    } else if ( fileId in state.sourceRefreshTimes ) {
-        delete state.sourceRefreshTimes[fileId][variant]
-    }
 }
 
 export const FileSlice = createSlice({
@@ -105,7 +80,6 @@ export const FileSlice = createSlice({
         setFileNull: function(state, action) {
             const fileId = action.payload
             state.sources[fileId] = null
-            delete state.sourceRefreshTimes[fileId]
 
             setNull(state, action)
         }, 
@@ -114,12 +88,6 @@ export const FileSlice = createSlice({
         clearFileQueries: clearQueries,
         resetFileSlice: (state, action) => initialState,
 
-        /**
-         * Set one link: `{ fileId, variant, url, refreshTime }`, with the
-         * variant 'full' when it's missing. A null `url` means the variant
-         * couldn't be found. `refreshTime` comes from refreshTimeFor(), and
-         * without it the link is kept until the page reloads.
-         */
         setSource: (state, action ) => {
             const fileId = action.payload.fileId
             const variant = action.payload.variant
@@ -137,15 +105,13 @@ export const FileSlice = createSlice({
 
             const url = action.payload.url
 
-            const key = variant ? variant : 'full'
-            state.sources[fileId][key] = url
-            setRefreshTime(state, fileId, key, typeof url === 'string' ? action.payload.refreshTime : undefined)
+            if ( variant ) {
+                state.sources[fileId][variant] = url
+            } else {
+                state.sources[fileId]['full'] = url
+            }
         },
 
-        /**
-         * Set a response's links: `{ fileId, sources, refreshTimes }`, the
-         * response's `sources` and their refreshTimesFor().
-         */
         setSources: (state, action) => {
             const fileId = action.payload.fileId
             if ( ! ( fileId in state.sources) ) {
@@ -161,7 +127,6 @@ export const FileSlice = createSlice({
 
             for(const [variant, source] of Object.entries(action.payload.sources)) {
                 state.sources[fileId][variant] = source
-                setRefreshTime(state, fileId, variant, action.payload.refreshTimes?.[variant])
             }
         },
 
@@ -171,7 +136,6 @@ export const FileSlice = createSlice({
             if ( fileId in state.sources) {
                 delete state.sources[fileId]
             }
-            delete state.sourceRefreshTimes[fileId]
         },
 
         setRequest: (state, action) => {

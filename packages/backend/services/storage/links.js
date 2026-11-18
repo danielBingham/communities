@@ -21,14 +21,13 @@
 /******************************************************************************
  * Signed links: how long the links each storage driver hands out last.
  *
- * Browsers load stored files from signed links, which the API returns with
- * how many seconds each lasts (`sourceLifetimes`). The client asks for a new
- * link shortly before one runs out, and again if one fails to load
- * (web-application/client/state/File).
+ * Browsers load stored files from signed links. When one fails to load,
+ * because it has run out or for any other reason, the client asks for a new
+ * one (web-application/client/components/files/File).
  *
  * A driver's `link_lifetime` setting caps its links, in seconds. It defaults
  * to the longest S3 allows, 7 days. Set it low (60, say) in a development
- * configuration to watch the client replace links.
+ * configuration to watch the client replace links that have run out.
  ******************************************************************************/
 
 /**
@@ -38,9 +37,9 @@
 const MAX_LINK_LIFETIME_SECONDS = 60*60*24*7
 
 /**
- * The shortest `link_lifetime` allowed. The client replaces a link when a
- * quarter of its life is left, so much shorter than this would have it
- * asking almost constantly.
+ * The shortest `link_lifetime` allowed. A much shorter link could run out
+ * before a video finishes loading, which the client would take for a broken
+ * file.
  */
 const MIN_LINK_LIFETIME_SECONDS = 60
 

@@ -33,12 +33,11 @@ const S3Storage = require('./S3Storage')
  *
  * Every driver has the same methods: uploadFile, uploadFileFromStream,
  * uploadFileFromBuffer, copyFile, moveFile, hasFile, getFile, downloadFile,
- * getSignedLink, getSignedUrl and removeFile, plus `location` (recorded with
- * each file) and `contentOrigins` (where browsers load files from).
+ * getSignedUrl and removeFile, plus `location` (recorded with each file) and
+ * `contentOrigins` (where browsers load files from).
  *
- * getSignedLink returns a link to a file with how many seconds it lasts,
- * which the API passes on to the client so it can replace links before they
- * run out (see links.js); getSignedUrl returns just the link, for redirects.
+ * getSignedUrl's links last `link_lifetime` at most (see links.js), and the
+ * client asks for a new one when one fails to load.
  *
  * @param {Core} core   A core with `config` and `logger`.
  *

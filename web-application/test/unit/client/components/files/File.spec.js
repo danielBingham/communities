@@ -21,7 +21,9 @@ jest.mock('/state/lib/makeRequest', () => ({
         mockRequests.push({
             method, endpoint,
             respond: (response) => { onSuccess(response); resolve({ success: true }) },
-            fail: (status) => { onFailure(status, {}); resolve({ success: false }) }
+            fail: (status) => { onFailure(status, {}); resolve({ success: false }) },
+            // As makeRequest's catch path: no answer, so no onFailure.
+            networkFail: () => { resolve({ success: false, response: { status: 0 } }) }
         })
         return [ promise, new AbortController() ]
     }
@@ -42,7 +44,6 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 describe('Files whose links run out', function() {
 
     const image = { id: 'f', type: 'image/jpeg', kind: 'image', variants: [ '650' ] }
-    const later = () => Date.now() + 60*60*1000
 
     let container = null
     let root = null
@@ -58,9 +59,22 @@ describe('Files whose links run out', function() {
         await act(async () => root.unmount())
         container.remove()
         jest.restoreAllMocks()
+        jest.useRealTimers()
     })
 
-    const storeWith = function(file, sources, refreshTimes) {
+    // Fake only setTimeout, for useLinkRetry's waits, and leave React's
+    // scheduling alone.
+    const fakeTimeouts = function() {
+        jest.useFakeTimers({ doNotFake: [ 'Date', 'hrtime', 'nextTick', 'performance', 'queueMicrotask',
+            'requestAnimationFrame', 'cancelAnimationFrame', 'requestIdleCallback', 'cancelIdleCallback',
+            'setImmediate', 'clearImmediate', 'setInterval', 'clearInterval' ] })
+    }
+
+    const wait = async function(ms) {
+        await act(async () => jest.advanceTimersByTime(ms))
+    }
+
+    const storeWith = function(file, sources) {
         const store = configureStore({
             reducer: {
                 File: FileReducer,
@@ -68,7 +82,7 @@ describe('Files whose links run out', function() {
             }
         })
         store.dispatch(setFilesInDictionary({ entity: file }))
-        store.dispatch(setSources({ fileId: file.id, sources: sources, refreshTimes: refreshTimes }))
+        store.dispatch(setSources({ fileId: file.id, sources: sources }))
         return store
     }
 
@@ -81,77 +95,140 @@ describe('Files whose links run out', function() {
     }
 
     describe('File', function() {
+        const respondWith = async function(request, url) {
+            await act(async () => request.respond({ entity: image, sources: { 650: url }, relations: {} }))
+        }
+
+        const img = () => container.querySelector('img')
+
         it('Should ask for a new link when an image fails to load, and show it', async function() {
             const onError = jest.fn()
-            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }, { 650: later() }))
-            expect(container.querySelector('img').getAttribute('src')).toBe('https://s3/a1')
+            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }))
+            expect(img().getAttribute('src')).toBe('https://s3/a1')
             expect(mockRequests).toHaveLength(0)
 
-            await fire(container.querySelector('img'), 'error')
+            await fire(img(), 'error')
             expect(mockRequests).toHaveLength(1)
             expect(mockRequests[0]).toMatchObject({ method: 'GET', endpoint: '/file/f/source?variant=650' })
 
-            await act(async () => mockRequests[0].respond({
-                entity: image, sources: { 650: 'https://s3/a2' }, sourceLifetimes: { 650: 3600 }, relations: {}
-            }))
-            expect(container.querySelector('img').getAttribute('src')).toBe('https://s3/a2')
+            await respondWith(mockRequests[0], 'https://s3/a2')
+            expect(img().getAttribute('src')).toBe('https://s3/a2')
             expect(onError).not.toHaveBeenCalled()
         })
 
-        it('Should give up when the new link fails too, and try again after a minute', async function() {
-            const now = jest.spyOn(Date, 'now')
-            const start = Date.now()
-            now.mockReturnValue(start)
-
+        it('Should give up when the new link fails before it loads', async function() {
             const onError = jest.fn()
-            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }, { 650: start + 3600*1000 }))
+            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }))
 
-            await fire(container.querySelector('img'), 'error')
-            await act(async () => mockRequests[0].respond({
-                entity: image, sources: { 650: 'https://s3/a2' }, sourceLifetimes: { 650: 3600 }, relations: {}
-            }))
+            await fire(img(), 'error')
+            await respondWith(mockRequests[0], 'https://s3/a2')
+            await fire(img(), 'error')
 
-            now.mockReturnValue(start + 5*1000)
-            await fire(container.querySelector('img'), 'error')
             expect(mockRequests).toHaveLength(1)
             expect(onError).toHaveBeenCalledTimes(1)
+        })
 
-            now.mockReturnValue(start + 61*1000)
-            await fire(container.querySelector('img'), 'error')
+        it('Should ask again whenever a link that loaded fails, however soon', async function() {
+            const onError = jest.fn()
+            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }))
+
+            await fire(img(), 'error')
+            await respondWith(mockRequests[0], 'https://s3/a2')
+            await fire(img(), 'load')
+
+            // Expired again (or a blip): a link that loaded is worth replacing.
+            await fire(img(), 'error')
             expect(mockRequests).toHaveLength(2)
+            await respondWith(mockRequests[1], 'https://s3/a3')
+            await fire(img(), 'load')
+            expect(img().getAttribute('src')).toBe('https://s3/a3')
+
+            await fire(img(), 'error')
+            expect(mockRequests).toHaveLength(3)
+            expect(onError).not.toHaveBeenCalled()
+        })
+
+        it('Should ask again after a pause when asking gets no answer, and carry on when it does', async function() {
+            fakeTimeouts()
+            const onError = jest.fn()
+            await render(<File id="f" width={650} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }))
+
+            await fire(img(), 'error')
+            await act(async () => mockRequests[0].networkFail())
+            expect(img().getAttribute('src')).toBe('https://s3/a1')
+
+            await wait(1999)
+            expect(mockRequests).toHaveLength(1)
+            await wait(1)
+            expect(mockRequests).toHaveLength(2)
+
+            await respondWith(mockRequests[1], 'https://s3/a2')
+            expect(img().getAttribute('src')).toBe('https://s3/a2')
+            await fire(img(), 'load')
+            expect(onError).not.toHaveBeenCalled()
+        })
+
+        it('Should give up, and show the fallback, when asking keeps getting no answer', async function() {
+            fakeTimeouts()
+            const onError = jest.fn()
+            await render(<File id="f" width={650} fallback={true} onError={onError} />, storeWith(image, { 650: 'https://s3/a1' }))
+
+            await fire(img(), 'error')
+            for ( const delay of [ 2000, 10000, 30000 ] ) {
+                await act(async () => mockRequests.at(-1).networkFail())
+                expect(onError).not.toHaveBeenCalled()
+                await wait(delay)
+            }
+            expect(mockRequests).toHaveLength(4)
+            await act(async () => mockRequests[3].networkFail())
+
             expect(onError).toHaveBeenCalledTimes(1)
+            expect(onError.mock.calls[0][0]?.type).toBe('error')
+            expect(img()).toBe(null)
+            expect(container.querySelector('.file__fallback')).not.toBe(null)
+
+            await wait(60000)
+            expect(mockRequests).toHaveLength(4)
+        })
+
+        it('Should ask again after a pause when the same link comes back', async function() {
+            fakeTimeouts()
+            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/a1' }))
+
+            await fire(img(), 'error')
+            // Signed in the same second with the same credentials: the
+            // browser wouldn't load it again.
+            await respondWith(mockRequests[0], 'https://s3/a1')
+            expect(mockRequests).toHaveLength(1)
+
+            await wait(2000)
+            expect(mockRequests).toHaveLength(2)
+            await respondWith(mockRequests[1], 'https://s3/a2')
+            expect(img().getAttribute('src')).toBe('https://s3/a2')
+        })
+
+        it('Should stop waiting when it goes away', async function() {
+            fakeTimeouts()
+            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/a1' }))
+            await fire(img(), 'error')
+            await act(async () => mockRequests[0].networkFail())
+
+            await act(async () => root.render(<div />))
+            await wait(60000)
+            expect(mockRequests).toHaveLength(1)
         })
 
         it('Should ask for a new link to the full file when that\'s what it shows', async function() {
-            await render(<File id="f" width={650} />, storeWith(image, { 650: null, full: 'https://s3/full1' }, { full: later() }))
-            expect(container.querySelector('img').getAttribute('src')).toBe('https://s3/full1')
+            await render(<File id="f" width={650} />, storeWith(image, { 650: null, full: 'https://s3/full1' }))
+            expect(img().getAttribute('src')).toBe('https://s3/full1')
 
-            await fire(container.querySelector('img'), 'error')
+            await fire(img(), 'error')
             expect(mockRequests.map((r) => r.endpoint)).toEqual([ '/file/f/source?variant=full' ])
         })
 
-        it('Should replace a link that\'s due before showing it', async function() {
-            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/old' }, { 650: Date.now() - 1 }))
-            expect(container.querySelector('img')).toBe(null)
-            expect(container.querySelector('[role="status"]')).not.toBe(null)
-            expect(mockRequests.map((r) => r.endpoint)).toEqual([ '/file/f/source?variant=650' ])
-
-            await act(async () => mockRequests[0].respond({
-                entity: image, sources: { 650: 'https://s3/new' }, sourceLifetimes: { 650: 3600 }, relations: {}
-            }))
-            expect(container.querySelector('img').getAttribute('src')).toBe('https://s3/new')
-            expect(mockRequests).toHaveLength(1)
-        })
-
-        it('Should keep a link without a refresh time, as from an older server', async function() {
-            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/a1' }))
-            expect(container.querySelector('img').getAttribute('src')).toBe('https://s3/a1')
-            expect(mockRequests).toHaveLength(0)
-        })
-
         it('Should fall back on the full file when a new link can\'t be had', async function() {
-            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/a1' }, { 650: later() }))
-            await fire(container.querySelector('img'), 'error')
+            await render(<File id="f" width={650} />, storeWith(image, { 650: 'https://s3/a1' }))
+            await fire(img(), 'error')
             await act(async () => mockRequests[0].fail(404))
 
             expect(mockRequests.map((r) => r.endpoint)).toEqual([ '/file/f/source?variant=650', '/file/f/source?variant=full' ])
@@ -160,20 +237,30 @@ describe('Files whose links run out', function() {
         it('Should ask for a new link to a video\'s poster when it fails to load', async function() {
             const video = { id: 'v', type: 'video/mp4', kind: 'video', variants: [ '650' ], thumbId: 't' }
             const thumbnail = { id: 't', type: 'image/jpeg', kind: 'image', variants: [ '650' ] }
-            const store = storeWith(video, { 650: 'https://s3/v1' }, { 650: later() })
+            const store = storeWith(video, { 650: 'https://s3/v1' })
             store.dispatch(setFilesInDictionary({ entity: thumbnail }))
-            store.dispatch(setSources({ fileId: 't', sources: { 650: 'https://s3/t1' }, refreshTimes: { 650: later() } }))
+            store.dispatch(setSources({ fileId: 't', sources: { 650: 'https://s3/t1' } }))
+            const poster = () => container.querySelector('img.video__poster__image')
 
             await render(<File id="v" width={650} />, store)
-            const poster = container.querySelector('img.video__poster__image')
-            expect(poster.getAttribute('src')).toBe('https://s3/t1')
+            expect(poster().getAttribute('src')).toBe('https://s3/t1')
 
-            await fire(poster, 'error')
+            await fire(poster(), 'error')
             expect(mockRequests.map((r) => r.endpoint)).toEqual([ '/file/t/source?variant=650' ])
-            await act(async () => mockRequests[0].respond({
-                entity: thumbnail, sources: { 650: 'https://s3/t2' }, sourceLifetimes: { 650: 3600 }, relations: {}
-            }))
-            expect(container.querySelector('img.video__poster__image').getAttribute('src')).toBe('https://s3/t2')
+            await act(async () => mockRequests[0].respond({ entity: thumbnail, sources: { 650: 'https://s3/t2' }, relations: {} }))
+            expect(poster().getAttribute('src')).toBe('https://s3/t2')
+
+            // It loads, and later fails again: another new link.
+            await fire(poster(), 'load')
+            await fire(poster(), 'error')
+            expect(mockRequests).toHaveLength(2)
+            await act(async () => mockRequests[1].respond({ entity: thumbnail, sources: { 650: 'https://s3/t3' }, relations: {} }))
+
+            // That one fails before it loads: give up on the poster, and
+            // leave the video alone.
+            await fire(poster(), 'error')
+            expect(mockRequests).toHaveLength(2)
+            expect(container.querySelector('video').getAttribute('src')).toBe('https://s3/v1')
         })
     })
 

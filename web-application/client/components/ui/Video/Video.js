@@ -70,9 +70,9 @@ const describeUrl = function(url) {
  * the video showing, and once the new link loads, go back to where the
  * video was when it failed, and play on if it was playing.  `onPosterError`
  * tells the caller the poster failed to load, so it can ask for a new link
- * to it too.
+ * to it too, and `onPosterLoad` that it loaded.
  */
-const Video = function({ className, src, mediaKey, preload, poster, playOverlay, altText, ref, onLoad, onError, onPosterError }) {
+const Video = function({ className, src, mediaKey, preload, poster, playOverlay, altText, ref, onLoad, onError, onPosterLoad, onPosterError }) {
 
     // Whether the user has pressed play on the current `src`.
     const [isActivated, setIsActivated] = useState(false)
@@ -151,9 +151,13 @@ const Video = function({ className, src, mediaKey, preload, poster, playOverlay,
     // ready first, show the play button rather than wait on the poster.
     const showSpinner = posterLoading && videoLoading
 
-    const onPosterLoad = function(event) {
+    const onPosterImageLoad = function(event) {
         const image = event.currentTarget
         setLoadedPoster({ url: poster, width: image.naturalWidth, height: image.naturalHeight })
+
+        if ( onPosterLoad !== undefined && onPosterLoad !== null ) {
+            onPosterLoad(event)
+        }
     }
 
     const onPosterImageError = function() {
@@ -348,7 +352,7 @@ const Video = function({ className, src, mediaKey, preload, poster, playOverlay,
                             src={poster}
                             alt=""
                             draggable={false}
-                            onLoad={onPosterLoad}
+                            onLoad={onPosterImageLoad}
                             onError={onPosterImageError}
                         />
                     }

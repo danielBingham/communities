@@ -159,15 +159,13 @@ describe('Storage', function() {
             expect(url.searchParams.get('X-Amz-Expires')).toBe(String(60*60*24*7))
         })
 
-        it('Should sign links with keys for 7 days, or link_lifetime, and say how long', async function() {
-            const link = await new S3Storage(coreWith(), s3Settings).getSignedLink('files/a.jpeg')
-            expect(link.lifetime).toBe(60*60*24*7)
-            expect(new URL(link.url).searchParams.get('X-Amz-Expires')).toBe(String(60*60*24*7))
-            expect(new URL(link.url).searchParams.get('X-Amz-Security-Token')).toBe(null)
+        it('Should sign links with keys for 7 days, or link_lifetime', async function() {
+            const url = new URL(await new S3Storage(coreWith(), s3Settings).getSignedUrl('files/a.jpeg'))
+            expect(url.searchParams.get('X-Amz-Expires')).toBe(String(60*60*24*7))
+            expect(url.searchParams.get('X-Amz-Security-Token')).toBe(null)
 
-            const short = await new S3Storage(coreWith(), { ...s3Settings, link_lifetime: '120' }).getSignedLink('files/a.jpeg')
-            expect(short.lifetime).toBe(120)
-            expect(new URL(short.url).searchParams.get('X-Amz-Expires')).toBe('120')
+            const short = new URL(await new S3Storage(coreWith(), { ...s3Settings, link_lifetime: '120' }).getSignedUrl('files/a.jpeg'))
+            expect(short.searchParams.get('X-Amz-Expires')).toBe('120')
         })
 
         describe('with expiring credentials, as Pod Identity\'s are', function() {
@@ -189,18 +187,15 @@ describe('Storage', function() {
                 return storage
             }
 
-            const lifetimeOf = (link) => parseInt(new URL(link.url).searchParams.get('X-Amz-Expires'), 10)
-
-            it('Should sign links for link_lifetime, and say so, however soon the credentials expire', async function() {
+            it('Should sign links for link_lifetime, however soon the credentials expire', async function() {
                 for ( const minutes of [ 5*60, 20 ] ) {
                     const provider = agent(minutes)
                     const storage = storageWith(provider)
                     jest.spyOn(storage.core.logger, 'warn')
 
-                    const link = await storage.getSignedLink('files/a.jpeg')
-                    expect(link.lifetime).toBe(60*60*24*7)
-                    expect(lifetimeOf(link)).toBe(60*60*24*7)
-                    expect(new URL(link.url).searchParams.get('X-Amz-Security-Token')).toBe('token-1')
+                    const url = new URL(await storage.getSignedUrl('files/a.jpeg'))
+                    expect(url.searchParams.get('X-Amz-Expires')).toBe(String(60*60*24*7))
+                    expect(url.searchParams.get('X-Amz-Security-Token')).toBe('token-1')
 
                     // The credentials are the SDK's business: a link that
                     // stops working when they expire is the client's to
@@ -211,16 +206,14 @@ describe('Storage', function() {
             })
 
             it('Should sign links for link_lifetime when it is set', async function() {
-                const link = await storageWith(agent(5*60), { link_lifetime: 120 }).getSignedLink('files/a.jpeg')
-                expect(link.lifetime).toBe(120)
-                expect(lifetimeOf(link)).toBe(120)
+                const url = new URL(await storageWith(agent(5*60), { link_lifetime: 120 }).getSignedUrl('files/a.jpeg'))
+                expect(url.searchParams.get('X-Amz-Expires')).toBe('120')
             })
 
             it('Should return null, and log, when it can\'t get credentials to sign with', async function() {
                 const storage = storageWith(jest.fn(async () => { throw new Error('agent unreachable') }))
                 jest.spyOn(storage.core.logger, 'error')
 
-                expect(await storage.getSignedLink('files/a.jpeg')).toBe(null)
                 expect(await storage.getSignedUrl('files/a.jpeg')).toBe(null)
                 expect(storage.core.logger.error).toHaveBeenCalled()
             })
@@ -349,15 +342,10 @@ describe('Storage', function() {
             expect(storage.pathFor('files/a.jpeg')).toBe(path.join(directory, 'storage/files/a.jpeg'))
         })
 
-        it('Should sign links for 7 days, or link_lifetime, and say how long', async function() {
-            const link = await storage.getSignedLink('files/a.jpeg')
-            expect(link.lifetime).toBe(60*60*24*7)
-            expect(link.url).toBe(await storage.getSignedUrl('files/a.jpeg'))
-
+        it('Should sign links for link_lifetime when it is set', async function() {
             const short = new FilesystemStorage(coreWith(), { directory: directory, secret: 'secret', link_lifetime: '60' })
-            const shortLink = await short.getSignedLink('files/a.jpeg')
-            expect(shortLink.lifetime).toBe(60)
-            expect(parseInt(new URL(shortLink.url).searchParams.get('expires'), 10) - Date.now() / 1000).toBeCloseTo(60, -1)
+            const url = new URL(await short.getSignedUrl('files/a.jpeg'))
+            expect(parseInt(url.searchParams.get('expires'), 10) - Date.now() / 1000).toBeCloseTo(60, -1)
         })
 
         it('Should sign links to its route on the app host, good for 7 days', async function() {

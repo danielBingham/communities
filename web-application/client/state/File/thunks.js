@@ -23,7 +23,6 @@ import { makeRequest } from '/state/lib/makeRequest'
 import { setRelationsInState }  from '/state/lib/relations'
 
 import { setFilesInDictionary, removeFile, setSource, setSources, setFileNull } from './slice'
-import { refreshTimeFor, refreshTimesFor } from './sourceRefresh'
 
 /**
  * POST /upload/image
@@ -92,12 +91,6 @@ export const postFiles = function(files) {
 
 }
 
-/**
- * GET /file/:id/source
- *
- * Get a signed link to a file, or one of its variants, into `sources`, with
- * when to replace it (./sourceRefresh.js).
- */
 export const getFileSource = function(fileId, variant) {
     return function(dispatch, getState) {
         let path = `/file/${encodeURIComponent(fileId)}/source`
@@ -107,9 +100,8 @@ export const getFileSource = function(fileId, variant) {
 
         return dispatch(makeRequest('GET', path, null,
             function(response) {
-                const refreshTimes = refreshTimesFor(response.sources, response.sourceLifetimes, Date.now())
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSources({ fileId: fileId, sources: response.sources, refreshTimes: refreshTimes }))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
 
                 dispatch(setRelationsInState(response.relations))
             }, 
@@ -131,9 +123,8 @@ export const getFile = function(fileId, variant) {
 
         return dispatch(makeRequest('GET', path, null,
             function(response) {
-                const refreshTimes = refreshTimesFor(response.sources, response.sourceLifetimes, Date.now())
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSources({ fileId: fileId, sources: response.sources, refreshTimes: refreshTimes }))
+                dispatch(setSources({ fileId: fileId, sources: response.sources }))
 
                 dispatch(setRelationsInState(response.relations))
             },
@@ -152,8 +143,7 @@ export const patchFile = function(fileId, patch) {
         return dispatch(makeRequest('PATCH', `/file/${encodeURIComponent(fileId)}`, patch,
             function(response) {
                 dispatch(setFilesInDictionary({ entity: response.entity}))
-                dispatch(setSource({ fileId: fileId, variant: 'full', url: response.sources['full'],
-                    refreshTime: refreshTimeFor(response.sourceLifetimes?.['full'], Date.now()) }))
+                dispatch(setSource({ fileId: fileId, variant: 'full', url: response.sources['full'] }))
 
                 dispatch(setRelationsInState(response.relations))
             }

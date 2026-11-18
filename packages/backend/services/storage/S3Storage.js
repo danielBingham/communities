@@ -63,7 +63,7 @@ const { linkLifetimeSetting } = require('./links')
  *   link_lifetime     How many seconds signed links last. Defaults to 7
  *                     days, S3's limit (see links.js). A link signed with Pod
  *                     Identity's credentials stops working sooner if they
- *                     expire first (see getSignedLink()).
+ *                     expire first (see getSignedUrl()).
  *
  * For an S3-compatible server instead of AWS, also set:
  *
@@ -298,51 +298,37 @@ module.exports = class S3Storage {
     }
 
     /**
-     * A signed link to the file, and how long it's signed for.
+     * A signed link to the file.
      *
      * A link is signed for `link_lifetime` (7 days unless set). But S3 stops
      * accepting a link when the credentials it's signed with expire,
      * whatever the link says. Access keys don't expire. Pod Identity's
-     * credentials last 6 hours, and the SDK keeps using a set until 5
-     * minutes before it expires, so a link signed with them can stop working
-     * anywhere from a few minutes to 6 hours after it's made. We leave that
-     * to the client, which asks for a new link when one fails to load
-     * (components/files/File in web-application/client), rather than
-     * reaching into the SDK for the credentials and their expiry.
+     * credentials last 6 hours, and the SDK replaces a set that has less than
+     * 5 minutes left before signing with it, so a link signed with them stops
+     * working anywhere from 5 minutes to 6 hours after it's made. The
+     * link can't say when: the SDK makes it with the lifetime asked for, and
+     * the credentials' expiry is only reachable through its internals. So
+     * the client asks for a new link when one fails to load
+     * (components/files/File in web-application/client).
      *
      * @param {string} path The file's key.
      *
-     * @return {Promise<Object|null>} `{ url, lifetime }`: the link, and how
-     * many seconds it's signed for. Null when it couldn't be signed, which
-     * is logged.
+     * @return {Promise<string|null>} The link, or null when it couldn't be
+     * signed, which is logged.
      */
-    async getSignedLink(path) {
+    async getSignedUrl(path) {
         try {
-            const lifetime = this.linkLifetime
-
             const params = {
                 Bucket: this.bucket,
                 Key: path
             }
 
             const command = new GetObjectCommand(params)
-            const url = await getSignedUrl(this.signingClient, command, { expiresIn: lifetime })
-            return { url: url, lifetime: lifetime }
+            return await getSignedUrl(this.signingClient, command, { expiresIn: this.linkLifetime })
         } catch (error) {
             this.core.logger.error(`Failed to getSignedUrl for '${path}': `, error)
             return null
         }
-    }
-
-    /**
-     * A signed link to the file, without how long it lasts. For a redirect,
-     * which the browser follows straight away.
-     *
-     * @return {Promise<string|null>} The link, or null when it couldn't be
-     * signed.
-     */
-    async getSignedUrl(path) {
-        return (await this.getSignedLink(path))?.url ?? null
     }
 
     async removeFile(path) {

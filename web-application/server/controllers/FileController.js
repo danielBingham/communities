@@ -354,12 +354,10 @@ module.exports = class FileController {
      *
      * Get a signed link to the file, or one of its variants, for display.
      *
-     * Responds with `sources`, the link by variant, and `sourceLifetimes`,
-     * how many seconds each link is signed for. The client replaces a link
-     * shortly before then, and when it fails to load: one signed with Pod
-     * Identity's credentials stops working sooner if they expire first (see
-     * S3Storage.getSignedLink()). See web-application/client/state/File and
-     * components/files/File.
+     * Responds with `sources`, the link by variant. Links run out, and one
+     * signed with Pod Identity's credentials can't say when (see
+     * S3Storage.getSignedUrl()), so the client asks for a new one when one
+     * fails to load (web-application/client/components/files/File).
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -412,8 +410,8 @@ module.exports = class FileController {
                 `Failed to find File(${id}) at path '${path}'.`)
         }
 
-        const link = await this.storage.getSignedLink(path)
-        if ( link === null ) {
+        const url = await this.storage.getSignedUrl(path)
+        if ( url === null ) {
             throw new ControllerError(404, 'not-found',
                 `Failed to find File(${id}) at path '${path}'.`,
                 `Failed to file that file.`)
@@ -424,10 +422,7 @@ module.exports = class FileController {
         response.status(200).json({
             entity: file,
             sources: {
-                [variant]: link.url
-            },
-            sourceLifetimes: {
-                [variant]: link.lifetime
+                [variant]: url
             },
             relations: relations
         })
@@ -437,8 +432,7 @@ module.exports = class FileController {
      * GET /file/:id
      *
      * Get a file, with signed links to it and the variant asked for in
-     * `sources`, and how long each is signed for in `sourceLifetimes`, as
-     * getFileSource() does.
+     * `sources`, as getFileSource() gives them.
      *
      * @param {Object} request  Standard Express request object.
      * @param {int} request.params.id   The database id of the file we wish to get.
@@ -476,15 +470,13 @@ module.exports = class FileController {
         }
 
         const sources = {}
-        const sourceLifetimes = {}
 
         // Files that haven't had their file uploaded yet will not have a
         // filepath.
         if ( file.filepath !== undefined && file.filepath !== null ) {
-            const link = await this.storage.getSignedLink(file.filepath)
-            if ( link !== null ) {
-                sources['full'] = link.url
-                sourceLifetimes['full'] = link.lifetime
+            const signedUrl = await this.storage.getSignedUrl(file.filepath)
+            if ( signedUrl !== null ) {
+                sources['full'] = signedUrl
             }
         }
 
@@ -493,11 +485,7 @@ module.exports = class FileController {
             const path = this.fileService.getPath(file, variant)
 
             if ( path !== null && path !== undefined ) {
-                const link = await this.storage.getSignedLink(path)
-                sources[variant] = link?.url ?? null
-                if ( link !== null ) {
-                    sourceLifetimes[variant] = link.lifetime
-                }
+                sources[variant] = await this.storage.getSignedUrl(path)
             } else {
                 request.logger.error(`Path for variant '${variant}' is null.`)
             }
@@ -508,7 +496,6 @@ module.exports = class FileController {
         response.status(200).json({
             entity: file,
             sources: sources,
-            sourceLifetimes: sourceLifetimes,
             relations: relations
         })
     }
@@ -617,16 +604,15 @@ module.exports = class FileController {
                 `Something went wrong on the backend.`)
         }
 
-        const link = await this.storage.getSignedLink(file.filepath)
+        const url = await this.storage.getSignedUrl(file.filepath)
 
         const relations = await this.getRelations(currentUser, entityResults)
 
         response.status(200).json({
             entity: entity,
             sources: {
-                ['full']: link?.url ?? null
+                ['full']: url
             },
-            sourceLifetimes: link !== null ? { ['full']: link.lifetime } : {},
             relations: relations
         })
     }

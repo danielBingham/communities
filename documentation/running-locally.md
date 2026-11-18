@@ -192,13 +192,19 @@ storage: {
 Signed links run out: after 7 days, or `link_lifetime` when it's set. With
 Pod Identity, on staging and production, a link can stop working sooner,
 since it lasts only as long as the credentials it's signed with (anywhere
-from a few minutes to 6 hours). The API says how long each link is signed
-for; the client asks for a new one shortly before then, and again if one
-fails to load. To watch that happen locally, give either
-driver's block `link_lifetime: 60` (seconds; the most is 7 days): open a page
-with images and a video, play the video, pause it, and come back after a
-couple of minutes. Images shown again get new links first; the paused video
-gets one when you play it, and carries on from where it was.
+from 5 minutes to 6 hours), and the API can't say when. So when a file
+fails to load, the client asks for a new link and shows that, and gives up
+only if a new link fails before it loads (`useLinkRetry.js`, beside
+`web-application/client/components/files/File/File.js`). To watch that
+happen locally, give either driver's block `link_lifetime: 60` (seconds; the
+most is 7 days), and turn on Disable cache in the browser's developer tools
+(Network tab). Open a page with images and a video, play the video, pause
+it, and wait a couple of minutes. Go to another page and back: each image
+fails once, then shows with a new link. Play the video: it gets a new link
+and carries on from where it was. To see a request for a new link get no
+answer, wait another couple of minutes, go offline in the developer tools,
+play the video, and go back online within half a minute: the client asks
+again after 2, 10 and 30 seconds before giving up.
 
 The `s3` driver also works with an S3-compatible server such as
 [Garage](https://garagehq.deuxfleurs.fr/) or
