@@ -30,29 +30,49 @@ import logger from '/logger'
  */
 export const RETRY_DELAYS_MS = [ 2*1000, 10*1000, 30*1000 ]
 
+/** The phases we go through, in order. **/
+const PHASE = {
+
+    /**
+     * The link we were given, or one that has loaded. If it fails, we ask for
+     * a new one. However often a link that loaded fails later, as a video
+     * playing past its credentials can, we ask again.
+     */
+    SHOWN: 'shown',
+
+    /**
+     * Asking. If the request fails without an answer, or gives us the same
+     * link back (signed in the same second with the same credentials, so the
+     * element wouldn't load it again), we wait (RETRY_DELAYS_MS) and ask
+     * again, and give up after the last try. If it fails with an answer,
+     * useFileSource sets the link to null and File falls back on the full
+     * file, and then its fallback.
+     **/
+    REPLACING: 'replacing',
+
+    /**
+     * Showing the new link. If it loads, it's shown. If it fails before it
+     * loads, the file itself is the problem (a new link is good for 5 minutes
+     * at the very least), so we give up.
+     */
+    TRYING: 'trying',
+
+    /**
+     * `onGiveUp` with the last error event, and `gaveUp` is true. A link that
+     * loads after all (another component replaced the shared one) takes us
+     * back to shown.
+     */
+    GAVEUP: 'gave-up'
+}
+
+
 /**
  * Keeps a file's signed link working while it's shown.
  *
  * Links run out (on staging and production, when the credentials they're
  * signed with expire, which the API can't predict), so when the file fails
  * to load we ask for a new link with `refresh` and show that. Each link
- * goes through:
- *
- * - shown: the link we were given, or one that has loaded. If it fails, we
- *   ask for a new one. However often a link that loaded fails later, as a
- *   video playing past its credentials can, we ask again.
- * - replacing: asking. If the request fails without an answer, or gives us
- *   the same link back (signed in the same second with the same
- *   credentials, so the element wouldn't load it again), we wait
- *   (RETRY_DELAYS_MS) and ask again, and give up after the last try. If it
- *   fails with an answer, useFileSource sets the link to null and File
- *   falls back on the full file, and then its fallback.
- * - trying: showing the new link. If it loads, it's shown. If it fails
- *   before it loads, the file itself is the problem (a new link is good for
- *   5 minutes at the very least), so we give up.
- * - gave up: `onGiveUp` with the last error event, and `gaveUp` is true. A
- *   link that loads after all (another component replaced the shared one)
- *   takes us back to shown.
+ * goes through the phases defined by PHASE.
  *
  * @param {Object} options
  * @param {string} options.label    What's shown, for the log.
@@ -68,7 +88,9 @@ export const RETRY_DELAYS_MS = [ 2*1000, 10*1000, 30*1000 ]
  * showing the link, and whether we've given up.
  */
 export const useLinkRetry = function({ label, url, request, refresh, onGiveUp }) {
-    const phase = useRef('shown')
+
+    // The phase we're currently in.  @see PHASE for details.
+    const phase = useRef(PHASE.SHOWN)
 
     // The link that failed, the last error event, and how many times we've
     // asked for a new link since.
@@ -93,7 +115,7 @@ export const useLinkRetry = function({ label, url, request, refresh, onGiveUp })
     }
 
     const giveUp = function() {
-        phase.current = 'gave-up'
+        phase.current = PHASE.GAVEUP
         logger.warn(`${label}:: Failed to load, and a new link didn't help. Giving up.`)
         setGaveUp(true)
 
@@ -104,20 +126,20 @@ export const useLinkRetry = function({ label, url, request, refresh, onGiveUp })
     }
 
     useEffect(() => {
-        if ( phase.current !== 'replacing' ) {
+        if ( phase.current !== PHASE.REPLACING ) {
             return
         }
 
         // No link now: the request failed with an answer, and File falls
         // back on the full file, or its fallback.
         if ( url === null || url === undefined ) {
-            phase.current = 'shown'
+            phase.current = PHASE.SHOWN
             return
         }
 
         // A new link, from our request or another component's.
         if ( url !== failedUrl.current ) {
-            phase.current = 'trying'
+            phase.current = PHASE.TRYING
             return
         }
 
@@ -153,13 +175,13 @@ export const useLinkRetry = function({ label, url, request, refresh, onGiveUp })
     const onError = function(event) {
         lastError.current = event
 
-        if ( phase.current === 'shown' ) {
+        if ( phase.current === PHASE.SHOWN ) {
             logger.warn(`${label}:: Failed to load (${event?.target?.error?.code ?? 'no code'}). Asking for a new link.`)
-            phase.current = 'replacing'
+            phase.current = PHASE.REPLACING
             failedUrl.current = url
             tries.current = 0
             ask()
-        } else if ( phase.current === 'trying' ) {
+        } else if ( phase.current === PHASE.TRYING ) {
             giveUp()
         }
         // While replacing, the old link failing again changes nothing. Once
@@ -167,8 +189,8 @@ export const useLinkRetry = function({ label, url, request, refresh, onGiveUp })
     }
 
     const onLoad = function() {
-        if ( phase.current === 'trying' || phase.current === 'gave-up' ) {
-            phase.current = 'shown'
+        if ( phase.current === PHASE.TRYING || phase.current === PHASE.GAVEUP ) {
+            phase.current = PHASE.SHOWN
             setGaveUp(false)
         }
     }
