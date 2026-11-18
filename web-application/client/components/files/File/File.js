@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -30,7 +30,7 @@ import Video from '/components/ui/Video'
 
 import Spinner from '/components/Spinner'
 
-import { useLinkRetry } from './useLinkRetry'
+import { useLinkRetry } from '/lib/hooks/File'
 
 import './File.css'
 
@@ -41,7 +41,7 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // TECHDEBT HACK: Need to reference the id through the file to ensure that we retrieve the
     // file first and only retrieve the source URL if we actually successfully
     // retreive the file.
-    // 
+    //
     // We should probably handle this better in useFileSource.  Right now
     // there's a case, where you can generate an error by calling useFileSource
     // without first calling the file.
@@ -139,8 +139,8 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     //      RENDER
     // ========================================================================
 
-    if ( file === undefined 
-        || ( url === undefined 
+    if ( file === undefined
+        || ( url === undefined
             || (url === null && rootUrl === undefined)
         )
     ) {
@@ -148,7 +148,7 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     }
 
 
-    if ( file?.kind === 'video' && 
+    if ( file?.kind === 'video' &&
         ( thumbnail === undefined || thumbnailUrl === undefined || (thumbnailUrl === null && rootThumbnailUrl === undefined))
     ) {
         return ( <div className={`file ${className ? className : ''}`}><Spinner /></div> )

@@ -194,8 +194,7 @@ Pod Identity, on staging and production, a link can stop working sooner,
 since it lasts only as long as the credentials it's signed with (anywhere
 from 5 minutes to 6 hours), and the API can't say when. So when a file
 fails to load, the client asks for a new link and shows that, and gives up
-only if a new link fails before it loads (`useLinkRetry.js`, beside
-`web-application/client/components/files/File/File.js`). To watch that
+only if a new link fails before it loads. To watch that
 happen locally, give either driver's block `link_lifetime: 60` (seconds; the
 most is 7 days), and turn on Disable cache in the browser's developer tools
 (Network tab). Open a page with images and a video, play the video, pause
