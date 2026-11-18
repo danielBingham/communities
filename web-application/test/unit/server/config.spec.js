@@ -128,6 +128,12 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
         }
     })
 
+    it('Should give staging no S3 keys: its pods reach S3 with EKS Pod Identity', function() {
+        for (const key of s3Keys) {
+            expect(staging).not.toHaveProperty([ key ])
+        }
+    })
+
     it('Should only turn on known push drivers, each configured, under notifications', function() {
         const drivers = {
             ios: [ 'privateCert', 'publicCert', 'applicationBundleID', 'endpoint' ],

@@ -70,14 +70,14 @@ module.exports = {
     },
     // Storage: `driver` selects where uploaded files are kept, and the block
     // with the same name configures that driver (see
-    // packages/backend/services/storage).
+    // packages/backend/services/storage). With no access keys of its own,
+    // the s3 driver reaches the bucket with the pod's EKS Pod Identity, as
+    // Parameter Store is read.
     storage: {
         driver: 's3',
         s3: {
             bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
-            bucket: 'aws-ssm-parameter:/storage/s3/bucket',
-            access_id: 'aws-ssm-parameter:/storage/s3/access-id',
-            access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+            bucket: 'aws-ssm-parameter:/storage/s3/bucket'
         }
     },
     // Email: `driver` selects how email is sent, and the block with the same
