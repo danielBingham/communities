@@ -127,12 +127,17 @@ module.exports = class S3Storage {
 
         // The block's own keys when it has them (see above), otherwise the
         // ones Parameter Store is read with.
-        const { source, credentials } = settings.access_id && settings.access_key
-            ? {
-                source: 'the access keys in storage.s3.access_id and storage.s3.access_key',
-                credentials: { accessKeyId: settings.access_id, secretAccessKey: settings.access_key }
-            }
-            : chooseAWSCredentials(env ?? process.env, 'use S3')
+        let source = undefined
+        let credentials = undefined
+        if ( settings.access_id && settings.access_key ) {
+            source = 'the access keys in storage.s3.access_id and storage.s3.access_key',
+            credentials = { accessKeyId: settings.access_id, secretAccessKey: settings.access_key }
+        } else {
+            const chosenCredentials = chooseAWSCredentials(env ?? process.env, 'use S3')
+
+            source = chosenCredentials.source
+            credentials = chosenCredentials.credentials
+        }
         core.logger.info(`Using S3 with ${source}.`)
 
         // If client is defined, just use that client.
