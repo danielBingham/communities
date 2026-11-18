@@ -33,7 +33,9 @@
       "^/state/(.*)": "<rootDir>/client/state/$1",
       "^/errors/(.*)": "<rootDir>/client/errors/$1",
       "^/components/(.*)": "<rootDir>/client/components/$1",
-      "^/pages/(.*)": "<rootDir>/client/pages/$1"
+      "^/pages/(.*)": "<rootDir>/client/pages/$1",
+      "^/lib/(.*)": "<rootDir>/client/lib/$1",
+      "\\.css$": "<rootDir>/test/unit/client/fixtures/stylesheet.js"
     }
   },
   "dependencies": {

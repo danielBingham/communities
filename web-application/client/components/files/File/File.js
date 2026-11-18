@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- *  Communities -- Non-profit, cooperative social media 
- *  Copyright (C) 2022 - 2024 Daniel Bingham 
+ *  Communities -- Non-profit, cooperative social media
+ *  Copyright (C) 2022 - 2024 Daniel Bingham
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published
@@ -30,6 +30,8 @@ import Video from '/components/ui/Video'
 
 import Spinner from '/components/Spinner'
 
+import { useLinkRetry } from '/lib/hooks/File'
+
 import './File.css'
 
 const File = function({ id, width, type, fallback, className, onLoad, onError, ref }) {
@@ -39,16 +41,37 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     // TECHDEBT HACK: Need to reference the id through the file to ensure that we retrieve the
     // file first and only retrieve the source URL if we actually successfully
     // retreive the file.
-    // 
+    //
     // We should probably handle this better in useFileSource.  Right now
     // there's a case, where you can generate an error by calling useFileSource
     // without first calling the file.
     const [url, sourceRequest, refreshFileSource] = useFileSource(file?.id, width)
-    const [ thumbnailUrl, thumnailUrlRequest] = useFileSource(thumbnail?.id, width)
+    const [ thumbnailUrl, thumnailUrlRequest, refreshThumbnail] = useFileSource(thumbnail?.id, width)
 
     // If we fail to load the requested variant URL, then fall back on the full URL.
     const [rootUrl, rootRequest, refreshRoot] = useFileSource(url === null ? file?.id : null, 'full')
-    const [rootThumbnailUrl, rootThumbnailUrlRequest] = useFileSource(thumbnailUrl === null ? thumbnail?.id : null, 'full')
+    const [rootThumbnailUrl, rootThumbnailUrlRequest, refreshRootThumbnail] = useFileSource(thumbnailUrl === null ? thumbnail?.id : null, 'full')
+
+    // Links run out, and the API can't say when: when the file or its poster
+    // fails to load, ask for a new link to whichever we're showing, the
+    // variant or the full file (see useLinkRetry.js).
+    const fileRetry = useLinkRetry({
+        label: `File(${id}, ${width})`,
+        url: url !== null ? url : rootUrl,
+        request: url !== null ? sourceRequest : rootRequest,
+        refresh: url !== null ? refreshFileSource : refreshRoot,
+        onGiveUp: function(event) {
+            if ( onError !== undefined && onError !== null ) {
+                onError(event)
+            }
+        }
+    })
+    const posterRetry = useLinkRetry({
+        label: `File(${id}, ${width}) poster`,
+        url: thumbnailUrl !== null ? thumbnailUrl : rootThumbnailUrl,
+        request: thumbnailUrl !== null ? thumnailUrlRequest : rootThumbnailUrlRequest,
+        refresh: thumbnailUrl !== null ? refreshThumbnail : refreshRootThumbnail
+    })
 
     // If the caller provided a ref, we'll use that. Otherwise, we'll use this
     // as a fallback to get a ref on Video components, so that we can pause the
@@ -57,19 +80,46 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
 
     const videoUploadsEnabled = useFeature('video-uploads')
 
+    const onLoadInternal = function(event) {
+        fileRetry.onLoad()
+
+        if ( onLoad !== undefined && onLoad !== null ) {
+            onLoad(event)
+        }
+    }
+
     const onErrorInternal = function(event) {
         try {
-            logger.error(`Failed to load file with errror: `, event.target?.error) 
-            if ( event?.target?.error?.code === 2 ) {
-                refreshFileSource()
-            }
-
-            if ( onError !== undefined && onError !== null ) {
-                onError(event)
-            }
+            fileRetry.onError(event)
         } catch (error) {
             logger.error(error)
         }
+    }
+
+    // Video shows the play button on black while the poster is missing.
+    const onPosterLoadInternal = function() {
+        posterRetry.onLoad()
+    }
+
+    const onPosterErrorInternal = function(event) {
+        try {
+            posterRetry.onError(event)
+        } catch (error) {
+            logger.error(error)
+        }
+    }
+
+    const renderFallback = function() {
+        if ( fallback !== true ) {
+            return null
+        }
+
+        return (
+            <div className={`file__fallback ${ className ? className : '' }`}>
+                <div className="file__fallback__icon"> { type && type === 'video' ? <VideoCameraIcon /> : <PhotoIcon /> }</div>
+                <p>Failed to load { type && type === 'video' ? 'video' : 'image' }.  If the error persists while you have a good connection, please report as a bug!</p>
+            </div>
+        )
     }
 
     useEffect(() => {
@@ -89,8 +139,8 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     //      RENDER
     // ========================================================================
 
-    if ( file === undefined 
-        || ( url === undefined 
+    if ( file === undefined
+        || ( url === undefined
             || (url === null && rootUrl === undefined)
         )
     ) {
@@ -98,23 +148,20 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
     }
 
 
-    if ( file?.kind === 'video' && 
+    if ( file?.kind === 'video' &&
         ( thumbnail === undefined || thumbnailUrl === undefined || (thumbnailUrl === null && rootThumbnailUrl === undefined))
     ) {
         return ( <div className={`file ${className ? className : ''}`}><Spinner /></div> )
     }
 
     if ( file === null ||  ( url === null && rootUrl === null ) ) {
-        if ( fallback === true ) {
-            return (
-                <div className={`file__fallback ${ className ? className : '' }`}>
-                    <div className="file__fallback__icon"> { type && type === 'video' ? <VideoCameraIcon /> : <PhotoIcon /> }</div>
-                    <p>Failed to load { type && type === 'video' ? 'video' : 'image' }.  If the error persists while you have a good connection, please report as a bug!</p>
-                </div>
-            )
-        }
+        return renderFallback()
+    }
 
-        return null
+    // We've given up on the link: show the fallback, if there is one, rather
+    // than a broken file.
+    if ( fileRetry.gaveUp && fallback === true ) {
+        return renderFallback()
     }
 
     const filetype = file.type.split('/')[0]
@@ -134,16 +181,16 @@ const File = function({ id, width, type, fallback, className, onLoad, onError, r
 
     if ( url !== null ) {
         if ( filetype === 'video' ) {
-            return ( <Video className={`file ${className ? className : ''}`} src={url} poster={thumb} playOverlay={true} onLoad={onLoad} onError={onErrorInternal} ref={ref ? ref : videoRef} />)
+            return ( <Video className={`file ${className ? className : ''}`} src={url} mediaKey={`${file.id}/${width}`} poster={thumb} playOverlay={true} onLoad={onLoadInternal} onError={onErrorInternal} onPosterLoad={onPosterLoadInternal} onPosterError={onPosterErrorInternal} ref={ref ? ref : videoRef} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={url} onLoad={onLoadInternal} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     } else if ( url === null && rootUrl !== null ) {
         if ( filetype === 'video' ) {
-            return ( <Video className={`file ${className ? className : ''}`} src={rootUrl} poster={thumb} playOverlay={true} onLoad={onLoad} onError={onErrorInternal} ref={ref ? ref : videoRef} />)
+            return ( <Video className={`file ${className ? className : ''}`} src={rootUrl} mediaKey={`${file.id}/full`} poster={thumb} playOverlay={true} onLoad={onLoadInternal} onError={onErrorInternal} onPosterLoad={onPosterLoadInternal} onPosterError={onPosterErrorInternal} ref={ref ? ref : videoRef} />)
         }
 
-        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoad} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
+        return ( <Image className={`file ${className ? className : ''}`} src={rootUrl} onLoad={onLoadInternal} onError={onErrorInternal} crossOrigin={true} ref={ref} /> )
     }
 }
 

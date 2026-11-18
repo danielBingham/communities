@@ -24,6 +24,9 @@ const { S3 } = require('@aws-sdk/client-s3')
 const { HeadObjectCommand, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, CopyObjectCommand } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
 
+const { chooseAWSCredentials } = require('../../lib/aws-credentials')
+const { linkLifetimeSetting } = require('./links')
+
 
 /**
  * Keeps files in an S3 bucket.
@@ -34,11 +37,33 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
  *       driver: 's3',
  *       s3: {
  *           bucket_url: 'aws-ssm-parameter:/storage/s3/bucket-url',
- *           bucket: 'aws-ssm-parameter:/storage/s3/bucket',
- *           access_id: 'aws-ssm-parameter:/storage/s3/access-id',
- *           access_key: 'aws-ssm-parameter:/storage/s3/access-key'
+ *           bucket: 'aws-ssm-parameter:/storage/s3/bucket'
  *       }
  *   }
+ *
+ * It reaches S3 with the same AWS credentials the app reads Parameter Store
+ * with (chooseAWSCredentials() in lib/aws-credentials.js): the access keys
+ * in AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY locally, the pod's EKS Pod
+ * Identity on staging and production. So each environment uses one identity
+ * for both.
+ *
+ * A block can have keys of its own instead, which override those when both
+ * are set:
+ *
+ *   access_id         The access key ID.
+ *   access_key        The secret access key.
+ *
+ * An S3-compatible server's key goes here. Staging's and production's
+ * configurations also have them, from `/<env>/storage/s3/access-id` and
+ * `access-key`, until runbooks/feat-15-no-access-keys-for-s3 (in the
+ * infrastructure repository) moves each to its pods' role.
+ *
+ * Optionally:
+ *
+ *   link_lifetime     How many seconds signed links last. Defaults to 7
+ *                     days, S3's limit (see links.js). A link signed with Pod
+ *                     Identity's credentials stops working sooner if they
+ *                     expire first (see getSignedUrl()).
  *
  * For an S3-compatible server instead of AWS, also set:
  *
@@ -49,6 +74,12 @@ const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
  *                     differs from `endpoint` (e.g. `endpoint` is a container
  *                     hostname). Signed links are made with it.
  *   region            (Optional) Defaults to 'us-east-1'.
+ *
+ * The permissions it needs are the ones the S3 policies in the
+ * infrastructure repository's terraform/aws/shared/iam give
+ * (`s3-<environment>-access`): GetObject, PutObject, DeleteObject and
+ * ListBucket. A release that makes another kind of S3 call needs it added to
+ * those first.
  */
 module.exports = class S3Storage {
 
@@ -57,14 +88,22 @@ module.exports = class S3Storage {
      *
      * @param {Object} settings The `storage.s3` block.
      *
-     * @throws {Error} When a required setting is missing.
+     * @throws {Error} When a required setting is missing, only one of the
+     * keys is set, or `link_lifetime` isn't valid.
      */
     static validateConfig(settings) {
-        for (const key of [ 'bucket_url', 'bucket', 'access_id', 'access_key' ]) {
+        for (const key of [ 'bucket_url', 'bucket' ]) {
             if ( ! settings?.[key] ) {
                 throw new Error(`The s3 storage driver needs storage.s3.${key} in the configuration.`)
             }
         }
+
+        if ( Boolean(settings.access_id) !== Boolean(settings.access_key) ) {
+            throw new Error(`The s3 storage driver needs both storage.s3.access_id and storage.s3.access_key, `
+                + `or neither to use the same AWS credentials as Parameter Store.`)
+        }
+
+        linkLifetimeSetting(settings.link_lifetime, 'storage.s3')
     }
 
     /**
@@ -72,13 +111,34 @@ module.exports = class S3Storage {
      * @param {Object} settings The `storage.s3` block.
      * @param {Object} [client] An S3 client to use instead of constructing
      * one.
+     * @param {Object} [env]    The environment the credentials are chosen
+     * from. Defaults to `process.env`.
+     *
+     * @throws {ConfigError} When there are no keys and no Pod Identity (see
+     * chooseAWSCredentials()).
      */
-    constructor(core, settings, client) {
+    constructor(core, settings, client, env) {
         S3Storage.validateConfig(settings, core.config?.environment)
 
         this.core = core
         this.bucket = settings.bucket
         this.region = settings.region || 'us-east-1'
+        this.linkLifetime = linkLifetimeSetting(settings.link_lifetime, 'storage.s3')
+
+        // The block's own keys when it has them (see above), otherwise the
+        // ones Parameter Store is read with.
+        let source = undefined
+        let credentials = undefined
+        if ( settings.access_id && settings.access_key ) {
+            source = 'the access keys in storage.s3.access_id and storage.s3.access_key',
+            credentials = { accessKeyId: settings.access_id, secretAccessKey: settings.access_key }
+        } else {
+            const chosenCredentials = chooseAWSCredentials(env ?? process.env, 'use S3')
+
+            source = chosenCredentials.source
+            credentials = chosenCredentials.credentials
+        }
+        core.logger.info(`Using S3 with ${source}.`)
 
         // If client is defined, just use that client.
         if ( client ) {
@@ -88,10 +148,7 @@ module.exports = class S3Storage {
         else {
             const clientConfig = {
                 region: this.region,
-                credentials: {
-                    accessKeyId: settings.access_id,
-                    secretAccessKey: settings.access_key
-                }
+                credentials: credentials
             }
 
             // If endpoint is set, it means we're using an S3 compatible API.
@@ -109,10 +166,7 @@ module.exports = class S3Storage {
         if ( 'public_endpoint' in settings && settings.public_endpoint ) {
             const signingClientConfig = {
                 region: this.region,
-                credentials: {
-                    accessKeyId: settings.access_id,
-                    secretAccessKey: settings.access_key
-                },
+                credentials: credentials,
                 endpoint: settings.public_endpoint,
                 forcePathStyle: true // An undocumented API that prevents the client from adding the bucket to the origin.
             }
@@ -248,6 +302,25 @@ module.exports = class S3Storage {
         await once(stream, 'finish')
     }
 
+    /**
+     * A signed link to the file.
+     *
+     * A link is signed for `link_lifetime` (7 days unless set). But S3 stops
+     * accepting a link when the credentials it's signed with expire,
+     * whatever the link says. Access keys don't expire. Pod Identity's
+     * credentials last 6 hours, and the SDK replaces a set that has less than
+     * 5 minutes left before signing with it, so a link signed with them stops
+     * working anywhere from 5 minutes to 6 hours after it's made. The
+     * link can't say when: the SDK makes it with the lifetime asked for, and
+     * the credentials' expiry is only reachable through its internals. So
+     * the client asks for a new link when one fails to load
+     * (components/files/File in web-application/client).
+     *
+     * @param {string} path The file's key.
+     *
+     * @return {Promise<string|null>} The link, or null when it couldn't be
+     * signed, which is logged.
+     */
     async getSignedUrl(path) {
         try {
             const params = {
@@ -256,13 +329,12 @@ module.exports = class S3Storage {
             }
 
             const command = new GetObjectCommand(params)
-            return await getSignedUrl(this.signingClient, command, { expiresIn: 60*60*24*7 })
+            return await getSignedUrl(this.signingClient, command, { expiresIn: this.linkLifetime })
         } catch (error) {
             this.core.logger.error(`Failed to getSignedUrl for '${path}': `, error)
             return null
         }
     }
-
 
     async removeFile(path) {
         const params = {
