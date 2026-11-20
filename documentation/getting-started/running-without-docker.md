@@ -75,5 +75,4 @@ From the repository root:
 
 Express sends every page as the `index.html` webpack builds, with the page's
 title and link preview tags rendered into it, so the dev server writes its
-builds to `web-application/public/dist` where Express can find them. See
-[Pages and Metadata](../server/pages-and-metadata.md).
+builds to `web-application/public/dist` where Express can find them.

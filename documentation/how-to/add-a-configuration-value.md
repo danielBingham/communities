@@ -4,6 +4,9 @@ How to add a setting the web application or worker reads from its
 configuration. How configuration works is in
 [Configuration](../architecture/configuration.md).
 
+**Code:** `web-application/server/config/`, `worker/config/`,
+`.env.local.example`, `packages/backend/config.js`
+
 ## 1. Name It
 
 Choose its key in the configuration object (`thing.timeout`), and its

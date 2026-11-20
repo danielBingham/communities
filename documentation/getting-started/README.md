@@ -30,9 +30,12 @@ machine; see [Running Without Docker](running-without-docker.md).
 | [running-without-docker.md](running-without-docker.md) | Running PostgreSQL, Redis and the apps directly on your machine. |
 | [local-data.md](local-data.md) | Starting over with an empty database, or keeping your data in a folder of your own. |
 | [your-first-account.md](your-first-account.md) | Registering locally, making yourself an admin, and using the admin dashboard. |
+| [running-the-mobile-apps.md](running-the-mobile-apps.md) | Building and running the iOS and Android apps against your local stack or another environment. |
 
 ## Next
 
 - [Testing](../testing/README.md): running the unit, integration and
   end-to-end tests against your local stack.
-- [Repository Layout](../layout.md): where everything is.
+- [Repository Layout](../layout.md) and the
+  [System Overview](../architecture/overview.md): where everything is, and
+  how it fits together.

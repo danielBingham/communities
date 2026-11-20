@@ -68,9 +68,13 @@ AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
 
-The apps read Parameter Store with these keys and nothing else: they never
+The keys belong to your local environment's IAM user (such as
+`local-<username>`), which can read only `/local/<username>/*` and use the
+development bucket, `communities-development-storage`. The apps read
+Parameter Store and reach S3 with these keys and nothing else: they never
 fall back on a profile or login in `~/.aws`, so a local app only ever has
-its environment's permissions. Copy the parameters you need under
+its environment's permissions, and you don't need to be signed in to AWS
+to run it. Copy the parameters you need under
 `/local/<username>` from another `/local` path. To take one value from
 somewhere else, change its source in your `index.development.js` (say
 `host: 'env:COMMUNITIES_DATABASE_HOST'`) and set that variable in `.env`.

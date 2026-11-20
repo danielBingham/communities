@@ -20,7 +20,7 @@ How changes get from a branch into a release.
 | `doc` | Documentation only. |
 
 The branch name is also the name of the feature flag and the manual test
-run directory, if the change has them. See [Naming](naming.md).
+run directory, if the change has them.
 
 ## Making a Change
 

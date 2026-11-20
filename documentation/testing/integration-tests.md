@@ -50,19 +50,8 @@ local secret is never sent to staging.
 
 ## Organization
 
-The suites are organized by controller and route handler:
-`suites/PostController/patchPost.spec.js` tests `PATCH /post/:id`. A handler
-with many cases gets a directory instead (`suites/PostController/getPosts/`).
-The test cases they automate are marked `(covered: integration)` in
-[the manual test cases](test-cases).
-
-| Controller | Suites |
-| ---------- | ------ |
-| `AuthenticationController` | Logging in and out, and the session. |
-| `CommentReactionController` | Reacting to comments, and the relations that come back. |
-| `GroupController`, `GroupMemberController` | Groups and membership. |
-| `NewsController`, `PageController` | News posts, and the page metadata rendered for them. |
-| `PostController` | Posts. |
-| `UserController`, `UserRelationshipController` | Users and friendships. |
-
-Endpoints without a suite yet are still covered by the manual test cases.
+The suites are organized by controller and route handler
+(`suites/PostController/patchPost.spec.js` tests `PATCH /post/:id`). The
+test cases they automate are marked `(covered: integration)` in
+[the manual test cases](test-cases); endpoints without a suite yet are
+still covered by those.

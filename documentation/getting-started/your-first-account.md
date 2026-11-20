@@ -32,23 +32,12 @@ Without Docker, run the same `UPDATE` with `psql communities`. Log out and
 back in to pick up the new role. (This is the same statement
 `database/helper/promote-superadmin` runs on staging.)
 
-## The Admin Dashboard
+## The Admin Dashboard and Feature Flags
 
-Administrators get an Admin item in the menu, which opens `/admin`:
-
-| Section | Path | What it's for |
-| ------- | ---- | ------------- |
-| Dashboard | `/admin` | Site statistics. |
-| Features | `/admin/features` | Feature flags and their migrations: insert, initialize, migrate, enable, disable, roll back. See [Feature Flags and Migrations](../backend/feature-flags-and-migrations.md). |
-| News | `/admin/news/create` | Writing News posts for `/about/news`. |
-| Users | `/admin/users` | Finding and administering accounts. |
-| Moderation | `/admin/moderation` | The site moderation queue. |
-| Blocklist | `/admin/blocklist` | Email domains that can't register. |
-
-Features and News need the `admin` or `superadmin` role; moderators see the
-rest.
-
-## Features in a New Database
+Administrators get an Admin item in the menu, which opens `/admin`. Its
+Features page (`/admin/features`, `admin` or `superadmin` only) is where
+feature flags are turned on and their migrations run; see
+[Add a Feature Flag](../how-to/add-a-feature-flag.md).
 
 `schema.sql` is the schema with every migration applied, and it inserts the
 current feature flags as already enabled. So a new local database has every

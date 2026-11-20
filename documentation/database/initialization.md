@@ -56,4 +56,4 @@ it would be restored from its own snapshots and backups.
 `schema.sql` always describes the database with every migration applied,
 and it inserts the feature flags whose migrations it already includes as
 `enabled`. A change that adds a migration updates `schema.sql` in the same
-change. See [Feature Flags and Migrations](../backend/feature-flags-and-migrations.md).
+change. See [Add a Database Migration](../how-to/add-a-database-migration.md).

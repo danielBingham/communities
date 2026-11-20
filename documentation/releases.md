@@ -16,7 +16,7 @@ follow are documented in the infrastructure repository.
 
 The client and server of a release always have the same version, which is
 how the web client and the apps know to update (see
-[Live Updates](mobile/live-updates.md)).
+[Mobile](architecture/mobile.md#live-updates)).
 
 ## The Path to Production
 
@@ -42,7 +42,7 @@ for them:
 | ----------------- | -------- | ------- |
 | Changes the schema or data | A migration behind a feature flag (see [Add a Database Migration](how-to/add-a-database-migration.md)) | Migrations run from the admin dashboard after a deploy, and images can be rolled back but migrations stay applied. Code behind a flag has to work with it off. |
 | Adds a configuration value | The value set for staging and production | They're kept in Parameter Store, which maintainers manage. See [Add a Configuration Value](how-to/add-a-configuration-value.md). |
-| Adds a worker queue | A new worker deployment | Each queue runs as its own deployment. |
+| Adds a worker queue | A new worker deployment | Each queue runs as its own deployment. See [Add a Worker Job](how-to/add-a-worker-job.md). |
 | Changes native code, a Capacitor plugin, or `capacitor.config.js` | An app store release | Live updates only replace the web bundle. |
 | Changes a feature a worker job checks for | The workers restarted after the flag is enabled | Workers read feature flags when they start. |
 

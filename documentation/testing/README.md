@@ -18,7 +18,7 @@ how they fit together, and how to run and write each.
 | ---- | ------------ |
 | [strategy.md](strategy.md) | Deciding which tests a change needs, or which suite to run. |
 | [unit-tests.md](unit-tests.md) | Running or writing unit tests. |
-| [test-library.md](test-library.md) | Using or changing the fixture users, API helpers or test endpoints the integration and end-to-end tests share. |
+| [test-library.md](test-library.md) | Using or changing the fixture users or test endpoints the integration and end-to-end tests share. |
 | [integration-tests.md](integration-tests.md) | Running the integration tests, locally or on staging. |
 | [writing-integration-tests.md](writing-integration-tests.md) | Writing an integration test. |
 | [e2e-tests.md](e2e-tests.md) | Running the end-to-end tests, or debugging a failure. |

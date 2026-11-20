@@ -8,9 +8,6 @@ read alike and say plainly what they check. Running them is in
 
 ## How They Work
 
-- **Setup.** `test/e2e/setup.js` checks where the tests are pointed, that
-  the browser is installed and that the server is ready, then runs the
-  shared setup that creates the fixture users.
 - **Windows.** Each test file starts one browser. A test opens a window for
   each user it acts as with `openAs(key)` (`lib/browser.js`), each with its
   own cookies and local storage, so two users can be open at once and
@@ -21,8 +18,6 @@ read alike and say plainly what they check. Running them is in
   per file, through the API as the client does, and later windows reuse that
   session. A test that logs out asks for its own session,
   `openAs(key, { fresh: true })`, so it doesn't end the shared one.
-- **Staying off production.** The run refuses a `BASE_URL` or `API_ROOT` on
-  production, and every window aborts any request the page makes to it.
 
 ## Organization
 
@@ -139,5 +134,5 @@ Assertions stay in the tests.
 ## Finishing Up
 
 Mark each case you automated `(covered: e2e)`, or `(partially covered:
-e2e)` if part still needs a person, in its case file, and update the table
-in [End-to-End Tests](e2e-tests.md#whats-covered).
+e2e)` if part still needs a person, in its case file (see
+[Writing Test Cases](writing-test-cases.md#coverage-markers)).

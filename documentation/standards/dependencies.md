@@ -8,14 +8,11 @@ lockfile that's checked on every build.
 
 ## The Workspace
 
-The root `package.json` lists the workspace packages (`packages/shared`,
-`packages/backend`, `packages/session`, `worker`, `web-application`), and one
-root `package-lock.json` pins every dependency for all of them. There are no
-lockfiles in the packages. The internal `@communities/*` packages are linked
-from source, versioned together by the Release workflow, and never
-published or downloaded from a registry.
-
-Dependencies come from the public npm registry. No credentials are needed.
+One root `package-lock.json` pins every dependency for every workspace
+package; there are no lockfiles in the packages. The internal
+`@communities/*` packages are linked from source and never published or
+downloaded from a registry. Dependencies come from the public npm
+registry, with no credentials needed.
 
 ## Installing
 
@@ -63,4 +60,4 @@ After changing dependencies, rebuild the Docker images; see
 ## `packages/session`
 
 `packages/session` is our fork of express-session, and keeps the version
-ranges it inherited. See [The Session Package](../server/session-package.md).
+ranges it inherited. See [Server](../architecture/server.md#sessions).

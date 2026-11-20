@@ -95,17 +95,3 @@ npx playwright show-trace test/e2e/results/<test name>/1-user1-trace.zip
 ```
 
 Each run clears the last run's results; git ignores the folder.
-
-## What's Covered
-
-Every Post case the integration tests don't cover, except the YouTube
-cases:
-
-| Case file | Tests |
-| --------- | ----- |
-| `Post/create.md` | Making a post; link previews; images, and reordering, removing and refusing them; videos, and refusing them; supported formats and corrupted files; mentions; long strings and links; drafts, with media and links; discarding; public posts; announcements and info posts; the 10,000 character limit; sharing. |
-| `Post/read.md` | Who sees which posts; permalinks to posts you can't see; copying a post's link; long posts; paging through a gallery; sorting the feed. |
-| `Post/update.md` | Editing text, images, links and who sees a post; saving and cancelling; edits reaching shares; edit drafts; only editing your own posts. |
-| `Post/delete.md` | Deleting posts with images and links, and ones that have been shared; confirming; only deleting your own posts. |
-
-The other entities' cases are still run by hand.

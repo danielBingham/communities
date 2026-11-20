@@ -23,12 +23,6 @@ inherited from express-session.
 
 ## Where They Live
 
-| Package | Directory | What's tested |
-| ------- | --------- | ------------- |
-| `packages/shared` | `test/schema`, `test/cleaning`, `test/validation`, `test/lib` | Schemas, cleaners, validators and the shared helpers. |
-| `packages/backend` | `test/services`, plus `config`, `core`, `database` and `redis` specs at the top | Services, especially `PermissionService` (one directory per permission class, one file per action) and `ValidationService` (one file per entity). |
-| `web-application` | `test/unit/server`, `test/unit/client`, `test/unit/lib` | Server modules (config, certificates, pages, storage, the test controller) and client state helpers. |
-
 Spec files mirror the path of the code they test and end in `.spec.js`.
 
 ## Fixtures

@@ -18,35 +18,8 @@ Name the top-level `describe` for the route, as the API sees it:
 
 ## The Shape of a Spec
 
-```javascript
-const { describe, it, before, after } = require('node:test')
-const assert = require('node:assert/strict')
-
-const { initialize, logout, loginAs } = require('../../../lib/authentication')
-const { getPost, deleteAllPostsForUser } = require('../../../lib/posts')
-
-describe('GET /post/:id', function() {
-    let author = null
-
-    before(async function() {
-        author = await loginAs('user1')
-        await deleteAllPostsForUser(author.session, author.user.id)
-    })
-
-    after(async function() {
-        await deleteAllPostsForUser(author.session, author.user.id)
-        await logout(author.session)
-    })
-
-    it(`Should reject an unauthenticated request`, async function() {
-        const session = await initialize()
-        const response = await getPost(session, crypto.randomUUID())
-
-        assert.equal(response.status, 401)
-        assert.equal(response.content?.error?.type, 'not-authenticated')
-    })
-})
-```
+`suites/CommentReactionController/deleteCommentReaction.spec.js` is a good
+one to copy.
 
 - **Log in once per file** in `before()` with `loginAs(key)`, and log out in
   `after()`. Use `initialize()` alone for an unauthenticated session.
@@ -69,7 +42,7 @@ body:
   depends on in `content.relations`.
 - **Errors:** the status and `content.error.type` (`not-authenticated`,
   `not-found`, `invalid`, and so on). See
-  [Responses and Errors](../server/responses-and-errors.md).
+  [Server](../architecture/server.md#response-shapes).
 - **The change itself:** read it back (a follow-up `GET`) when the response
   alone doesn't prove it happened, or didn't.
 
@@ -87,19 +60,9 @@ and type it should give.
 
 ## Feature Flags
 
-A test for a feature behind a flag checks the flag first, and skips rather
-than fails when it's off:
-
-```javascript
-before(async function() {
-    enabled = await isFeatureEnabled(COMMENT_REACTIONS_FEATURE)
-})
-
-it(`Should ...`, async function(t) {
-    if ( ! enabled ) { t.skip(`${COMMENT_REACTIONS_FEATURE} feature is not enabled`); return }
-    ...
-})
-```
+A test for a feature behind a flag checks the flag with
+`isFeatureEnabled()` in `before()`, and calls `t.skip()` rather than
+failing when it's off, as `deleteCommentReaction.spec.js` does.
 
 ## Finishing Up
 

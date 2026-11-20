@@ -1,58 +1,60 @@
 # Documentation
 
-How the documentation in `documentation/` is organized and written, so it
-stays easy to find your way through, and cheap to read only what you need.
+What belongs in `documentation/`, and how it's written so it stays small,
+current and cheap to read only what you need.
+
+## What Belongs Here
+
+Only two kinds of documentation:
+
+1. **A high-level overview** that lets you find your footing and know where
+   to look: the pieces, how they fit together, and where each lives in the
+   code.
+2. **Processes, configuration and setup that aren't clear from the code**:
+   running the platform locally, configuring it, testing, releasing, and
+   changes that touch places you wouldn't find by following the code (a
+   migration, a queue, a configuration value).
+
+Anything a contributor can reasonably work out by reading the code stays
+out: how a class works, what each function does, lists of routes, tables,
+components or hooks. That kind of documentation is long, drifts from the
+code, and makes every pull request noisier. Explain *why* in a comment in
+the code instead.
 
 ## How It's Organized
 
-`documentation/README.md` is the top index. Each directory has its own
-`README.md` index. A reader goes from the top index to a directory index to
-one file, and stops there.
+`documentation/README.md` is the top index. Each directory has a
+`README.md` index listing every file in it, with one line saying when to
+read it. A reader goes from the top index to a directory index to one
+file, and stops there.
 
-| Directory | Holds | Example |
-| --------- | ----- | ------- |
-| `getting-started/` | Setting up and running locally. | `running-with-docker.md` |
-| `architecture/` | How the components work together: flows across them, without code-level detail. | `request-lifecycle.md` |
-| `server/`, `backend/`, `shared/`, `client/`, `worker/`, `database/`, `mobile/` | One per code directory: its structure, patterns and conventions, at code level. | `backend/daos.md` |
-| `domain/` | Each product feature end to end, and where its code is in every layer. | `domain/groups.md` |
-| `standards/` | Rules that apply everywhere. | `standards/naming.md` |
-| `how-to/` | Step-by-step recipes for common changes, linking to the rest. | `how-to/add-a-worker-job.md` |
-| `testing/` | The test suites: running and writing them, and the manual test cases. | `testing/e2e-tests.md` |
-| `api/` | The API reference. | |
+| Directory | Holds |
+| --------- | ----- |
+| `getting-started/` | Setting up and running locally. |
+| `architecture/` | The overview: how the pieces fit, and where to look in each. |
+| `database/` | How databases are initialized, locally and on staging. |
+| `how-to/` | Checklists for changes that touch non-obvious places. |
+| `standards/` | How we work: git, dependencies, what a change includes, documentation. |
+| `testing/` | Running and writing the test suites, and the manual test cases. |
+| `api/` | The API reference. |
 
-Each fact has one home. If you're not sure where something goes, ask: is it
-a rule (standards), a recipe (how-to), how one piece of code works
-(component directory), how pieces work together (architecture), or how a
-feature behaves (domain)?
+## Writing
 
-## Rules for Writing
-
-1. **One subject per file**, about 50 to 150 lines. Split anything a reader
-   would look up separately.
-2. **Indexes route.** Every directory's `README.md` lists every file in it,
-   with one line saying when to read it. Add the line when you add the file.
-3. **Open with what the file covers**, in a sentence or two, then a
-   **Code:** line with the paths it describes, from the repository root.
-4. **Link, don't repeat.** If another file already explains something, link
-   to it.
-5. **Facts over prose.** Tables for names, settings and comparisons. Exact
-   identifiers in backticks: `PostDAO`, `feat-268-comment-reactions`,
-   `web-application/server/router.js`.
-6. **Paths, not line numbers.** Line numbers go stale with every change.
-7. **Say what the code does now**, not its history. Mention history only
-   when it explains something that would otherwise look wrong.
-8. **The infrastructure repository is private.** Say when something is
-   handled there; don't link to it or give paths in it.
-9. **Write for contributors**: plain, present tense, "you".
+- **One subject per file**, small enough to read whole. Each fact has one
+  home; link to it rather than repeating it.
+- **Open with what the file covers**, then a **Code:** line with the paths
+  it's about, from the repository root.
+- **Exact identifiers in backticks**, and paths rather than line numbers.
+- **Say what's true now**, not its history, unless the history explains
+  something that would otherwise look wrong.
+- **The infrastructure repository is private.** Say when something is
+  handled there; don't link to it or give paths in it.
+- **Write for contributors**: plain, present tense, "you".
 
 ## Keeping It Current
 
-Documentation changes with the code, in the same pull request. When a change
-adds or changes a pattern, a convention, a configuration value, a command or
-a feature's behavior, update the file that describes it. When it adds a new
-piece (an entity, a job, a driver), add it to the tables that list them.
-
-Code comments can point to documentation by path
-(`documentation/testing/test-library.md`); update them if a file moves. A
-`README.md` next to code that's documented here is a short pointer to the
-documentation, not a second copy.
+Documentation changes with the code, in the same pull request, when the
+change makes it wrong: a command, a setup step, a configuration value, a
+process, or the map of where things are. A `README.md` next to code is a
+short pointer to the documentation here, not a second copy. Code comments
+can point to documentation by path; update them if a file moves.

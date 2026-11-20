@@ -1,4 +1,4 @@
-# Running the Apps
+# Running the Mobile Apps
 
 How to build and run the iOS and Android apps yourself, against your local
 stack or another environment.
@@ -38,7 +38,7 @@ The local variant talks to `https://localhost:3000`, so:
 
 - run it where `localhost` reaches your machine (the iOS Simulator does);
 - the simulator or emulator has to trust your local HTTPS certificate (see
-  [Running Without Docker](../getting-started/running-without-docker.md));
+  [Running Without Docker](running-without-docker.md));
 - push notifications are logged rather than sent, by the local `log` push
   driver.
 

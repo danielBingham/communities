@@ -7,5 +7,5 @@ a Schema when its validation needs to change.
 
 The type validators in [`types/`](types) are not deprecated.
 
-See [Validation and Cleaning](../../../documentation/shared/validation-and-cleaning.md)
-and [Move Validation to a Schema](../../../documentation/how-to/move-validation-to-a-schema.md).
+See [Shared](../../../documentation/architecture/shared.md#validation-is-moving-to-schemas)
+for how to move an entity to a Schema.
