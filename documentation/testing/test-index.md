@@ -29,8 +29,8 @@ execute the test cases within.
 
 ## [Read PostComment](documentation/testing/test-cases/PostComment/read.md)
 ## [Create PostComment](documentation/testing/test-cases/PostComment/create.md)
-## [Update PostComment](documentation/testing/test-cases/PostComment/delete.md)
-## [Delete PostComment](documentation/testing/test-cases/PostComment/update.md)
+## [Update PostComment](documentation/testing/test-cases/PostComment/update.md)
+## [Delete PostComment](documentation/testing/test-cases/PostComment/delete.md)
 
 ## [Create CommentReaction](documentation/testing/test-cases/CommentReaction/create.md)
 ## [Read CommentReaction](documentation/testing/test-cases/CommentReaction/read.md)

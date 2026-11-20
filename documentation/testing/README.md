@@ -87,7 +87,7 @@ For migrations, test only the code directly affected by the migration, before
 and after.
 
 Some case files have no Manual Regression section, because their cases are
-automated (so far, Post's: see [the case files](#test-cases-manual-test-case-definitions)).
+automated (so far, Post's and PostComment's: see [the case files](#test-cases-manual-test-case-definitions)).
 From those, run the Smoke Test cases, and the Full Regression cases that
 aren't marked as covered.
 
@@ -183,11 +183,14 @@ all the tests in Full Regression.
 Once a case file's cases are automated, it has just two sections, **Smoke
 Test** and **Full Regression**: with nothing left that only a person can run,
 there's no Manual Regression to set apart from the rest. So far that's Post's
-case files (`test-cases/Post/`). Their Full Regression has every case that
-isn't in the Smoke Test, most covered by the end-to-end tests and the rest by
-the integration tests, apart from a few, unmarked, that are still run by hand
-(the YouTube cases, which depend on YouTube). The other case files will follow
-as their cases are automated, until there are only the two suites.
+and PostComment's case files (`test-cases/Post/` and `test-cases/PostComment/`).
+Their Full Regression has every case that isn't in the Smoke Test, most
+covered by the end-to-end tests and the rest by the integration tests, apart
+from a few that are still run by hand: unmarked if none of the case is
+automated (the YouTube cases, which depend on YouTube), and marked partially
+covered if some of it is (replying on iOS and Android, where the keyboard
+opens). The other case files will follow as their cases are automated, until
+there are only the two suites.
 
 - **Smoke Test**: These are the core interface and security tests covering the
     most heavily used and critical parts of the app.  The full Smoke Test suite

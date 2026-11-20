@@ -24,8 +24,8 @@ images and videos and sends notifications), from the repository root, run
 either suite (see [Suites](#suites)):
 
 ```
-npm run test:e2e:smoke-test    # the Smoke Test, on https://localhost:3000: about 2 minutes
-npm run test:e2e               # a Full Regression, every test: about 10 minutes
+npm run test:e2e:smoke-test    # the Smoke Test, on https://localhost:3000: about 3 minutes
+npm run test:e2e               # a Full Regression, every test: about 15 minutes
 ```
 
 Before it starts, a run checks that the server can do what the tests need,
@@ -196,10 +196,19 @@ assert.equal(await page.getByText(original.content).count(), 0)
   the page has to have loaded first, or the check passes because nothing has
   arrived yet.
 - **Things that change on their own time.** When something settles after an
-  action with nothing to wait for (a menu closing, names in mentions loading,
-  a notification the worker sends), retry the assertion itself with
-  `eventually()` ([`lib/wait.js`](lib/wait.js)) rather than waiting for the
-  outcome and asserting it afterward.
+  action with nothing to wait for (a menu closing, names in mentions loading),
+  retry the assertion itself with `eventually()` ([`lib/wait.js`](lib/wait.js))
+  rather than waiting for the outcome and asserting it afterward. The worker
+  sends notifications, so one can take a moment to arrive:
+  `waitForNotification()` ([`lib/app.js`](lib/app.js)) opens the notification
+  menu again until it's there, and the test then asserts what it says.
+- **Things that shouldn't happen.** To check a user *wasn't* notified, there
+  has to be something showing the worker has got to it, or the check passes
+  because the notification hasn't been sent yet. The worker sends all of a
+  comment's notifications in one go, so wait for another notification of the
+  same comment first (to the post's author, say), and then open the menu with
+  `openNotifications()`, which waits for the app to have loaded the
+  notifications before the test counts them.
 - **Every outcome the case confirms.** Each "Confirm..." in the case file is
   an assertion in the test.
 - **Actions wait for themselves.** Helpers that act (`submitPost()`,
@@ -294,10 +303,28 @@ as well if the case is in its file's Smoke Test section, and mark it in its
 case file: `(covered: e2e)`, or `(partially covered: e2e)` if part of it
 still needs testing by hand.
 
+A case that covers a bug that hasn't been fixed yet is automated all the
+same, as a to-do, with Node's test runner's `todo` option saying what the bug
+is:
+
+```
+it('As a user, I am notified when I am newly mentioned during a comment edit.', {
+    tags: [ 'full-regression' ],
+    todo: 'Editing a comment sends no notifications, so a mention added in an edit goes unannounced.'
+}, async function() {
+```
+
+A to-do runs like any other test, and the run reports how it went, but it
+doesn't fail the run. Once the bug is fixed and the test passes, take the
+option off.
+
 ### What's covered
 
 Every Post case that the integration tests don't cover, except the two
-YouTube cases (see [Media and links](#media-and-links)):
+YouTube cases (see [Media and links](#media-and-links)), and every
+PostComment case, which the integration tests don't cover yet, though only
+part of the one about replying in a long thread on a phone (the keyboard
+opening is checked by hand):
 
 | Case file | Tests |
 | --------- | ----- |
@@ -305,5 +332,9 @@ YouTube cases (see [Media and links](#media-and-links)):
 | `Post/read.md` | Who sees which posts; permalinks to posts you can't see; copying a post's link; long posts; paging through a gallery; sorting the feed |
 | `Post/update.md` | Editing text, images, links and who sees a post; saving and cancelling; edits reaching shares; edit drafts, with images and links; only editing your own posts |
 | `Post/delete.md` | Deleting posts with images and links, and ones that have been shared; confirming; only deleting your own posts |
+| `PostComment/create.md` | Commenting, and the order comments show in; discarding; the 5,000 character limit, and posting a comment that long (a to-do, for a bug); mentions, and their suggestions and notifications, with a block among the commenters; replying, to a draft, in a long thread, and where "Reply" is offered; drafts, across reloads, after a comment's posted or fails, logging out and cancelling |
+| `PostComment/read.md` | Who sees comments on public and private posts, and when a post goes private; copying a comment's link; folding comments away in the feed; blocked commenters; mention notifications, and none for a post you can't see |
+| `PostComment/update.md` | Editing and cancelling; being asked before discarding; only editing your own comments; mention notifications on an edit (a to-do, for a bug); edit drafts, across reloads, logging out and cancelling |
+| `PostComment/delete.md` | Deleting your comments, and only yours; confirming; the notification of a deleted comment |
 
 The other entities' cases are still run by hand.
