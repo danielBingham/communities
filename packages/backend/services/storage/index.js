@@ -36,6 +36,9 @@ const S3Storage = require('./S3Storage')
  * getSignedUrl and removeFile, plus `location` (recorded with each file) and
  * `contentOrigins` (where browsers load files from).
  *
+ * getSignedUrl's links last `link_lifetime` at most (see links.js), and the
+ * client asks for a new one when one fails to load.
+ *
  * @param {Core} core   A core with `config` and `logger`.
  *
  * @return {S3Storage|FilesystemStorage}

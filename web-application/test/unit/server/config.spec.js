@@ -10,7 +10,11 @@
  * only `database.ssl: 'verify-full'` uses; and `redis.password`, which only
  * `redis.auth: 'token'` uses. The environment example connects to the local
  * database without TLS and to the local Redis without AUTH, so it leaves
- * those two out. Covers the web application and the worker.
+ * those two out. And the s3 driver's own access keys, `storage.s3.access_id`
+ * and `access_key`, an override of the credentials Parameter Store is read
+ * with: staging and production have them until feat-15 moves them to their
+ * pods' roles, and the examples have none. Covers the web application and the
+ * worker.
  ******************************************************************************/
 
 const path = require('path')
@@ -48,6 +52,14 @@ const unusedLocally = (key) => key === 'database.certificateAuthorities' || key 
 const withoutTestBlock = (definition) => Object.fromEntries(
     Object.entries(definition).filter(([key]) => ! testBlock(key)))
 
+// The s3 driver's own access keys, which override Parameter Store's
+// credentials (packages/backend/lib/aws-credentials.js): both or neither in
+// each file. Only staging and production have them, until each moves to its
+// pods' role.
+const s3Keys = [ 'storage.s3.access_id', 'storage.s3.access_key' ]
+const withoutS3Keys = (definition) => Object.fromEntries(
+    Object.entries(definition).filter(([key]) => ! s3Keys.includes(key)))
+
 const variableFor = (parameter) => 'COMMUNITIES_' + parameter.replace(/^\/+/, '').replace(/[/-]/g, '_').toUpperCase()
 
 describe.each(Object.entries(apps))('Configuration definitions: %s', function(app, directory) {
@@ -73,7 +85,7 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
     })
 
     it('Should define the same values, from the same sources, in staging and the Parameter Store example', function() {
-        const withoutEnvironment = ({ environment, ...rest }) => rest
+        const withoutEnvironment = ({ environment, ...rest }) => withoutS3Keys(rest)
         expect(withoutEnvironment(withoutTestBlock(staging))).toEqual(withoutEnvironment(production))
         expect(withoutEnvironment(withoutTestBlock(ssmExample))).toEqual(withoutEnvironment(production))
     })
@@ -96,7 +108,7 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
 
     it('Should select a known storage driver and configure it in each file', function() {
         const drivers = {
-            s3: [ 'storage.s3.bucket_url', 'storage.s3.bucket', 'storage.s3.access_id', 'storage.s3.access_key' ],
+            s3: [ 'storage.s3.bucket_url', 'storage.s3.bucket' ],
             filesystem: [ 'storage.filesystem.directory', 'storage.filesystem.secret' ]
         }
         for (const definition of [ production, staging, ssmExample, envExample ]) {
@@ -104,9 +116,23 @@ describe.each(Object.entries(apps))('Configuration definitions: %s', function(ap
             for (const key of drivers[definition['storage.driver']]) {
                 expect(definition).toHaveProperty([ key ])
             }
+            expect(s3Keys.map((key) => key in definition)).toEqual(s3Keys.map((key) => s3Keys[0] in definition))
         }
         expect(production['storage.driver']).toBe('s3')
         expect(envExample['storage.driver']).toBe('filesystem')
+
+        // A local environment reaches S3 with the keys it reads Parameter
+        // Store with, so the example has none of its own.
+        for (const key of s3Keys) {
+            expect(ssmExample).not.toHaveProperty([ key ])
+        }
+    })
+
+    it('Should give staging and production no S3 keys: their pods reach S3 with EKS Pod Identity', function() {
+        for (const key of s3Keys) {
+            expect(staging).not.toHaveProperty([ key ])
+            expect(production).not.toHaveProperty([ key ])
+        }
     })
 
     it('Should only turn on known push drivers, each configured, under notifications', function() {
