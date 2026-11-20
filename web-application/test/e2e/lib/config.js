@@ -67,7 +67,8 @@ if ( new URL(API_ROOT).origin !== new URL(BASE_URL).origin ) {
 const LOCAL_HOSTS = [ 'localhost', '127.0.0.1', '[::1]' ]
 
 // A server on this machine serves a self-signed certificate (see
-// documentation/running-locally.md), which the browser is told to accept.
+// documentation/getting-started/running-without-docker.md), which the
+// browser is told to accept.
 const IS_LOCAL = LOCAL_HOSTS.includes(new URL(BASE_URL).hostname)
 
 const BROWSERS = [ 'chromium', 'firefox', 'webkit' ]
