@@ -85,7 +85,7 @@ For migrations, test only the code directly affected by the migration, before
 and after.
 
 Some case files have no Manual Regression section, because their cases are
-automated (so far, Post's: see [the case files](README.md#test-cases-manual-test-case-definitions)).
+automated (so far, Post's and PostComment's: see [the case files](README.md#test-cases-manual-test-case-definitions)).
 From those, run the Smoke Test cases, and the Full Regression cases that
 aren't marked as covered.
 

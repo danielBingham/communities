@@ -11,12 +11,12 @@ Cases covering making comments on posts.
 
 #### Cases
 
-- [ ] As a user, I can comment on a post I can see.
+- [ ] As a user, I can comment on a post I can see. (covered: e2e)
     - As User2:
         - Comment "First." on User1's post.
             - **Confirm comment appears on User1's post.**
 
-- [ ] As a user, comments appear in the order they are made.
+- [ ] As a user, comments appear in the order they are made. (covered: e2e)
     - As User1:
         - Comment "Second." on User1's post.
             - **Confirm comment appears on User1's post.**
@@ -25,16 +25,41 @@ Cases covering making comments on posts.
             - **Confirm comment appears on User1's post.**
             - **Confirm comments appear in the correct order: User2 "First.", User1 "Second.", User2 "Third."**
 
-### Manual Regression
+### Full Regression
 
 #### Pre-requisites
 
 - [ ] User1 has been created and has created a public post.
-- [ ] User2 has been created and has friends who can be mentioned.
+- [ ] User2 has been created and is friends with User3 and User4, who can be mentioned.
+- [ ] User5 has been created and is **not** friends with User1 or User2.
+- [ ] A site admin has been created.
+
+The post comment endpoints aren't covered by the integration tests yet, so
+these cases are covered by the end-to-end tests alone.
+
+#### Cases
+
+- [ ] As a user, I'm asked before a comment I've started is discarded. (covered: e2e)
+    - As User2:
+        - Click "Start a comment..." on User1's post, and click "Cancel" without writing anything.
+            - **Confirm the form closes without asking.**
+        - Start a comment, write some text, and click "Cancel".
+            - **Confirm you're asked whether to discard the comment.**
+        - Click "Keep Editing".
+            - **Confirm the form still has the text.**
+        - Click "Cancel", then "Discard Comment".
+            - **Confirm the form closes, and starting a comment again shows an empty form.**
+
+- [ ] As a user, the comment form stops at 5,000 characters. (covered: e2e)
+    - As User2:
+        - Paste more than 5,000 characters into a comment on User1's post.
+            - **Confirm an error says comments are limited to 5,000 characters, and the text isn't taken.**
+        - Paste exactly 5,000 characters.
+            - **Confirm the text is taken, and the error goes.**
 
 #### Mentions
 
-- [ ] As a user, I can mention other users in comments.
+- [ ] As a user, I can mention other users in comments. (covered: e2e)
     - As User2:
         - Comment on User1's post and begin a mention by typing '@' and the beginning of User1's name.
             - **Confirm mention suggestions menu is limited to User2's friends and User1.**
@@ -48,12 +73,13 @@ Cases covering making comments on posts.
         - Select User1 and hit the "Enter" key.
             - **Confirm mention completes with User1's username.**
         - Post the comment.
+            - **Confirm the comment shows the mention as User1's name, linking to their profile.**
     - As User1:
         - **Confirm mention notification received.**
         - Click on the notification.
             - **Confirm comment highlighted.**
 
-- [ ] As a user, I'm notified of mentions and subscribed comments even when someone else involved has blocked the commenter.
+- [ ] As a user, I'm notified of mentions and subscribed comments even when someone else involved has blocked the commenter. (covered: e2e)
     - Users who can't see a comment (because they've blocked, or been blocked by, its author) are skipped, and the users after them must still be notified.  Doing these steps in order makes it likely User3 is checked first.
     - As User3:
         - Comment on User1's post, which subscribes User3 to it.
@@ -72,12 +98,12 @@ Cases covering making comments on posts.
 
 #### Replies
 
-- [ ] As a user, I can reply to another user's comment.
+- [ ] As a user, I can reply to another user's comment. (covered: e2e)
     - As User1:
         - Comment "Reply to me." on User1's post.
     - As User2:
         - Comment "Me first." on User1's post.
-            - **Confirm a "Reply" link appears in the bottom left corner of User1's comment.**
+            - **Confirm a "Reply" link appears in the bottom right corner of User1's comment, beside its like button.**
             - **Confirm no "Reply" link appears on User2's own comment.**
         - Click "Reply" on User1's comment.
             - **Confirm a new comment form opens at the end of the comment thread.**
@@ -88,7 +114,7 @@ Cases covering making comments on posts.
     - As User1:
         - **Confirm mention notification received.**
 
-- [ ] As a user, replying doesn't discard a comment I'm already writing.
+- [ ] As a user, replying doesn't discard a comment I'm already writing. (covered: e2e)
     - As User2:
         - Start a comment and write "Draft in progress." without posting it.
         - Click "Reply" on User1's comment.
@@ -100,14 +126,15 @@ Cases covering making comments on posts.
             - **Confirm only one warning is shown, and it disappears a few seconds after the last click.**
         - Cancel the draft.
 
-- [ ] As a user, replying in a long thread brings the comment form into view.
+- [ ] As a user, replying in a long thread brings the comment form into view. (partially covered: e2e)
+    - The end-to-end tests cover the desktop and phone-sized browser windows, but not the keyboard on iOS and Android, which is still checked by hand.
     - As User2, on a post with enough comments that the thread is taller than the screen:
         - Scroll to the top of the thread and click "Reply" on one of the first comments.
             - **Confirm the page scrolls so the comment form, including its buttons, is visible and focused.**
     - Repeat on iOS and Android.
         - **Confirm the keyboard opens with the comment form visible above it.**
 
-- [ ] As a user, the "Reply" link only appears where I can reply.
+- [ ] As a user, the "Reply" link only appears where I can reply. (covered: e2e)
     - As User2:
         - Flag User1's comment.
     - As an Administrator:
@@ -122,9 +149,9 @@ Cases covering making comments on posts.
 
 #### Drafts
 
-- [ ] As a user, my comment drafts are saved as long as I am logged in.
+- [ ] As a user, my comment drafts are saved as long as I am logged in. (covered: e2e)
     - As User2:
-        - Write a comment draft.
+        - Write a comment draft on a post in your feed.
         - Navigate away from the home feed and back to feed.
             - **Confirm draft remains.**
         - Close the Communities browser window. Reopen and reload.
@@ -132,7 +159,7 @@ Cases covering making comments on posts.
         - Post the draft.
             - **Confirm comment posts correctly.**
 
-- [ ] As a user, my comment drafts keep being saved after I've posted a comment.
+- [ ] As a user, my comment drafts keep being saved after I've posted a comment. (covered: e2e)
     - As User2:
         - Post a comment on User1's post.
         - Without reloading, start another comment on the same post and write a draft.
@@ -141,7 +168,7 @@ Cases covering making comments on posts.
         - Post the draft.
             - **Confirm comment posts correctly and the draft is gone.**
 
-- [ ] As a user, my comment drafts keep being saved after a comment fails to post.
+- [ ] As a user, my comment drafts keep being saved after a comment fails to post. (covered: e2e)
     - As User2:
         - Write a comment draft.
         - Turn off your network connection and try to post the draft.
@@ -150,14 +177,14 @@ Cases covering making comments on posts.
         - Turn your network connection back on and reload the page.
             - **Confirm the edited draft remains.**
 
-- [ ] As a user, my comment drafts are deleted when I log out.
+- [ ] As a user, my comment drafts are deleted when I log out. (covered: e2e)
     - As User2:
         - Write a comment draft.
         - Log out.
         - Log back in.
             - **Confirm draft is gone.**
 
-- [ ] As a user, I can cancel a comment draft, which deletes it.
+- [ ] As a user, I can cancel a comment draft, which deletes it. (covered: e2e)
     - As User2:
         - Write a comment draft.
         - Cancel the draft.
@@ -166,13 +193,3 @@ Cases covering making comments on posts.
             - **Confirm draft is still gone.**
         - Navigate away and back.
             - **Confirm draft is still gone.**
-
-### Full Regression
-
-#### Pre-requisites
-
-None.
-
-The post comment endpoints are not yet covered by the Integration suite.  All
-comment creation cases are defined in the Smoke Test and Manual Regression
-sections above.

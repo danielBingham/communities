@@ -19,8 +19,8 @@
  ******************************************************************************/
 
 /******************************************************************************
- * Getting around the app: opening pages, the header, logging in and out
- * through the UI.
+ * Getting around the app: opening pages, the header and its notification
+ * menu, logging in and out through the UI.
  *
  * Like the rest of test/e2e/lib, these find things the way a person (or a
  * screen reader) does, by role and accessible name, so they don't break when
@@ -31,6 +31,13 @@
  * page, usually a Playwright Locator for the test to act on or check, and
  * does nothing to the page. The rest are actions.
  ******************************************************************************/
+
+const config = require('./config')
+const { eventually } = require('./wait')
+
+// How long to wait for a notification to arrive: the worker sends them, on
+// its own time.
+const NOTIFICATION_TIMEOUT = Math.max(config.TIMEOUT, 30000)
 
 /**
  * Get the button that opens the header's account menu, which only a logged in
@@ -50,11 +57,49 @@ const getNotificationsButton = function(page) {
 }
 
 /**
+ * Get the notifications in the header's notification menu, once it's open,
+ * whose text includes `text` (a string or a RegExp). Each says what happened,
+ * like 'Test User2 mentioned you in their comment, "...", on a post by Test
+ * User1, "...".', and follows a link to it when clicked.
+ */
+const getNotifications = function(page, text) {
+    return page.getByRole('banner').getByRole('menuitem').filter({ hasText: text })
+}
+
+/**
  * Open `path` and wait for the app to have loaded it, logged in.
  */
 const openPage = async function(page, path) {
     await page.goto(path)
     await getAccountMenuButton(page).waitFor()
+}
+
+/**
+ * Open `path` (the feed, by default) and the header's notification menu, with
+ * the user's notifications loaded. Until they are, the menu says "No
+ * notifications.", so this waits for the app to have them before opening it:
+ * then what the menu shows, and doesn't, is what the user has been sent.
+ */
+const openNotifications = async function(page, path = '/') {
+    const loaded = page.waitForResponse((response) => response.request().method() === 'GET'
+        && new URL(response.url()).pathname.endsWith('/notifications'))
+    await openPage(page, path)
+    await loaded
+    await getNotificationsButton(page).click()
+    await page.getByRole('banner').getByRole('menuitem', { name: 'Mark All Read', exact: true }).waitFor()
+}
+
+/**
+ * Wait for `notification` (from getNotifications()) to arrive, and leave the
+ * notification menu open on it. The worker sends notifications, so one may
+ * take a moment: this opens the menu again, on a fresh page, until it's
+ * there.
+ */
+const waitForNotification = async function(page, notification) {
+    await eventually(async () => {
+        await openNotifications(page)
+        await notification.first().waitFor({ timeout: 1000 })
+    }, { timeout: NOTIFICATION_TIMEOUT })
 }
 
 /**
@@ -91,7 +136,10 @@ const logIn = async function(page, fixture) {
 module.exports = {
     getAccountMenuButton: getAccountMenuButton,
     getNotificationsButton: getNotificationsButton,
+    getNotifications: getNotifications,
     openPage: openPage,
+    openNotifications: openNotifications,
+    waitForNotification: waitForNotification,
     followHeaderLink: followHeaderLink,
     logOut: logOut,
     logIn: logIn
