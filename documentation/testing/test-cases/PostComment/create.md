@@ -57,6 +57,15 @@ these cases are covered by the end-to-end tests alone.
         - Paste exactly 5,000 characters.
             - **Confirm the text is taken, and the error goes.**
 
+- [ ] As a user, I can post a comment of exactly 5,000 characters. (covered: e2e)
+    - NOTE: This case covers a current bug: the comment form takes 5,000
+      characters, but the server only accepts fewer than 5,000, so the
+      comment fails to post. The end-to-end test runs as a to-do, which
+      reports its result without failing the run, until the bug is fixed.
+    - As User2:
+        - Paste exactly 5,000 characters into a comment on User1's post, and post it.
+            - **Confirm the comment is posted, with all 5,000 characters.**
+
 #### Mentions
 
 - [ ] As a user, I can mention other users in comments. (covered: e2e)

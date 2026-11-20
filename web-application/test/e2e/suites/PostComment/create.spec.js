@@ -285,6 +285,33 @@ describe('Create PostComment', function() {
         assert.equal((await textbox.inputValue()).length, 5000)
     })
 
+    it('As a user, I can post a comment of exactly 5,000 characters.', {
+        tags: [ 'full-regression' ],
+        todo: 'The comment form takes 5,000 characters, but the server only accepts fewer than 5,000, so the comment fails to post.'
+    }, async function() {
+        const post = await createPostToCommentOn('A post with a full-length comment')
+        const { page } = await openAs('user2')
+
+        // Exactly 5,000 characters, starting with a uniqueText() to find
+        // the comment by.
+        const intro = posts.uniqueText('A full-length comment:')
+        const text = `${`${intro} ${'This comment goes on and on. '.repeat(200)}`.substring(0, 4999)}.`
+        assert.equal(text.length, 5000)
+
+        const view = await openPost(page, post)
+        await comments.writeComment(view, text)
+        assert.equal(await comments.getCommentTextbox(comments.getCommentForm(view)).inputValue(), text)
+
+        // Post it: it's posted, all of it, here and after a reload.
+        // (submitComment() fails with what the app says if it isn't.)
+        await comments.submitComment(view)
+        await assertCommented(view, intro, user2.fixture, text)
+
+        await page.reload()
+        await posts.waitForPermalinkPage(page)
+        await assertCommented(view, intro, user2.fixture, text)
+    })
+
     describe('Mentions', function() {
 
         it('As a user, I can mention other users in comments.', { tags: [ 'full-regression' ] }, async function() {
