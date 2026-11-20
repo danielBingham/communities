@@ -37,6 +37,8 @@
  * each, as the server words it, for a test to find and check them by.
  ******************************************************************************/
 
+const { eventually } = require('./wait')
+
 // A comment, as a post's thread shows it: an article inside the post's, with
 // the id 'comment-<id>'. It's found by its class as well as its role, like a
 // post (see posts.js): the profile card beside a permalink is an article too.
@@ -304,12 +306,33 @@ const chooseCommentAction = async function(comment, action) {
 }
 
 /**
- * Open the form to edit `comment`, on `post`. The form takes the comment's
- * place in the thread.
+ * Wait for the form editing a comment on `post` to be ready to use. It opens
+ * with its text box empty, and fills in the comment's text, or the draft of
+ * an edit to it, on its next render: until then, what the text box says
+ * isn't what it will, and anything typed in it is overwritten. So this waits
+ * for the text box to have text, which every comment the tests edit has.
+ *
+ * For an edit the test opens, editComment() waits for this itself. An edit
+ * with a draft opens on its own when the post's page loads: wait for this
+ * before checking it.
+ */
+const waitForEditForm = async function(post) {
+    const textbox = getCommentTextbox(getEditForm(post))
+    await textbox.waitFor()
+    await eventually(async () => {
+        if ( await textbox.inputValue() === '' ) {
+            throw new Error(`The edit form hasn't filled in the comment's text.`)
+        }
+    })
+}
+
+/**
+ * Open the form to edit `comment`, on `post`, and wait for it to be ready to
+ * use. The form takes the comment's place in the thread.
  */
 const editComment = async function(post, comment) {
     await chooseCommentAction(comment, 'edit')
-    await getCommentTextbox(getEditForm(post)).waitFor()
+    await waitForEditForm(post)
 }
 
 /**
@@ -410,6 +433,7 @@ module.exports = {
 
     openCommentMenu: openCommentMenu,
     chooseCommentAction: chooseCommentAction,
+    waitForEditForm: waitForEditForm,
     editComment: editComment,
     saveCommentEdit: saveCommentEdit,
     deleteComment: deleteComment,

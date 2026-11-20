@@ -126,9 +126,8 @@ describe('Update PostComment', function() {
 
     // Assert that `view` shows the edit of a comment open, with `text` in it.
     const assertEditing = async function(view, text) {
-        const textbox = comments.getCommentTextbox(comments.getEditForm(view))
-        await textbox.waitFor()
-        assert.equal(await textbox.inputValue(), text)
+        await comments.waitForEditForm(view)
+        assert.equal(await comments.getCommentTextbox(comments.getEditForm(view)).inputValue(), text)
     }
 
     it('As a user, I can edit my comments.', { tags: [ 'smoke-test', 'full-regression' ] }, async function() {
